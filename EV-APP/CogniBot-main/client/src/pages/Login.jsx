@@ -274,7 +274,7 @@ const Typewriter = ({ words, delay = 2000 }) => {
   useEffect(() => {
     let timeout;
     const currentWord = words[index];
-    
+
     if (isDeleting) {
       timeout = setTimeout(() => {
         setDisplayText(currentWord.substring(0, displayText.length - 1));
@@ -408,7 +408,7 @@ const Login = () => {
 
 
       {/* Main Content */}
-      <motion.div 
+      <motion.div
         initial={{ opacity: 0, y: 40 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
@@ -416,7 +416,7 @@ const Login = () => {
         className="w-full max-w-lg px-6"
       >
         {/* Status Indicator */}
-        <motion.div 
+        <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2, duration: 0.6 }}
@@ -428,15 +428,15 @@ const Login = () => {
 
         {/* Card Container */}
         <div className="glass-card" style={{ padding: 48, borderRadius: 32 }}>
-          
+
           {/* Header */}
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.3, duration: 0.6 }}
             style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: 48 }}
           >
-            <motion.div 
+            <motion.div
               whileHover={{ rotate: 10, scale: 1.08 }}
               whileTap={{ scale: 0.95 }}
               style={{ width: 64, height: 64, background: '#16a34a', borderRadius: 20, display: 'flex', alignItems: 'center', justifyContent: 'center', border: '2px solid #0f172a', boxShadow: '8px 8px 0 #0f172a', marginBottom: 28, cursor: 'pointer' }}
@@ -453,7 +453,7 @@ const Login = () => {
 
           {/* Error State */}
           {error && (
-            <motion.div 
+            <motion.div
               initial={{ opacity: 0, height: 0 }}
               animate={{ opacity: 1, height: 'auto' }}
               exit={{ opacity: 0, height: 0 }}
@@ -466,9 +466,9 @@ const Login = () => {
 
           {/* Form */}
           <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
-            
+
             {/* Email Input */}
-            <motion.div 
+            <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.35, duration: 0.6 }}
@@ -515,7 +515,7 @@ const Login = () => {
             </motion.div>
 
             {/* Password Input */}
-            <motion.div 
+            <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.4, duration: 0.6 }}
@@ -609,7 +609,7 @@ const Login = () => {
           </form>
 
           {/* Divider */}
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.5, duration: 0.6 }}
@@ -654,7 +654,7 @@ const Login = () => {
           </motion.button>
 
           {/* Footer */}
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.6, duration: 0.6 }}
@@ -662,11 +662,11 @@ const Login = () => {
           >
             <p style={{ fontSize: 14, color: '#64748b', margin: 0, fontWeight: 600 }}>
               New to the system?{' '}
-              <Link 
-                to="/register" 
-                style={{ 
-                  color: '#0f172a', 
-                  fontWeight: 800, 
+              <Link
+                to="/register"
+                style={{
+                  color: '#0f172a',
+                  fontWeight: 800,
                   textDecoration: 'none',
                   borderBottom: '2px solid #16a34a',
                   paddingBottom: 2,
@@ -682,7 +682,7 @@ const Login = () => {
         </div>
 
         {/* Floating Info Card */}
-        <motion.div 
+        <motion.div
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.65, duration: 0.6 }}

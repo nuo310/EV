@@ -1,0 +1,12 @@
+{
+  "name": "ocpp-charger-simulator",
+  "version": "1.0.0",
+  "description": "OCPP 1.6 JSON ChargePoint Simulator for testing local backends",
+  "main": "simulator.js",
+  "scripts": {
+    "start": "node simulator.js"
+  },
+  "dependencies": {
+    "ws": "^8.14.2"
+  }
+}

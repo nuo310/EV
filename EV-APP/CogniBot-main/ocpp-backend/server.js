@@ -7,6 +7,7 @@ const http = require("http");
 const { v4: uuidv4 } = require("uuid");
 
 const handleRequest = require("./handlers/requestHandler");
+const db = require("./firebase");
 
 const app = express();
 
@@ -193,11 +194,26 @@ wss.on("connection", (ws, request) => {
 
   });
 
-  ws.on("close", () => {
+  ws.on("close", async () => {
 
     delete chargers[chargePointId];
 
     console.log(`❌ ChargePoint Disconnected: ${chargePointId}`);
+
+    try {
+      const stationRef = db.collection("stations").doc(chargePointId);
+      const stationDoc = await stationRef.get();
+      if (stationDoc.exists) {
+        await stationRef.set({
+          isOnline: false,
+          status: "Unavailable",
+          lastSeen: new Date()
+        }, { merge: true });
+        console.log(`Updated Firestore: ${chargePointId} is now offline.`);
+      }
+    } catch (err) {
+      console.error(`Failed to update offline status for ${chargePointId}:`, err);
+    }
 
   });
 
@@ -303,6 +319,37 @@ app.post("/remote-start", async (req, res) => {
   }
 
 });
+
+app.post("/remote-stop", async (req, res) => {
+
+  const { stationId, transactionId } = req.body;
+
+  if (!stationId) {
+    return res.status(400).json({
+      error: "stationId required",
+    });
+  }
+
+  try {
+
+    const payload = await sendCallAndAwaitResult(
+      stationId,
+      "RemoteStopTransaction",
+      { transactionId: Number(transactionId) }
+    );
+
+    res.json(payload);
+
+  } catch (error) {
+
+    res.status(500).json({
+      error: error.message,
+    });
+
+  }
+
+});
+
 
 /*
 ========================

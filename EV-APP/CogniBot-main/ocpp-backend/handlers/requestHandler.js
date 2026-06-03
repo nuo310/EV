@@ -34,9 +34,27 @@ module.exports = async function handleRequest(
         }, { merge: true });
       } else {
         console.log(
-          "Skipping Firestore station write (not registered by admin yet):",
+          "Auto-creating Firestore station for simulator testing:",
           chargePointId
         );
+        await stationRefBoot.set({
+          name: `Simulated Charger ${chargePointId}`,
+          ocppStationId: chargePointId,
+          lat: 26.1443, // Centered at Guwahati area (where your browser coordinates are)
+          lng: 91.7363,
+          availableSlots: 1,
+          pricePerHour: 15,
+          energyRatePerKwh: 12,
+          chargerType: "Type 2 AC",
+          connectorId: 1,
+          vendor: payload.chargePointVendor || "ZynkaTech Simulator",
+          model: payload.chargePointModel || "Z-Model-S",
+          status: "Available",
+          errorCode: "NoError",
+          isOnline: true,
+          published: true,
+          lastSeen: new Date()
+        });
       }
 
       sendResponse(ws, uniqueId, {
@@ -46,6 +64,7 @@ module.exports = async function handleRequest(
       });
 
       break;
+
 
 
     // ===============================

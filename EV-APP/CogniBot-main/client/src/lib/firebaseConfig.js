@@ -1,8 +1,10 @@
 export const firebaseConfig = {
-  apiKey: "AIzaSyD-AsfBSVdeEOcIWwUN4GVWphJ7yLof6nU",
-  authDomain: "ev-charging-app-2026.firebaseapp.com",
-  projectId: "ev-charging-app-2026",
-  storageBucket: "ev-charging-app-2026.firebasestorage.app",
-  messagingSenderId: "193668056093",
-  appId: "1:193668056093:web:0ab1c2d3e4f5g6h7i8j9",
+  apiKey: "AIzaSyChKMPYtBaSZJyABqUKT-Qma0JfgObPuCc",
+  authDomain: "ev-app-4b0f9.firebaseapp.com",
+  projectId: "ev-app-4b0f9",
+  storageBucket: "ev-app-4b0f9.firebasestorage.app",
+  messagingSenderId: "40038334977",
+  appId: "1:40038334977:web:cc2e615924153a8283b600",
+  measurementId: "G-EZ82E0K4YG"
 };
+
