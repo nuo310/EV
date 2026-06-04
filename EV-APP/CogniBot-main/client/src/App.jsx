@@ -20,6 +20,15 @@ import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { Toaster } from 'react-hot-toast';
 import { Navigate } from 'react-router-dom';
 
+// Compliance and Payment Pages
+import About from './pages/compliance/About';
+import Terms from './pages/compliance/Terms';
+import Privacy from './pages/compliance/Privacy';
+import Refunds from './pages/compliance/Refunds';
+import Contact from './pages/compliance/Contact';
+import PaymentStatus from './pages/PaymentStatus';
+
+
 const LandingPage = () => {
   const { currentUser } = useAuth();
   
@@ -81,6 +90,14 @@ function App() {
                   <AdminDashboard />
                 </ProtectedRoute>
               } />
+
+              {/* Compliance and Payment Routes */}
+              <Route path="/about" element={<About />} />
+              <Route path="/terms" element={<Terms />} />
+              <Route path="/privacy" element={<Privacy />} />
+              <Route path="/refunds" element={<Refunds />} />
+              <Route path="/contact" element={<Contact />} />
+              <Route path="/payment-status" element={<PaymentStatus />} />
             </Routes>
           </div>
 

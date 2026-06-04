@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
+import { Link } from 'react-router-dom';
 import { Zap, Globe, Cpu, Activity, Clock, Terminal, ShieldCheck, BarChart3, Radio } from 'lucide-react';
 
 /* ─────────────────────────────────────────────────────────
@@ -39,9 +40,34 @@ const Footer = () => {
   }, []);
 
   const navGroups = [
-    { title: 'Infrastucture', links: ['Live Hubs', 'Latency Map', 'API Terminal', 'Network Logs'] },
-    { title: 'Protocol', links: ['Smart Routing', 'Handshake ISO', 'Fleet Sync', 'Security'] },
-    { title: 'Global', links: ['Careers', 'Contact Hub', 'Legal docs', 'System Status'] },
+    { 
+      title: 'Infrastructure', 
+      links: [
+        { label: 'Live Hubs', path: '/find-charger' },
+        { label: 'Latency Map', path: '#' },
+        { label: 'API Terminal', path: '#' },
+        { label: 'Network Logs', path: '#' }
+      ] 
+    },
+    { 
+      title: 'Protocol', 
+      links: [
+        { label: 'Smart Routing', path: '#' },
+        { label: 'Handshake ISO', path: '#' },
+        { label: 'Fleet Sync', path: '#' },
+        { label: 'Security', path: '#' }
+      ] 
+    },
+    { 
+      title: 'Legal & Compliance', 
+      links: [
+        { label: 'About Us', path: '/about' },
+        { label: 'Contact Us', path: '/contact' },
+        { label: 'Terms & Conditions', path: '/terms' },
+        { label: 'Privacy Policy', path: '/privacy' },
+        { label: 'Refund Policy', path: '/refunds' }
+      ] 
+    },
   ];
 
   return (
@@ -93,15 +119,28 @@ const Footer = () => {
                   {group.title}
                </h4>
                <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-                 {group.links.map((link, j) => (
-                   <motion.a 
-                    key={j} href="#" 
-                    whileHover={{ x: 6, color: '#16a34a' }}
-                    style={{ textDecoration: 'none', color: '#64748b', fontSize: 14, fontWeight: 700, transition: 'color 0.2s' }}
-                   >
-                     {link}
-                   </motion.a>
-                 ))}
+                 {group.links.map((link, j) => {
+                   const isExternalOrHash = link.path.startsWith('#') || link.path.startsWith('http');
+                   return isExternalOrHash ? (
+                     <motion.a 
+                      key={j} href={link.path} 
+                      whileHover={{ x: 6, color: '#16a34a' }}
+                      style={{ textDecoration: 'none', color: '#64748b', fontSize: 14, fontWeight: 700, transition: 'color 0.2s' }}
+                     >
+                       {link.label}
+                     </motion.a>
+                   ) : (
+                     <motion.div key={j} whileHover={{ x: 6 }}>
+                       <Link 
+                         to={link.path} 
+                         style={{ textDecoration: 'none', color: '#64748b', fontSize: 14, fontWeight: 700, transition: 'color 0.2s' }}
+                         className="hover:text-emerald-500"
+                       >
+                         {link.label}
+                       </Link>
+                     </motion.div>
+                   );
+                 })}
                </div>
             </div>
           ))}

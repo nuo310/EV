@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { MapContainer, TileLayer, Marker, Popup, useMap, Polyline } from 'react-leaflet';
+import { useNavigate } from 'react-router-dom';
 import {
   collection,
   onSnapshot,
@@ -13,11 +14,12 @@ import {
 } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 import { useAuth } from '../contexts/AuthContext';
-import { Zap, Loader2, BatteryCharging, Navigation, Wifi, WifiOff, AlertCircle, X } from 'lucide-react';
+import { Zap, Loader2, BatteryCharging, Navigation, Wifi, WifiOff, AlertCircle, X, Check } from 'lucide-react';
 import toast from 'react-hot-toast';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
 import { ocppSyncService } from '../services/ocppService';
+import CheckoutModal from '../components/CheckoutModal';
 
 const DEFAULT_ENERGY_RATE_PER_KWH = Number(import.meta.env.VITE_DEFAULT_ENERGY_RATE_PER_KWH) || 12;
 
@@ -211,6 +213,7 @@ function MapController({ setUserPosition, setMapInstance }) {
 }
 
 const EVChargingFinder = () => {
+  const navigate = useNavigate();
   const [stations, setStations] = useState([]);
   const [loading, setLoading] = useState(true);
   const [bookingLoadingId, setBookingLoadingId] = useState(null);
@@ -222,6 +225,9 @@ const EVChargingFinder = () => {
   const [lastRouteFetchPosition, setLastRouteFetchPosition] = useState(null);
   const [myBookings, setMyBookings] = useState([]);
   const [receiptModal, setReceiptModal] = useState(null);
+  const [kwhInputStation, setKwhInputStation] = useState(null);
+  const [kwhInputValue, setKwhInputValue] = useState(20);
+  const [checkoutModalOpen, setCheckoutModalOpen] = useState(false);
   const { currentUser } = useAuth();
 
   const bookingForStation = (stationId) => myBookings.find((b) => b.stationId === stationId);
@@ -317,20 +323,35 @@ const EVChargingFinder = () => {
     };
   }, [stations, hasActiveChargingSession]);
 
-  const handleStartCharging = async (station) => {
+  const handleStartCharging = (station) => {
     if (!currentUser) return toast.error('Please sign in');
     if (bookingLoadingId) return;
+    setKwhInputStation(station);
+    setKwhInputValue(20); // Default to 20 kWh
+  };
 
+  const handleConfirmKwh = () => {
+    if (!kwhInputStation) return;
+    setCheckoutModalOpen(true);
+  };
+
+  const handleCompletePayment = async (totalAmount, finalKwh) => {
+    setCheckoutModalOpen(false);
+    const station = kwhInputStation;
+    if (!station) return;
+    
     setBookingLoadingId(station.id);
     try {
-      const response = await ocppSyncService.sendRemoteStart(getOcppStationId(station), {
+      // 1. Send the actual OCPP startup signal so the simulator triggers charging!
+      await ocppSyncService.sendRemoteStart(getOcppStationId(station), {
         idTag: currentUser.uid,
         connectorId: station.connectorId || 1,
       });
-      
+
       const ocppId = getOcppStationId(station);
       const meterStartWh = parseEnergyWhFromTelemetry(stationStatuses?.[ocppId]?.telemetry) ?? 0;
 
+      // 2. Write booking to firestore so it appears as an active session in our map & dashboard
       await setDoc(doc(collection(db, 'bookings')), {
         userId: currentUser.uid,
         stationId: station.id,
@@ -340,8 +361,15 @@ const EVChargingFinder = () => {
         createdAt: serverTimestamp(),
         startedAt: serverTimestamp(),
         meterStartWh,
+        kwhRequested: finalKwh,
+        paidAmount: totalAmount,
       });
-      toast.success('Start command sent successfully');
+
+      setKwhInputStation(null);
+      toast.success('Charging session authorized and started!');
+      
+      // 3. Navigate to success page
+      navigate(`/payment-status?status=success&amount=${totalAmount}&kwh=${finalKwh}&stationName=${encodeURIComponent(station.name)}&orderId=TXN-${Math.floor(100000 + Math.random() * 900000)}&stationId=${station.id}`);
     } catch (err) {
       console.error(err);
       toast.error(err instanceof Error ? err.message : String(err));
@@ -870,6 +898,179 @@ const EVChargingFinder = () => {
             </button>
           </div>
         </div>
+      )}
+
+      {/* Energy kWh Input Modal */}
+      {kwhInputStation && !checkoutModalOpen && (
+        <div
+          style={{
+            position: 'fixed',
+            inset: 0,
+            zIndex: 10000,
+            background: 'rgba(15,23,42,0.65)',
+            backdropFilter: 'blur(4px)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            padding: '16px',
+          }}
+          onClick={() => setKwhInputStation(null)}
+          role="presentation"
+        >
+          <div
+            role="dialog"
+            aria-modal="true"
+            onClick={(e) => e.stopPropagation()}
+            style={{
+              background: '#0f172a',
+              border: '2px solid #1e293b',
+              borderRadius: '24px',
+              boxShadow: '0 20px 25px -5px rgb(0 0 0 / 0.5)',
+              maxWidth: '440px',
+              width: '100%',
+              padding: '28px',
+              position: 'relative',
+              color: '#f8fafc',
+            }}
+          >
+            <button
+              type="button"
+              onClick={() => setKwhInputStation(null)}
+              style={{
+                position: 'absolute',
+                top: '20px',
+                right: '20px',
+                border: 'none',
+                background: 'transparent',
+                cursor: 'pointer',
+                padding: '4px',
+                color: '#94a3b8',
+              }}
+            >
+              <X size={20} />
+            </button>
+            
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '16px' }}>
+              <div style={{ background: 'rgba(16,185,129,0.1)', border: '1px solid rgba(16,185,129,0.2)', borderRadius: '10px', padding: '8px', color: '#34d399' }}>
+                <Zap size={22} className="animate-pulse" />
+              </div>
+              <div>
+                <h2 style={{ fontSize: '1.25rem', fontWeight: 900, margin: 0, color: '#fff' }}>Configure Charge</h2>
+                <p style={{ fontSize: '10px', color: '#94a3b8', fontFamily: 'monospace', margin: 0 }}>STATION: {kwhInputStation.name.toUpperCase()}</p>
+              </div>
+            </div>
+
+            <p style={{ margin: '0 0 20px 0', fontSize: '13px', color: '#94a3b8', lineHeight: '1.5' }}>
+              Specify the energy required for your vehicle. The system will calculate the reservation tariff and compile your secure invoice.
+            </p>
+
+            {/* kWh Number Input Selector */}
+            <div style={{ marginBottom: '24px' }}>
+              <label style={{ display: 'block', fontSize: '10px', fontWeight: 900, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '8px' }}>
+                Target Capacity (Kilowatt-hours)
+              </label>
+              <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+                <input
+                  type="number"
+                  min="1"
+                  max="100"
+                  value={kwhInputValue}
+                  onChange={(e) => setKwhInputValue(Math.max(1, Math.min(100, Number(e.target.value) || 1)))}
+                  style={{
+                    background: '#020617',
+                    border: '2px solid #1e293b',
+                    borderRadius: '12px',
+                    padding: '12px 16px',
+                    fontSize: '18px',
+                    fontWeight: 'bold',
+                    color: '#fff',
+                    flex: 1,
+                    outline: 'none',
+                  }}
+                />
+                <span style={{ fontSize: '16px', fontWeight: 800, color: '#34d399' }}>kWh</span>
+              </div>
+
+              {/* Quick selectors presets */}
+              <div style={{ display: 'flex', gap: '8px', marginTop: '12px' }}>
+                {[10, 20, 30, 50].map((val) => (
+                  <button
+                    key={val}
+                    type="button"
+                    onClick={() => setKwhInputValue(val)}
+                    style={{
+                      background: kwhInputValue === val ? 'rgba(16,185,129,0.1)' : '#020617',
+                      border: kwhInputValue === val ? '2px solid #10b981' : '2px solid #1e293b',
+                      color: kwhInputValue === val ? '#34d399' : '#94a3b8',
+                      borderRadius: '8px',
+                      padding: '6px 12px',
+                      fontSize: '11px',
+                      fontWeight: 800,
+                      cursor: 'pointer',
+                      flex: 1,
+                      transition: 'all 0.2s',
+                    }}
+                  >
+                    {val} kWh
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Calculations Breakdown */}
+            <div style={{ background: '#020617', borderRadius: '16px', border: '1.5px solid #1e293b', padding: '16px', marginBottom: '24px' }}>
+              <div style={{ display: 'flex', justifycontent: 'space-between', marginBottom: '8px', fontSize: '12px' }}>
+                <span style={{ color: '#64748b', fontWeight: 600 }}>Energy tariff</span>
+                <span style={{ fontWeight: 800, color: '#f8fafc' }}>₹{energyRateForStation(kwhInputStation)} / kWh</span>
+              </div>
+              <div style={{ display: 'flex', justifycontent: 'space-between', marginBottom: '8px', fontSize: '12px' }}>
+                <span style={{ color: '#64748b', fontWeight: 600 }}>Estimated charge duration</span>
+                <span style={{ fontWeight: 800, color: '#f8fafc' }}>~{Math.round((kwhInputValue / 7.4) * 10) / 10} hours (at 7.4 kW)</span>
+              </div>
+              <div style={{ borderTop: '1px solid #1e293b', paddingTop: '10px', marginTop: '8px', display: 'flex', justifycontent: 'space-between', fontSize: '15px', fontWeight: 900 }}>
+                <span style={{ color: '#fff' }}>Tariff Subtotal</span>
+                <span style={{ color: '#34d399' }}>₹{Math.round(kwhInputValue * energyRateForStation(kwhInputStation) * 100) / 100}</span>
+              </div>
+            </div>
+
+            {/* Submit */}
+            <button
+              type="button"
+              onClick={handleConfirmKwh}
+              style={{
+                width: '100%',
+                background: '#10b981',
+                border: 'none',
+                color: '#020617',
+                padding: '14px',
+                borderRadius: '14px',
+                fontWeight: 900,
+                fontSize: '14px',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '8px',
+                boxShadow: '0 4px 14px rgba(16,185,129,0.3)',
+              }}
+            >
+              Confirm & Proceed to Payment
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* CheckoutModal Overlay Component */}
+      {checkoutModalOpen && kwhInputStation && (
+        <CheckoutModal
+          isOpen={checkoutModalOpen}
+          onClose={() => setCheckoutModalOpen(false)}
+          amount={Math.round(kwhInputValue * energyRateForStation(kwhInputStation) * 100) / 100}
+          kwh={kwhInputValue}
+          rate={energyRateForStation(kwhInputStation)}
+          station={kwhInputStation}
+          onPay={handleCompletePayment}
+        />
       )}
     </div>
   );
