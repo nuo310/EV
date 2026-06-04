@@ -35,6 +35,7 @@ const Navbar = () => {
   ] : [
     { name: 'About App', href: '/#features' },
     { name: 'How It Works', href: '/#how-it-works' },
+    { name: 'Log In', href: '/login', isRoute: true },
   ];
 
   const containerVariants = {
