@@ -542,8 +542,8 @@ const EVChargingFinder = () => {
               const conn = connectorSessionFlags(s, stationStatuses);
               const ub = bookingForStation(s.id);
               
-              const showStart = conn.isAvailable;
-              const showStop = !conn.isAvailable;
+              const showStop = ub?.status === 'active';
+              const showStart = !showStop;
               
               // Compute live consumption
               const live = ub?.status === 'active' 
@@ -668,18 +668,18 @@ const EVChargingFinder = () => {
                         <button
                           type="button"
                           onClick={() => handleStartCharging(s)}
-                          disabled={isStationBooking}
+                          disabled={isStationBooking || !isStationConsideredOnline(s) || !conn.isAvailable}
                           style={{
-                            background: '#16a34a',
-                            color: '#fff',
-                            border: '2px solid #15803d',
+                            background: (isStationBooking || !isStationConsideredOnline(s) || !conn.isAvailable) ? '#e2e8f0' : '#16a34a',
+                            color: (isStationBooking || !isStationConsideredOnline(s) || !conn.isAvailable) ? '#94a3b8' : '#fff',
+                            border: `2px solid ${(isStationBooking || !isStationConsideredOnline(s) || !conn.isAvailable) ? '#cbd5e1' : '#15803d'}`,
                             padding: '10px 22px',
                             borderRadius: '12px',
                             fontWeight: 800,
                             fontSize: '14px',
-                            boxShadow: '4px 4px 0 #0f172a',
-                            cursor: isStationBooking ? 'wait' : 'pointer',
-                            opacity: isStationBooking ? 0.75 : 1,
+                            boxShadow: (isStationBooking || !isStationConsideredOnline(s) || !conn.isAvailable) ? 'none' : '4px 4px 0 #0f172a',
+                            cursor: (isStationBooking || !isStationConsideredOnline(s) || !conn.isAvailable) ? 'not-allowed' : 'pointer',
+                            opacity: 1,
                           }}
                         >
                           {isStationBooking ? <Loader2 className="animate-spin" size={16} /> : 'Start charging'}
@@ -732,8 +732,8 @@ const EVChargingFinder = () => {
             const pubLoading = bookingLoadingId === s.id;
             const pubConn = connectorSessionFlags(s, stationStatuses);
             
-            const pubShowStart = pubConn.isAvailable;
-            const pubShowStop = !pubConn.isAvailable;
+            const pubShowStop = pubUb?.status === 'active';
+            const pubShowStart = !pubShowStop;
 
             const pubLive = pubUb?.status === 'active' 
                 ? liveConsumptionBill(pubUb, s, stationStatuses?.[getOcppStationId(s)]?.telemetry) 
@@ -769,17 +769,17 @@ const EVChargingFinder = () => {
                     <button
                       type="button"
                       onClick={() => handleStartCharging(s)}
-                      disabled={pubLoading}
+                      disabled={pubLoading || !isStationConsideredOnline(s) || !pubConn.isAvailable}
                       style={{
                         width: '100%',
                         marginTop: 8,
-                        background: '#16a34a',
-                        color: '#fff',
+                        background: (pubLoading || !isStationConsideredOnline(s) || !pubConn.isAvailable) ? '#e2e8f0' : '#16a34a',
+                        color: (pubLoading || !isStationConsideredOnline(s) || !pubConn.isAvailable) ? '#94a3b8' : '#fff',
                         padding: '12px',
                         borderRadius: '10px',
                         fontWeight: 800,
-                        border: 'none',
-                        cursor: pubLoading ? 'wait' : 'pointer',
+                        border: `2px solid ${(pubLoading || !isStationConsideredOnline(s) || !pubConn.isAvailable) ? '#cbd5e1' : 'transparent'}`,
+                        cursor: (pubLoading || !isStationConsideredOnline(s) || !pubConn.isAvailable) ? 'not-allowed' : 'pointer',
                       }}
                     >
                       {pubLoading ? '…' : 'Start charging'}

@@ -279,7 +279,7 @@ function sendCallAndAwaitResult(stationId, action, payload) {
 
       reject(new Error(`${action} timed out`));
 
-    }, 20000);
+    }, 60000);
 
     pendingCalls.set(uniqueId, {
 
