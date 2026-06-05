@@ -49,6 +49,7 @@ function stationDocToForm(s) {
   return {
     name: s.name ?? '',
     ocppStationId: (s.ocppStationId || s.id || '').toString(),
+    websocketUrl: s.websocketUrl ?? '',
     lat: s.lat != null && s.lat !== '' ? String(s.lat) : '',
     lng: s.lng != null && s.lng !== '' ? String(s.lng) : '',
     availableSlots: s.availableSlots ?? 1,
@@ -90,6 +91,7 @@ const EVChargingFinder = () => {
   const defaultNewStation = () => ({
     name: '',
     ocppStationId: '',
+    websocketUrl: '',
     lat: '',
     lng: '',
     availableSlots: 1,
@@ -108,6 +110,44 @@ const EVChargingFinder = () => {
   const [newStation, setNewStation] = useState(defaultNewStation);
   /** Firestore document id while editing; null = creating new station */
   const [editingDocId, setEditingDocId] = useState(null);
+
+  const [backendWsInfo, setBackendWsInfo] = useState(null);
+
+  useEffect(() => {
+    const fetchWsInfo = async () => {
+      try {
+        const baseUrl = import.meta.env.VITE_OCPP_REMOTE_START_BASE_URL || 'http://localhost:9221';
+        const res = await fetch(`${baseUrl.replace(/\/+$/, '')}/ws-info`);
+        if (res.ok) {
+          const data = await res.json();
+          setBackendWsInfo(data);
+        }
+      } catch (err) {
+        console.error("Failed to fetch backend WebSocket info:", err);
+      }
+    };
+    fetchWsInfo();
+  }, []);
+
+  const handleWebsocketUrlChange = (url) => {
+    let extractedId = url;
+    if (url.includes('://') || url.startsWith('/')) {
+      try {
+        const parts = url.split('/');
+        const lastPart = parts[parts.length - 1] || parts[parts.length - 2];
+        if (lastPart) {
+          extractedId = lastPart.replace(/[^a-zA-Z0-9_-]/g, '');
+        }
+      } catch (e) {
+        // ignore
+      }
+    }
+    setNewStation(prev => ({
+      ...prev,
+      websocketUrl: url,
+      ocppStationId: editingDocId ? prev.ocppStationId : extractedId
+    }));
+  };
 
   const openNewStationModal = () => {
     setEditingDocId(null);
@@ -161,6 +201,7 @@ const EVChargingFinder = () => {
       const schemaData = {
         name: newStation.name.trim(),
         ocppStationId: stationDocId,
+        websocketUrl: newStation.websocketUrl ? newStation.websocketUrl.trim() : '',
         lat: parseFloat(newStation.lat),
         lng: parseFloat(newStation.lng),
         availableSlots: parseInt(newStation.availableSlots, 10) || 0,
@@ -231,6 +272,11 @@ const EVChargingFinder = () => {
                   </button>
                 </div>
                 <p className="text-[10px] font-mono text-slate-400 mt-1">{s.id}</p>
+                {s.websocketUrl && (
+                  <p className="text-[9px] font-mono text-slate-500 mt-1 truncate" title={s.websocketUrl}>
+                    URL: {s.websocketUrl}
+                  </p>
+                )}
                 <div className="flex items-center gap-2 mt-2 text-xs font-medium text-slate-500">
                   <Zap size={14} className="text-green-500" />
                   <span>{s.chargerType}</span>
@@ -332,6 +378,20 @@ const EVChargingFinder = () => {
                   />
                 </div>
                 <div>
+                  <label className={labelClass} htmlFor="st-ws-url">WebSocket Connection URL</label>
+                  <input
+                    id="st-ws-url"
+                    disabled={Boolean(editingDocId)}
+                    className={fieldClass}
+                    placeholder="e.g. ws://13.62.76.143:9221/ocpp/CP_001"
+                    value={newStation.websocketUrl || ''}
+                    onChange={(e) => handleWebsocketUrlChange(e.target.value)}
+                  />
+                  <p className="mt-1.5 text-[11px] leading-relaxed text-slate-500">
+                    Paste the charger's WebSocket URL. We'll extract the OCPP ID automatically.
+                  </p>
+                </div>
+                <div>
                   <label className={labelClass} htmlFor="st-ocpp">OCPP station ID · Firestore document id</label>
                   <input
                     id="st-ocpp"
@@ -348,6 +408,18 @@ const EVChargingFinder = () => {
                       : 'Creates / updates stations/{id} with this exact id.'}
                   </p>
                 </div>
+                {backendWsInfo && newStation.ocppStationId && (
+                  <div className="rounded-xl border border-blue-200 bg-blue-50/50 p-3.5 text-xs text-blue-900 leading-relaxed">
+                    <p className="font-bold mb-1">🔌 Physical Charger Connection Settings:</p>
+                    <p className="mb-2">Enter this URL in your physical charger's OCPP settings:</p>
+                    <code className="block bg-white border border-blue-200 rounded px-2 py-1 font-mono break-all text-[11px] text-blue-700 select-all">
+                      {backendWsInfo.websocketUrl.replace('{CHARGER_ID}', newStation.ocppStationId)}
+                    </code>
+                    <p className="mt-2 text-[10px] text-blue-700 font-medium">
+                      Ensure the protocol (ws/wss) matches your server's SSL configuration.
+                    </p>
+                  </div>
+                )}
                 {editingLastSeenLabel && (
                   <p className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-[11px] text-slate-600">
                     <span className="font-mono font-bold text-slate-800">lastSeen</span> (read-only){' '}

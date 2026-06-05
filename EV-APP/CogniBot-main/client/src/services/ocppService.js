@@ -1,5 +1,5 @@
 const REMOTE_START_BASE_URL =
-  import.meta.env.VITE_OCPP_REMOTE_START_BASE_URL || "/api";
+  (import.meta.env.VITE_OCPP_REMOTE_START_BASE_URL || "/api").replace(/\/+$/, "");
 
 class OcppSyncService {
 
@@ -29,79 +29,96 @@ class OcppSyncService {
 
   async sendRemoteStart(stationId, payload = {}) {
 
-    const response = await fetch(
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 65000);
 
-      `${REMOTE_START_BASE_URL}/remote-start`,
+    try {
+      const response = await fetch(
 
-      {
-        method: "POST",
+        `${REMOTE_START_BASE_URL}/remote-start`,
 
-        headers: {
-          "Content-Type": "application/json"
-        },
+        {
+          method: "POST",
 
-        body: JSON.stringify({
-          stationId,
-          connectorId: payload.connectorId || 1,
-          idTag: payload.idTag
-        })
+          headers: {
+            "Content-Type": "application/json"
+          },
 
-      }
+          body: JSON.stringify({
+            stationId,
+            connectorId: payload.connectorId || 1,
+            idTag: payload.idTag
+          }),
 
-    );
-
-    const body = await response.json().catch(() => ({}));
-
-    if (!response.ok) {
-
-      throw new Error(
-
-        body.error ||
-        `Remote start failed for ${stationId}`
+          signal: controller.signal,
+        }
 
       );
 
-    }
+      const body = await response.json().catch(() => ({}));
 
-    return body;
+      if (!response.ok) {
+
+        throw new Error(
+
+          body.error ||
+          `Remote start failed for ${stationId}`
+
+        );
+
+      }
+
+      return body;
+    } finally {
+      clearTimeout(timeout);
+    }
 
   }
 
   async sendRemoteStop(stationId, payload = {}) {
 
-    const response = await fetch(
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 65000);
 
-      `${REMOTE_START_BASE_URL}/remote-stop`,
+    try {
+      const response = await fetch(
 
-      {
-        method: "POST",
+        `${REMOTE_START_BASE_URL}/remote-stop`,
 
-        headers: {
-          "Content-Type": "application/json"
-        },
+        {
+          method: "POST",
 
-        body: JSON.stringify({
-          stationId,
-          transactionId: payload.transactionId
-        })
-      }
+          headers: {
+            "Content-Type": "application/json"
+          },
 
-    );
+          body: JSON.stringify({
+            stationId,
+            transactionId: payload.transactionId
+          }),
 
-    const body = await response.json().catch(() => ({}));
-
-    if (!response.ok) {
-
-      throw new Error(
-
-        body.error ||
-        `Remote stop failed for ${stationId}`
+          signal: controller.signal,
+        }
 
       );
 
-    }
+      const body = await response.json().catch(() => ({}));
 
-    return body;
+      if (!response.ok) {
+
+        throw new Error(
+
+          body.error ||
+          `Remote stop failed for ${stationId}`
+
+        );
+
+      }
+
+      return body;
+    } finally {
+      clearTimeout(timeout);
+    }
 
   }
 

@@ -20,13 +20,14 @@ import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { Toaster } from 'react-hot-toast';
 import { Navigate } from 'react-router-dom';
 
-// Compliance and Payment Pages
+// Compliance Pages
 import About from './pages/compliance/About';
 import Terms from './pages/compliance/Terms';
 import Privacy from './pages/compliance/Privacy';
 import Refunds from './pages/compliance/Refunds';
 import Contact from './pages/compliance/Contact';
-import PaymentStatus from './pages/PaymentStatus';
+// Payment gateway disabled — direct OCPP charger control
+// import PaymentStatus from './pages/PaymentStatus';
 
 
 const LandingPage = () => {
@@ -97,6 +98,7 @@ function App() {
               <Route path="/privacy" element={<Privacy />} />
               <Route path="/refunds" element={<Refunds />} />
               <Route path="/contact" element={<Contact />} />
+              {/* Payment route disabled — direct OCPP charger control */}
               {/* <Route path="/payment-status" element={<PaymentStatus />} /> */}
             </Routes>
           </div>

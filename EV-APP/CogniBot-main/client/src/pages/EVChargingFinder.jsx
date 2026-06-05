@@ -19,7 +19,6 @@ import toast from 'react-hot-toast';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
 import { ocppSyncService } from '../services/ocppService';
-import CheckoutModal from '../components/CheckoutModal';
 
 const DEFAULT_ENERGY_RATE_PER_KWH = Number(import.meta.env.VITE_DEFAULT_ENERGY_RATE_PER_KWH) || 12;
 
@@ -289,8 +288,13 @@ const EVChargingFinder = () => {
     async function refreshStatuses() {
       if (stations.length === 0) return;
       try {
+        // Only poll active-session stations during charging to reduce API calls
+        const stationsToCheck = hasActiveChargingSession
+          ? stations.filter(s => myBookings.some(b => b.stationId === s.id))
+          : stations;
+
         const results = await Promise.all(
-          stations.map(async (s) => {
+          stationsToCheck.map(async (s) => {
             const stationId = getOcppStationId(s);
             if (!stationId) return null;
             try {
@@ -338,6 +342,11 @@ const EVChargingFinder = () => {
     handleCompletePayment(amount, kwhInputValue);
   };
 
+  // ⚠️  DOUBLE-BOOKING WARNING: This bypass flow creates a booking + sends RemoteStart
+  // directly from the client. If the CheckoutModal (CCAvenue payment) flow is re-enabled,
+  // paymentController.js ALSO creates a booking + RemoteStart on payment success callback.
+  // When switching to real payments, remove the booking creation and RemoteStart from HERE
+  // and let the payment callback handle it exclusively.
   const handleCompletePayment = async (totalAmount, finalKwh) => {
     const station = kwhInputStation;
     if (!station) return;
@@ -1021,15 +1030,15 @@ const EVChargingFinder = () => {
 
             {/* Calculations Breakdown */}
             <div style={{ background: '#020617', borderRadius: '16px', border: '1.5px solid #1e293b', padding: '16px', marginBottom: '24px' }}>
-              <div style={{ display: 'flex', justifycontent: 'space-between', marginBottom: '8px', fontSize: '12px' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px', fontSize: '12px' }}>
                 <span style={{ color: '#64748b', fontWeight: 600 }}>Energy tariff</span>
                 <span style={{ fontWeight: 800, color: '#f8fafc' }}>₹{energyRateForStation(kwhInputStation)} / kWh</span>
               </div>
-              <div style={{ display: 'flex', justifycontent: 'space-between', marginBottom: '8px', fontSize: '12px' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px', fontSize: '12px' }}>
                 <span style={{ color: '#64748b', fontWeight: 600 }}>Estimated charge duration</span>
                 <span style={{ fontWeight: 800, color: '#f8fafc' }}>~{Math.round((kwhInputValue / 7.4) * 10) / 10} hours (at 7.4 kW)</span>
               </div>
-              <div style={{ borderTop: '1px solid #1e293b', paddingTop: '10px', marginTop: '8px', display: 'flex', justifycontent: 'space-between', fontSize: '15px', fontWeight: 900 }}>
+              <div style={{ borderTop: '1px solid #1e293b', paddingTop: '10px', marginTop: '8px', display: 'flex', justifyContent: 'space-between', fontSize: '15px', fontWeight: 900 }}>
                 <span style={{ color: '#fff' }}>Tariff Subtotal</span>
                 <span style={{ color: '#34d399' }}>₹{Math.round(kwhInputValue * energyRateForStation(kwhInputStation) * 100) / 100}</span>
               </div>
