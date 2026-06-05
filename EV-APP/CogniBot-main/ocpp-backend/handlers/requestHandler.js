@@ -28,6 +28,7 @@ module.exports = async function handleRequest(
       if (stationDocBoot.exists) {
         await stationRefBoot.set({
           isOnline: true,
+          status: "Available",
           lastSeen: new Date(),
           vendor: payload.chargePointVendor,
           model: payload.chargePointModel
