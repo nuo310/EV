@@ -8,6 +8,7 @@ const { v4: uuidv4 } = require("uuid");
 
 const handleRequest = require("./handlers/requestHandler");
 const db = require("./firebase");
+const paymentRoutes = require("./payment-gateway/paymentRoutes");
 
 const app = express();
 
@@ -25,6 +26,17 @@ app.get("/", (req, res) => {
 
 app.use(cors());
 app.use(express.json());
+app.use(express.urlencoded({ extended: true })); // Required for CCAvenue form POST callbacks
+
+/*
+========================
+PAYMENT GATEWAY ROUTES
+========================
+*/
+
+app.use("/api/payment", paymentRoutes);
+app.use("/payment", paymentRoutes);
+console.log("💳 CCAvenue payment routes mounted at /api/payment and /payment");
 
 /*
 ========================
@@ -124,8 +136,25 @@ wss.on("connection", (ws, request) => {
   }
 
   chargers[chargePointId] = ws;
-
   console.log(`🔌 ChargePoint Connected: ${chargePointId}`);
+
+  // Automatically update Firestore online status
+  (async () => {
+    try {
+      const stationRef = db.collection("stations").doc(chargePointId);
+      const stationDoc = await stationRef.get();
+      if (stationDoc.exists) {
+        await stationRef.set({
+          isOnline: true,
+          status: "Available",
+          lastSeen: new Date()
+        }, { merge: true });
+        console.log(`Updated Firestore: ${chargePointId} is now online.`);
+      }
+    } catch (err) {
+      console.error(`Failed to update online status for ${chargePointId}:`, err);
+    }
+  })();
 
   ws.on("message", async (message) => {
 
@@ -290,13 +319,40 @@ app.get("/stations/:stationId/status", (req, res) => {
 
 });
 
+// Debug: List all currently connected chargers
+app.get("/debug/chargers", (req, res) => {
+  const connected = Object.keys(chargers).map((id) => ({
+    id,
+    readyState: chargers[id]?.readyState, // 0=CONNECTING, 1=OPEN, 2=CLOSING, 3=CLOSED
+  }));
+  console.log("🔍 Debug: Connected chargers:", connected);
+  res.json({ count: connected.length, chargers: connected });
+});
+
 app.post("/remote-start", async (req, res) => {
 
-  const { stationId } = req.body;
+  const { stationId, connectorId, idTag } = req.body;
+
+  console.log("─────────────────────────────────────────────");
+  console.log("⚡ POST /remote-start received");
+  console.log("   stationId:", stationId);
+  console.log("   connectorId:", connectorId || 1);
+  console.log("   idTag:", idTag || "WEB_APP");
+  console.log("   Connected chargers:", Object.keys(chargers));
+  console.log("─────────────────────────────────────────────");
 
   if (!stationId) {
     return res.status(400).json({
       error: "stationId required",
+    });
+  }
+
+  // Check if the charger is actually connected
+  if (!chargers[stationId]) {
+    console.error(`❌ Charger "${stationId}" is NOT in the connected chargers map.`);
+    console.log("   Available chargers:", Object.keys(chargers));
+    return res.status(500).json({
+      error: `Charger not connected: ${stationId}. Connected chargers: [${Object.keys(chargers).join(", ")}]`,
     });
   }
 
@@ -305,13 +361,26 @@ app.post("/remote-start", async (req, res) => {
     const payload = await sendCallAndAwaitResult(
       stationId,
       "RemoteStartTransaction",
-      { connectorId: 1, idTag: "WEB_APP" }
+      { connectorId: connectorId || 1, idTag: idTag || "WEB_APP" }
     );
+
+    console.log("✅ RemoteStartTransaction response from charger:", JSON.stringify(payload));
+
+    // Update Firestore status to Preparing
+    try {
+      await db.collection("stations").doc(stationId).set({
+        status: "Preparing",
+        lastSeen: new Date()
+      }, { merge: true });
+    } catch (e) {
+      console.error("Failed to update station status to Preparing:", e);
+    }
 
     res.json(payload);
 
   } catch (error) {
 
+    console.error("❌ RemoteStartTransaction error:", error.message);
     res.status(500).json({
       error: error.message,
     });

@@ -13,6 +13,7 @@ export default function PaymentStatus() {
   const kwh = searchParams.get('kwh') || '0.0';
   const stationName = searchParams.get('stationName') || 'EV Charger';
   const orderId = searchParams.get('orderId') || `TXN-${Math.floor(100000 + Math.random() * 900000)}`;
+  const reason = searchParams.get('reason') || '';
   const dateStr = new Date().toLocaleString();
 
   const isSuccess = status === 'success';
@@ -21,9 +22,9 @@ export default function PaymentStatus() {
     if (isSuccess) {
       toast.success('Charging session authorized successfully!');
     } else {
-      toast.error('Payment authorization aborted or failed.');
+      toast.error(reason ? `Payment failed: ${reason}` : 'Payment authorization aborted or failed.');
     }
-  }, [isSuccess]);
+  }, [isSuccess, reason]);
 
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col items-center justify-center py-20 px-4 sm:px-6 relative overflow-hidden">
@@ -79,7 +80,9 @@ export default function PaymentStatus() {
           <p className="text-slate-400 text-sm mb-8">
             {isSuccess
               ? 'Your charging transaction has been authorized securely.'
-              : 'The gateway returned a failure response. No charges were made.'}
+              : reason 
+                ? `Reason: ${reason}`
+                : 'The gateway returned a failure response. No charges were made.'}
           </p>
 
           {/* Bill Receipt breakdown details */}

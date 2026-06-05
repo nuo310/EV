@@ -1,13 +1,15 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, ShieldCheck, CreditCard, Landmark, Smartphone, Zap, Loader2, Lock } from 'lucide-react';
+import { useAuth } from '../contexts/AuthContext';
 
 export default function CheckoutModal({ isOpen, onClose, amount, kwh, rate, station, onPay }) {
+  const { currentUser } = useAuth();
   const [activeTab, setActiveTab] = useState('card'); // card, netbanking, upi
   const [loading, setLoading] = useState(false);
   const [loadingStep, setLoadingStep] = useState(0); // 0: idle, 1: handshake, 2: gateway redirect
-  const [email, setEmail] = useState('user@chargemap.in');
-  const [phone, setPhone] = useState('+91 99887 76655');
+  const [email, setEmail] = useState(currentUser?.email || 'user@chargemap.in');
+  const [phone, setPhone] = useState(currentUser?.profile?.phone || '+91 99887 76655');
 
   // Dummy inputs
   const [cardNumber, setCardNumber] = useState('');
@@ -16,27 +18,151 @@ export default function CheckoutModal({ isOpen, onClose, amount, kwh, rate, stat
   const [upiId, setUpiId] = useState('');
   const [selectedBank, setSelectedBank] = useState('');
 
+  useEffect(() => {
+    if (currentUser) {
+      if (currentUser.email) setEmail(currentUser.email);
+      if (currentUser.profile?.phone) setPhone(currentUser.profile.phone);
+    }
+  }, [currentUser]);
+
   if (!isOpen) return null;
 
   const tax = Math.round(amount * 0.18 * 100) / 100;
   const total = Math.round((amount + tax) * 100) / 100;
 
-  const handlePaymentSubmit = (e) => {
+  const handlePaymentSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
     setLoadingStep(1);
 
-    // Simulate CCAvenue secure handshake
-    setTimeout(() => {
+    try {
+      const backendUrl = import.meta.env.VITE_OCPP_REMOTE_START_BASE_URL || '/api';
+      // If it ends with a slash, strip it
+      const baseApiUrl = backendUrl.endsWith('/') ? backendUrl.slice(0, -1) : backendUrl;
+      const createUrl = `${baseApiUrl}/payment/create`;
+
+      const payload = {
+        amount: total,
+        customerName: currentUser?.displayName || currentUser?.profile?.name || 'EV Client',
+        email: email,
+        phone: phone,
+        userId: currentUser?.uid || 'guest',
+        chargerId: station?.ocppStationId || station?.id || 'unknown',
+        stationName: station?.name || 'EV Charger',
+        kwh: kwh,
+      };
+
+      console.log('Initiating payment request to:', createUrl, payload);
+
+      const res = await fetch(createUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(payload),
+      });
+
+      if (!res.ok) {
+        const errData = await res.json().catch(() => ({}));
+        throw new Error(errData.error || 'Failed to create payment order');
+      }
+
+      const { encRequest, access_code, actionUrl } = await res.json();
       setLoadingStep(2);
+
+      // Dynamically create a hidden form and submit it to redirect to CCAvenue
+      const form = document.createElement('form');
+      form.method = 'POST';
+      form.action = actionUrl;
+
+      const encReqInput = document.createElement('input');
+      encReqInput.type = 'hidden';
+      encReqInput.name = 'encRequest';
+      encReqInput.value = encRequest;
+      form.appendChild(encReqInput);
+
+      const accessCodeInput = document.createElement('input');
+      accessCodeInput.type = 'hidden';
+      accessCodeInput.name = 'access_code';
+      accessCodeInput.value = access_code;
+      form.appendChild(accessCodeInput);
+
+      document.body.appendChild(form);
+      console.log('Redirecting to CCAvenue payment page...');
+      form.submit();
+    } catch (err) {
+      console.error('Payment initiation failed:', err);
+      alert(err.message || 'Payment initiation failed. Please try again.');
+      setLoading(false);
+      setLoadingStep(0);
+    }
+  };
+
+  const handleMockSubmit = async () => {
+    setLoading(true);
+    setLoadingStep(1);
+
+    try {
+      const backendUrl = import.meta.env.VITE_OCPP_REMOTE_START_BASE_URL || '/api';
+      const baseApiUrl = backendUrl.endsWith('/') ? backendUrl.slice(0, -1) : backendUrl;
+      const createUrl = `${baseApiUrl}/payment/create`;
+      const mockSuccessUrl = `${baseApiUrl}/payment/mock-success`;
+
+      // 1. Create payment order first
+      const createPayload = {
+        amount: total,
+        customerName: currentUser?.displayName || currentUser?.profile?.name || 'EV Client',
+        email: email,
+        phone: phone,
+        userId: currentUser?.uid || 'guest',
+        chargerId: station?.ocppStationId || station?.id || 'unknown',
+        stationName: station?.name || 'EV Charger',
+        kwh: kwh,
+      };
+
+      const createRes = await fetch(createUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(createPayload),
+      });
+
+      if (!createRes.ok) {
+        const errData = await createRes.json().catch(() => ({}));
+        throw new Error(errData.error || 'Failed to create payment order');
+      }
+
+      const { orderId } = await createRes.json();
+      setLoadingStep(2);
+
+      // 2. Call mock success endpoint to trigger callback and get redirect URL
+      const mockRes = await fetch(mockSuccessUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ orderId }),
+      });
+
+      if (!mockRes.ok) {
+        const errData = await mockRes.json().catch(() => ({}));
+        throw new Error(errData.error || 'Failed to process mock payment');
+      }
+
+      const { redirectUrl } = await mockRes.json();
       
-      // Simulate redirection and callback success
+      // Simulate redirection delay for good feel
       setTimeout(() => {
-        setLoading(false);
-        setLoadingStep(0);
-        onPay(total, kwh);
-      }, 1500);
-    }, 1500);
+        window.location.href = redirectUrl;
+      }, 1000);
+
+    } catch (err) {
+      console.error('Mock payment failed:', err);
+      alert(err.message || 'Mock payment failed. Please try again.');
+      setLoading(false);
+      setLoadingStep(0);
+    }
   };
 
   return (
@@ -243,10 +369,21 @@ export default function CheckoutModal({ isOpen, onClose, amount, kwh, rate, stat
             {/* Submit Button */}
             <button
               type="submit"
-              className="w-full bg-emerald-500 hover:bg-emerald-600 active:scale-[0.98] text-slate-950 font-extrabold py-3.5 px-4 rounded-2xl transition-all shadow-lg shadow-emerald-500/10 flex items-center justify-center gap-2"
+              className="w-full bg-emerald-500 hover:bg-emerald-600 active:scale-[0.98] text-slate-950 font-extrabold py-3.5 px-4 rounded-2xl transition-all shadow-lg shadow-emerald-500/10 flex items-center justify-center gap-2 mb-3"
             >
               <Lock size={16} /> Pay ₹{total} securely via CCAvenue
             </button>
+
+            {/* Local Host bypass simulator button */}
+            {(window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') && (
+              <button
+                type="button"
+                onClick={handleMockSubmit}
+                className="w-full bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 border border-amber-500/30 font-bold py-2.5 px-4 rounded-xl transition-all flex items-center justify-center gap-1.5 text-xs mb-3"
+              >
+                <Zap size={14} className="animate-pulse" /> Simulate Local Sandbox Success (Bypass Whitelist)
+              </button>
+            )}
             
             <div className="mt-4 flex items-center justify-center gap-1.5 text-[10px] text-slate-500 font-semibold uppercase tracking-wider">
               <ShieldCheck size={14} className="text-emerald-500" /> Fully Secured 128-bit Encrypted Gateways

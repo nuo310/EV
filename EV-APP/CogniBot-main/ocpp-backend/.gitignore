@@ -1,5 +1,7 @@
 serviceAccountKey.json
 **/serviceAccountKey.json
+ev-app-firebase-service.json
+**/ev-app-firebase-service.json
 
 # Logs
 logs

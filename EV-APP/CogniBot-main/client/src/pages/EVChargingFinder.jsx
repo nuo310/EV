@@ -332,11 +332,13 @@ const EVChargingFinder = () => {
 
   const handleConfirmKwh = () => {
     if (!kwhInputStation) return;
-    setCheckoutModalOpen(true);
+    // Bypass checkout modal and trigger charger start directly
+    const rate = energyRateForStation(kwhInputStation);
+    const amount = Math.round(kwhInputValue * rate * 100) / 100;
+    handleCompletePayment(amount, kwhInputValue);
   };
 
   const handleCompletePayment = async (totalAmount, finalKwh) => {
-    setCheckoutModalOpen(false);
     const station = kwhInputStation;
     if (!station) return;
     
@@ -366,10 +368,10 @@ const EVChargingFinder = () => {
       });
 
       setKwhInputStation(null);
-      toast.success('Charging session authorized and started!');
+      toast.success('Charging session started successfully!');
       
-      // 3. Navigate to success page
-      navigate(`/payment-status?status=success&amount=${totalAmount}&kwh=${finalKwh}&stationName=${encodeURIComponent(station.name)}&orderId=TXN-${Math.floor(100000 + Math.random() * 900000)}&stationId=${station.id}`);
+      // 3. Navigate directly to dashboard to monitor charging session
+      navigate('/dashboard');
     } catch (err) {
       console.error(err);
       toast.error(err instanceof Error ? err.message : String(err));
@@ -1054,13 +1056,13 @@ const EVChargingFinder = () => {
                 boxShadow: '0 4px 14px rgba(16,185,129,0.3)',
               }}
             >
-              Confirm & Proceed to Payment
+              Confirm & Start Charging
             </button>
           </div>
         </div>
       )}
 
-      {/* CheckoutModal Overlay Component */}
+      {/* CheckoutModal Overlay Component commented out
       {checkoutModalOpen && kwhInputStation && (
         <CheckoutModal
           isOpen={checkoutModalOpen}
@@ -1072,6 +1074,7 @@ const EVChargingFinder = () => {
           onPay={handleCompletePayment}
         />
       )}
+      */}
     </div>
   );
 };

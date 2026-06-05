@@ -97,7 +97,7 @@ function App() {
               <Route path="/privacy" element={<Privacy />} />
               <Route path="/refunds" element={<Refunds />} />
               <Route path="/contact" element={<Contact />} />
-              <Route path="/payment-status" element={<PaymentStatus />} />
+              {/* <Route path="/payment-status" element={<PaymentStatus />} /> */}
             </Routes>
           </div>
 
