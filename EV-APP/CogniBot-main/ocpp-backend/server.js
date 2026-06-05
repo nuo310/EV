@@ -358,10 +358,13 @@ app.post("/remote-start", async (req, res) => {
 
   try {
 
+    // OCPP 1.6 requires idTag to be 20 characters max (Firebase UID is 28 chars, which fails on physical chargers)
+    const ocppIdTag = String(idTag || "WEB_APP").substring(0, 20);
+
     const payload = await sendCallAndAwaitResult(
       stationId,
       "RemoteStartTransaction",
-      { connectorId: connectorId || 1, idTag: idTag || "WEB_APP" }
+      { connectorId: connectorId || 1, idTag: ocppIdTag }
     );
 
     console.log("✅ RemoteStartTransaction response from charger:", JSON.stringify(payload));
@@ -399,12 +402,40 @@ app.post("/remote-stop", async (req, res) => {
     });
   }
 
+  let finalTxId = Number(transactionId);
+
+  // If no transaction ID was provided or it is invalid, attempt to look it up in Firestore
+  if (!finalTxId || isNaN(finalTxId)) {
+    console.log(`🔍 No transactionId provided for remote-stop on ${stationId}. Querying database...`);
+    try {
+      const activeTxSnap = await db.collection("transactions")
+        .where("stationId", "==", stationId)
+        .where("status", "==", "active")
+        .limit(1)
+        .get();
+
+      if (!activeTxSnap.empty) {
+        finalTxId = Number(activeTxSnap.docs[0].data().ocppTransactionId);
+        console.log(`🎯 Found active transaction ID in Firestore for ${stationId}: ${finalTxId}`);
+      } else {
+        console.log(`⚠️ No active transaction found in Firestore for ${stationId}`);
+      }
+    } catch (dbErr) {
+      console.error("Failed to query active transaction ID:", dbErr);
+    }
+  }
+
+  // Fallback default value if lookup also failed (so the OCPP message is still valid structurally)
+  if (!finalTxId || isNaN(finalTxId)) {
+    finalTxId = 1; 
+  }
+
   try {
 
     const payload = await sendCallAndAwaitResult(
       stationId,
       "RemoteStopTransaction",
-      { transactionId: Number(transactionId) }
+      { transactionId: finalTxId }
     );
 
     res.json(payload);
