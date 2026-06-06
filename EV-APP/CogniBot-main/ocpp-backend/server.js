@@ -8,7 +8,9 @@ const { v4: uuidv4 } = require("uuid");
 
 const handleRequest = require("./handlers/requestHandler");
 const db = require("./firebase");
-const paymentRoutes = require("./payment-gateway/paymentRoutes");
+
+// ── Payment gateway disabled — direct OCPP charger control only ──
+// const paymentRoutes = require("./payment-gateway/paymentRoutes");
 
 const app = express();
 
@@ -20,23 +22,60 @@ HEALTH ROUTE (IMPORTANT)
 ========================
 */
 
-app.get("/", (req, res) => {
-  res.status(200).send("Railway backend alive 🚀");
-});
-
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true })); // Required for CCAvenue form POST callbacks
 
+app.get("/", (req, res) => {
+  res.status(200).send("Railway backend alive 🚀");
+});
+
 /*
 ========================
-PAYMENT GATEWAY ROUTES
+PAYMENT GATEWAY ROUTES (DISABLED)
 ========================
+Payment gateway commented out — physical charger uses direct OCPP start/stop.
+To re-enable: uncomment the paymentRoutes require above and the lines below.
 */
 
-app.use("/api/payment", paymentRoutes);
-app.use("/payment", paymentRoutes);
-console.log("💳 CCAvenue payment routes mounted at /api/payment and /payment");
+// app.use("/api/payment", paymentRoutes);
+// app.use("/payment", paymentRoutes);
+// console.log("💳 CCAvenue payment routes mounted at /api/payment and /payment");
+
+/*
+========================
+WEBSOCKET INFO ENDPOINT
+========================
+Returns the WebSocket URL format for charger onboarding.
+The admin panel uses this to display the URL that charger operators
+must configure on their physical OCPP charger.
+*/
+
+app.get("/ws-info", (req, res) => {
+  // Derive WebSocket URL from the request's host
+  const protocol = req.headers['x-forwarded-proto'] === 'https' ? 'wss' : 'ws';
+  const host = req.headers['x-forwarded-host'] || req.headers.host || `localhost:${PORT}`;
+  const baseWsUrl = `${protocol}://${host}`;
+
+  res.json({
+    websocketUrl: `${baseWsUrl}/ocpp/{CHARGER_ID}`,
+    websocketUrlAlt: `${baseWsUrl}/ws/1.6/{CHARGER_ID}`,
+    instructions: [
+      "1. Open your physical charger's OCPP configuration panel",
+      "2. Set the OCPP Server URL to the websocketUrl above, replacing {CHARGER_ID} with your station's unique ID",
+      "3. Set OCPP Version to 1.6J (JSON over WebSocket)",
+      "4. Save and restart the charger",
+      "5. The charger will auto-connect and register on your platform via BootNotification",
+    ],
+    supportedFormats: [
+      "/ocpp/{CHARGER_ID}",
+      "/ws/1.6/{CHARGER_ID}",
+      "/{CHARGER_ID}",
+    ],
+    subprotocol: "ocpp1.6",
+    port: PORT,
+  });
+});
 
 /*
 ========================
@@ -57,6 +96,12 @@ const server = http.createServer(app);
 const wss = new WebSocket.Server({
   server,
   skipUTF8Validation: true,
+  handleProtocols: (protocols) => {
+    if (protocols.has("ocpp1.6")) return "ocpp1.6";
+    if (protocols.has("ocpp2.0.1")) return "ocpp2.0.1";
+    // Allow connections without subprotocol (e.g. browser debug tools)
+    return false;
+  },
 });
 
 console.log(`Server starting on port ${PORT}`);
@@ -123,7 +168,11 @@ wss.on("connection", (ws, request) => {
 
   console.log("Incoming WS connection attempt:", request.url);
 
-  const urlParts = request.url.split("/");
+  // Parse path and query parameters safely to avoid Charger ID corruption
+  const reqHost = request.headers['x-forwarded-host'] || request.headers.host || 'localhost';
+  const parsedUrl = new URL(request.url, `http://${reqHost}`);
+  const pathname = parsedUrl.pathname;
+  const urlParts = pathname.split("/");
 
   let chargePointId;
 
@@ -135,8 +184,34 @@ wss.on("connection", (ws, request) => {
     chargePointId = urlParts[1];
   }
 
+  // Reject connections with missing or invalid charger ID
+  if (!chargePointId || chargePointId.trim() === "") {
+    console.warn("⚠️ Rejecting WebSocket connection with no charger ID:", request.url);
+    ws.close(1008, "Missing charger identity");
+    return;
+  }
+
+  // Extract latitude & longitude from connection query parameters if present
+  const latParam = parsedUrl.searchParams.get("lat") || parsedUrl.searchParams.get("latitude");
+  const lngParam = parsedUrl.searchParams.get("lng") || parsedUrl.searchParams.get("longitude");
+  if (latParam && lngParam) {
+    const parsedLat = parseFloat(latParam);
+    const parsedLng = parseFloat(lngParam);
+    if (!isNaN(parsedLat) && !isNaN(parsedLng)) {
+      ws.latitude = parsedLat;
+      ws.longitude = parsedLng;
+      console.log(`📍 Parsed charger coordinates from URL: lat=${parsedLat}, lng=${parsedLng}`);
+    }
+  }
+
   chargers[chargePointId] = ws;
   console.log(`🔌 ChargePoint Connected: ${chargePointId}`);
+
+  // Capture the connection WebSocket URL for storage / diagnostics
+  const protocol = request.headers['x-forwarded-proto'] === 'https' ? 'wss' : 'ws';
+  const host = request.headers['x-forwarded-host'] || request.headers.host || `localhost:${PORT}`;
+  const connectionWsUrl = `${protocol}://${host}${request.url}`;
+  ws.connectionWsUrl = connectionWsUrl;
 
   // Automatically update Firestore online status
   (async () => {
@@ -144,12 +219,18 @@ wss.on("connection", (ws, request) => {
       const stationRef = db.collection("stations").doc(chargePointId);
       const stationDoc = await stationRef.get();
       if (stationDoc.exists) {
-        await stationRef.set({
+        const updateData = {
           isOnline: true,
           status: "Available",
-          lastSeen: new Date()
-        }, { merge: true });
-        console.log(`Updated Firestore: ${chargePointId} is now online.`);
+          lastSeen: new Date(),
+          websocketUrl: connectionWsUrl
+        };
+        if (ws.latitude && ws.longitude) {
+          updateData.lat = ws.latitude;
+          updateData.lng = ws.longitude;
+        }
+        await stationRef.set(updateData, { merge: true });
+        console.log(`Updated Firestore: ${chargePointId} is now online. WebSocket URL: ${connectionWsUrl}`);
       }
     } catch (err) {
       console.error(`Failed to update online status for ${chargePointId}:`, err);
@@ -223,6 +304,10 @@ wss.on("connection", (ws, request) => {
 
   });
 
+  ws.on("error", (err) => {
+    console.error(`WebSocket error for ${chargePointId}:`, err.message);
+  });
+
   ws.on("close", async () => {
 
     delete chargers[chargePointId];
@@ -262,6 +347,11 @@ function sendCallAndAwaitResult(stationId, action, payload) {
     throw new Error(`Charger not connected: ${stationId}`);
   }
 
+  if (charger.readyState !== WebSocket.OPEN) {
+    delete chargers[stationId];
+    throw new Error(`Charger WebSocket not open (state=${charger.readyState}): ${stationId}`);
+  }
+
   const message = [
     2,
     uuidv4(),
@@ -291,7 +381,10 @@ function sendCallAndAwaitResult(stationId, action, payload) {
 
       },
 
-      reject,
+      reject: (err) => {
+        clearTimeout(timeoutId);
+        reject(err);
+      },
 
     });
 
@@ -347,6 +440,8 @@ app.post("/remote-start", async (req, res) => {
     });
   }
 
+  console.log("Connected chargers: ", chargers)
+
   // Check if the charger is actually connected
   if (!chargers[stationId]) {
     console.error(`❌ Charger "${stationId}" is NOT in the connected chargers map.`);
@@ -396,6 +491,8 @@ app.post("/remote-stop", async (req, res) => {
 
   const { stationId, transactionId } = req.body;
 
+  console.log("hit remote stop")
+
   if (!stationId) {
     return res.status(400).json({
       error: "stationId required",
@@ -427,7 +524,7 @@ app.post("/remote-stop", async (req, res) => {
 
   // Fallback default value if lookup also failed (so the OCPP message is still valid structurally)
   if (!finalTxId || isNaN(finalTxId)) {
-    finalTxId = 1; 
+    finalTxId = 1;
   }
 
   try {

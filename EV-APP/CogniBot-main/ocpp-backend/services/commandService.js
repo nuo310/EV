@@ -1,36 +1,13 @@
-const { v4: uuidv4 } = require("uuid");
+/**
+ * DEPRECATED — This module is unused dead code.
+ *
+ * The server.js `sendCallAndAwaitResult()` function handles all
+ * remote OCPP calls directly with proper promise-based response tracking.
+ *
+ * This file's `remoteStartTransaction` was missing the required `connectorId`
+ * field and had no response tracking (fire-and-forget).
+ *
+ * Kept as a reference only. Do NOT import this module.
+ */
 
-function remoteStartTransaction(ws, idTag = "TEST_USER") {
-
-  const message = [
-    2,
-    uuidv4(),
-    "RemoteStartTransaction",
-    {
-      idTag
-    }
-  ];
-
-  ws.send(JSON.stringify(message));
-}
-
-
-function remoteStopTransaction(ws, transactionId) {
-
-  const message = [
-    2,
-    uuidv4(),
-    "RemoteStopTransaction",
-    {
-      transactionId
-    }
-  ];
-
-  ws.send(JSON.stringify(message));
-}
-
-
-module.exports = {
-  remoteStartTransaction,
-  remoteStopTransaction
-};
+// No exports — intentionally empty.

@@ -1,7 +1,26 @@
 const sendResponse = require("../utils/sendResponse");
 const db = require("../firebase");
 
-let nextOcppTransactionId = 1000;
+// Persistent transaction ID counter — bootstrapped from Firestore on first use
+let nextOcppTransactionId = null;
+
+async function getNextTransactionId() {
+  if (nextOcppTransactionId === null) {
+    try {
+      const snap = await db.collection("transactions")
+        .orderBy("ocppTransactionId", "desc")
+        .limit(1)
+        .get();
+      const maxId = snap.empty ? 999 : (Number(snap.docs[0].data().ocppTransactionId) || 999);
+      nextOcppTransactionId = maxId + 1;
+      console.log(`🔢 Transaction ID counter bootstrapped from Firestore: starting at ${nextOcppTransactionId}`);
+    } catch (err) {
+      console.error("Failed to bootstrap transaction ID from Firestore, using fallback:", err);
+      nextOcppTransactionId = Date.now(); // safe fallback — unique enough
+    }
+  }
+  return nextOcppTransactionId++;
+}
 
 module.exports = async function handleRequest(
   ws,
@@ -25,14 +44,23 @@ module.exports = async function handleRequest(
       const stationDocBoot = await stationRefBoot.get();
 
       // No Firestore station doc until admin creates it (client/admin panel).
+      const latVal = ws.latitude || 26.1443;
+      const lngVal = ws.longitude || 91.7363;
+
       if (stationDocBoot.exists) {
-        await stationRefBoot.set({
+        const updateData = {
           isOnline: true,
           status: "Available",
           lastSeen: new Date(),
           vendor: payload.chargePointVendor,
-          model: payload.chargePointModel
-        }, { merge: true });
+          model: payload.chargePointModel,
+          websocketUrl: ws.connectionWsUrl || ""
+        };
+        if (ws.latitude && ws.longitude) {
+          updateData.lat = ws.latitude;
+          updateData.lng = ws.longitude;
+        }
+        await stationRefBoot.set(updateData, { merge: true });
       } else {
         console.log(
           "Auto-creating Firestore station for simulator testing:",
@@ -41,8 +69,8 @@ module.exports = async function handleRequest(
         await stationRefBoot.set({
           name: `Simulated Charger ${chargePointId}`,
           ocppStationId: chargePointId,
-          lat: 26.1443, // Centered at Guwahati area (where your browser coordinates are)
-          lng: 91.7363,
+          lat: latVal,
+          lng: lngVal,
           availableSlots: 1,
           pricePerHour: 15,
           energyRatePerKwh: 12,
@@ -54,7 +82,8 @@ module.exports = async function handleRequest(
           errorCode: "NoError",
           isOnline: true,
           published: true,
-          lastSeen: new Date()
+          lastSeen: new Date(),
+          websocketUrl: ws.connectionWsUrl || ""
         });
       }
 
@@ -154,7 +183,7 @@ module.exports = async function handleRequest(
         break;
       }
 
-      const ocppTransactionId = nextOcppTransactionId++;
+      const ocppTransactionId = await getNextTransactionId();
 
       await db.collection("transactions")
         .add({
@@ -199,6 +228,16 @@ module.exports = async function handleRequest(
             status: "completed",
             endedAt: new Date()
           });
+        }
+
+        // Reset station status to Available after charging ends
+        try {
+          await db.collection("stations").doc(chargePointId).set({
+            status: "Available",
+            lastSeen: new Date()
+          }, { merge: true });
+        } catch (e) {
+          console.error("Failed to reset station status after StopTransaction:", e);
         }
       }
 

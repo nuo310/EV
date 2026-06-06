@@ -22,3 +22,6 @@ coverage/
 # Local binaries / scratch files in repo root
 /node
 /node.cpp
+
+
+pem-file/
