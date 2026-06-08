@@ -19,13 +19,12 @@
  * ═══════════════════════════════════════════════════════════
  */
 
-/*
 const WebSocket = require("ws");
 
 // -------------------------------------------------------------
 // CONFIGURATION
 // -------------------------------------------------------------
-const BACKEND_URL = "ws://localhost:9221/ws/1.6/mgch001";
+const BACKEND_URL = "ws://13.62.76.143:9221/ocpp/mgch001";
 const CHARGE_POINT_ID = "mgch001";
 const HEARTBEAT_INTERVAL_MS = 60000;
 const METER_VALUE_INTERVAL_MS = 5000;
@@ -196,4 +195,3 @@ function generateUniqueId() {
 }
 
 connect();
-*/
