@@ -26,6 +26,7 @@ const Navbar = () => {
   // Dynamic Links based on role
   const navLinks = currentUser ? [
     { name: isAdmin ? 'Admin Panel' : 'Dashboard', href: isAdmin ? '/admin' : '/dashboard', isRoute: true },
+    ...(isAdmin ? [{ name: 'Admin Dashboard', href: '/admin-route', isRoute: true }] : []),
     { 
       name: isAdmin ? 'Manage Stations' : 'Find Chargers', 
       href: isAdmin ? '/deploy-charger' : '/find-charger', 
@@ -144,10 +145,10 @@ const Navbar = () => {
                       </div>
 
                       <button 
-                        onClick={() => { setProfileOpen(false); navigate(isAdmin ? '/admin' : '/dashboard'); }}
+                        onClick={() => { setProfileOpen(false); navigate(isAdmin ? '/admin-route' : '/dashboard'); }}
                         style={{ border: 'none', background: '#f8fafc', padding: '10px', borderRadius: 12, fontWeight: 700, color: '#0f172a', cursor: 'pointer', textAlign: 'left', display: 'flex', alignItems: 'center', gap: 8 }}
                       >
-                         <Activity size={16} /> {isAdmin ? 'Admin Portal' : 'My Dashboard'}
+                         <Activity size={16} /> {isAdmin ? 'Admin Dashboard' : 'My Dashboard'}
                       </button>
 
                       <button 

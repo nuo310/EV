@@ -27,19 +27,40 @@ export function AuthProvider({ children }) {
             await updateProfile(userCredential.user, { displayName: name });
         }
         
+        const isSuperAdmin = email.trim().toLowerCase() === 'admin-ev@gmail.com';
+        
         // Create user document matching flutter schema
         await setDoc(doc(db, 'users', userCredential.user.uid), {
-            name: name || '',
+            name: name || (isSuperAdmin ? 'Super Admin' : ''),
             email: email,
-            walletBalance: 0.0,
+            walletBalance: isSuperAdmin ? 10000.0 : 0.0,
             createdAt: serverTimestamp(),
-            role: 'user'
+            role: isSuperAdmin ? 'admin' : 'user'
         });
         
         return userCredential;
     }
 
-    function login(email, password) {
+    async function login(email, password) {
+        const trimmedEmail = email.trim().toLowerCase();
+        if (trimmedEmail === 'admin-ev@gmail.com' && password === 'admin@ev') {
+            try {
+                return await signInWithEmailAndPassword(auth, trimmedEmail, password);
+            } catch (err) {
+                console.log("Login failed for admin-ev@gmail.com:", err.code);
+                // If user doesn't exist or credentials mismatch, we attempt to register it
+                if (err.code === 'auth/user-not-found' || err.code === 'auth/invalid-credential') {
+                    console.log("Super admin account not found. Registering...");
+                    try {
+                        return await signup(trimmedEmail, password, 'Super Admin');
+                    } catch (signUpErr) {
+                        console.error("Auto-registration of super admin failed:", signUpErr);
+                        throw err; // Throw the original login error if signup fails (e.g. password mismatch on existing account)
+                    }
+                }
+                throw err;
+            }
+        }
         return signInWithEmailAndPassword(auth, email, password);
     }
 
@@ -52,12 +73,13 @@ export function AuthProvider({ children }) {
         const docSnap = await getDoc(docRef);
         
         if (!docSnap.exists()) {
+            const isSuperAdmin = userCredential.user.email.toLowerCase().trim() === 'admin-ev@gmail.com';
             await setDoc(docRef, {
                 name: userCredential.user.displayName || '',
                 email: userCredential.user.email,
-                walletBalance: 0.0,
+                walletBalance: isSuperAdmin ? 10000.0 : 0.0,
                 createdAt: serverTimestamp(),
-                role: 'user'
+                role: isSuperAdmin ? 'admin' : 'user'
             });
         }
         
@@ -74,8 +96,30 @@ export function AuthProvider({ children }) {
                 try {
                     const docRef = doc(db, 'users', user.uid);
                     const docSnap = await getDoc(docRef);
-                    if (docSnap.exists()) {
-                        setCurrentUser({ ...user, profile: docSnap.data() });
+                    let profileData = docSnap.exists() ? docSnap.data() : null;
+                    
+                    const isSuperAdmin = user.email && user.email.toLowerCase().trim() === 'admin-ev@gmail.com';
+                    
+                    if (isSuperAdmin) {
+                        if (!profileData) {
+                            profileData = {
+                                name: 'Super Admin',
+                                email: user.email,
+                                walletBalance: 10000.0,
+                                createdAt: new Date(),
+                                role: 'admin'
+                            };
+                            await setDoc(docRef, profileData);
+                            console.log("Auto-created Firestore document for Super Admin.");
+                        } else if (profileData.role !== 'admin') {
+                            profileData.role = 'admin';
+                            await setDoc(docRef, { role: 'admin' }, { merge: true });
+                            console.log("Enforced role: 'admin' in Firestore for Super Admin.");
+                        }
+                    }
+                    
+                    if (profileData) {
+                        setCurrentUser({ ...user, profile: profileData });
                     } else {
                         setCurrentUser(user);
                     }

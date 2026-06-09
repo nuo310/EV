@@ -620,7 +620,7 @@ const Login = () => {
             <div style={{ flex: 1, height: '1px', background: '#e2e8f0' }} />
           </motion.div>
 
-          {/* Google Sign In */}
+           {/* Google Sign In */}
           <motion.button
             type="button"
             onClick={handleGoogleSignIn}
@@ -653,11 +653,57 @@ const Login = () => {
             <span>Sign In with Google</span>
           </motion.button>
 
+          {/* Admin Auto-Fill Option */}
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.6, duration: 0.6 }}
+            onClick={() => {
+              setEmail('admin-ev@gmail.com');
+              setPassword('admin@ev');
+              toast('Admin Credentials Auto-filled!', {
+                icon: '⚡',
+                style: {
+                  borderRadius: '16px',
+                  background: '#0f172a',
+                  color: '#fff',
+                  fontWeight: 800,
+                  border: '2px solid #16a34a',
+                },
+              });
+            }}
+            style={{
+              marginTop: 20,
+              padding: '14px',
+              borderRadius: 16,
+              background: '#f8fafc',
+              border: '2px solid #0f172a',
+              textAlign: 'center',
+              cursor: 'pointer',
+              fontWeight: 800,
+              fontSize: 12,
+              color: '#0f172a',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: 8,
+              boxShadow: '4px 4px 0 #16a34a',
+              transition: 'all 0.2s ease',
+              fontFamily: 'var(--font-body)',
+              letterSpacing: '0.05em'
+            }}
+            whileHover={{ y: -2, boxShadow: '6px 6px 0 #16a34a' }}
+            whileTap={{ y: 0, boxShadow: '2px 2px 0 #16a34a' }}
+          >
+            <Zap size={14} color="#16a34a" fill="#16a34a" />
+            <span>AUTO-FILL ADMIN CREDENTIALS</span>
+          </motion.div>
+
           {/* Footer */}
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            transition={{ delay: 0.6, duration: 0.6 }}
+            transition={{ delay: 0.65, duration: 0.6 }}
             style={{ marginTop: 32, paddingTop: 28, borderTop: '2px solid #e2e8f0', textAlign: 'center' }}
           >
             <p style={{ fontSize: 14, color: '#64748b', margin: 0, fontWeight: 600 }}>
