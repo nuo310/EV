@@ -387,7 +387,7 @@ const Login = () => {
           background: '#fee2e2',
           color: '#991b1b',
           fontWeight: 800,
-          border: '2px solid #dc2626',
+          border: '2px solid #dc2626 ',
         },
       });
     } finally {
@@ -620,7 +620,7 @@ const Login = () => {
             <div style={{ flex: 1, height: '1px', background: '#e2e8f0' }} />
           </motion.div>
 
-           {/* Google Sign In */}
+          {/* Google Sign In */}
           <motion.button
             type="button"
             onClick={handleGoogleSignIn}
