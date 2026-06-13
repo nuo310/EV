@@ -553,7 +553,24 @@ app.post("/remote-stop", async (req, res) => {
         finalTxId = Number(activeTxSnap.docs[0].data().ocppTransactionId);
         console.log(`🎯 Found active transaction ID in Firestore for ${stationId}: ${finalTxId}`);
       } else {
-        console.log(`⚠️ No active transaction found in Firestore for ${stationId}`);
+        console.log(`⚠️ No active transaction found in Firestore for ${stationId}. Falling back to most recent transaction...`);
+        // Fallback: Query recent transactions for this station and sort in-memory to find the most recent transaction
+        const recentTxSnap = await db.collection("transactions")
+          .where("stationId", "==", stationId)
+          .limit(10)
+          .get();
+        if (!recentTxSnap.empty) {
+          const docs = recentTxSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+          docs.sort((a, b) => {
+            const tA = a.timestamp ? (a.timestamp.toDate ? a.timestamp.toDate() : new Date(a.timestamp)) : new Date(0);
+            const tB = b.timestamp ? (b.timestamp.toDate ? b.timestamp.toDate() : new Date(b.timestamp)) : new Date(0);
+            return tB - tA; // sort desc
+          });
+          finalTxId = Number(docs[0].ocppTransactionId);
+          console.log(`🎯 Found most recent transaction ID in Firestore (in-memory sort) for ${stationId}: ${finalTxId}`);
+        } else {
+          console.log(`⚠️ No transactions whatsoever found in Firestore for ${stationId}`);
+        }
       }
     } catch (dbErr) {
       console.error("Failed to query active transaction ID:", dbErr);
