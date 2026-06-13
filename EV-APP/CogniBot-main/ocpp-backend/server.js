@@ -592,8 +592,58 @@ START SERVER
 ========================
 */
 
-server.listen(PORT, "0.0.0.0", () => {
+server.listen(PORT, "0.0.0.0", async () => {
 
   console.log(`🚀 Server running on Railway port ${PORT}`);
+
+  // Boot-time self-healing check: Clean up any stuck active bookings/transactions on offline/unavailable chargers
+  try {
+    console.log("🧹 Running boot-time self-healing cleanup check...");
+    const stationsSnap = await db.collection("stations").get();
+    for (const stationDoc of stationsSnap.docs) {
+      const station = stationDoc.data();
+      const isOnline = station.isOnline === true;
+      const status = (station.status || "").toLowerCase();
+      
+      // If the station is offline or unavailable, clean up active bookings/transactions
+      if (!isOnline || status === "unavailable" || status === "faulted") {
+        const stationId = stationDoc.id;
+        
+        // 1. Terminate stuck transactions
+        const txSnap = await db.collection("transactions")
+          .where("stationId", "==", stationId)
+          .where("status", "==", "active")
+          .get();
+        for (const doc of txSnap.docs) {
+          const data = doc.data();
+          await doc.ref.update({
+            status: "completed",
+            endedAt: new Date(),
+            meterStop: data.meterStart || 0
+          });
+          console.log(`🧹 [Boot Cleanup] Terminated active transaction ${doc.id} on offline station ${stationId}`);
+        }
+
+        // 2. Terminate stuck bookings
+        const bookingSnap = await db.collection("bookings")
+          .where("stationId", "==", stationId)
+          .where("status", "==", "active")
+          .get();
+        for (const doc of bookingSnap.docs) {
+          const data = doc.data();
+          await doc.ref.update({
+            status: "completed",
+            completedAt: new Date(),
+            endedAt: new Date(),
+            meterStopWh: data.meterStartWh || 0
+          });
+          console.log(`🧹 [Boot Cleanup] Terminated active booking ${doc.id} on offline station ${stationId}`);
+        }
+      }
+    }
+    console.log("🧹 Boot-time self-healing cleanup check completed.");
+  } catch (err) {
+    console.error("🧹 Boot-time self-healing cleanup check failed:", err);
+  }
 
 });
