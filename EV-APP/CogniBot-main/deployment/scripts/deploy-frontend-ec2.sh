@@ -14,7 +14,7 @@ sudo apt-get install -y nginx
 
 # 2. Build the client application
 echo "--> Going to client directory..."
-cd /home/ubuntu/EV/CogniBot-main/client
+cd /home/ubuntu/EV/EV-APP/CogniBot-main/client
 
 echo "--> Installing client dependencies..."
 npm install
@@ -27,7 +27,7 @@ npm run build
 echo "--> Copying build files to /var/www/client..."
 sudo mkdir -p /var/www/client
 sudo rm -rf /var/www/client/*
-sudo cp -r /home/ubuntu/EV/CogniBot-main/client/dist/* /var/www/client/
+sudo cp -r /home/ubuntu/EV/EV-APP/CogniBot-main/client/dist/* /var/www/client/
 
 echo "--> Setting permissions..."
 sudo chown -R www-data:www-data /var/www/client

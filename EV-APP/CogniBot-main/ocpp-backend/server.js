@@ -109,35 +109,6 @@ console.log(`Server starting on port ${PORT}`);
 const chargers = {};
 const pendingCalls = new Map();
 const stationTelemetry = new Map();
-const adminClients = new Set();
-
-/*
-========================
-ADMIN BROADCAST
-========================
-Sends live telemetry updates to all connected admin dashboard clients.
-*/
-
-function broadcastToAdmins(eventType, data) {
-  const message = JSON.stringify({ type: eventType, data, timestamp: new Date().toISOString() });
-  for (const client of adminClients) {
-    if (client.readyState === WebSocket.OPEN) {
-      try { client.send(message); } catch (e) { /* ignore */ }
-    }
-  }
-}
-
-function getFullChargerSnapshot() {
-  return Object.keys(chargers).map(id => ({
-    id,
-    readyState: chargers[id]?.readyState,
-    websocketUrl: chargers[id]?.connectionWsUrl || null,
-    latitude: chargers[id]?.latitude || null,
-    longitude: chargers[id]?.longitude || null,
-    telemetry: stationTelemetry.get(id) || null,
-    ...computeStationStatus(id),
-  }));
-}
 
 /*
 ========================
@@ -195,33 +166,6 @@ CHARGER CONNECTION
 
 wss.on("connection", (ws, request) => {
 
-  /*
-  ========================
-  ADMIN TELEMETRY CLIENTS
-  ========================
-  Admin dashboard connects to /admin-telemetry for live broadcast.
-  */
-  const parsedPathCheck = new URL(request.url, `http://${request.headers.host || 'localhost'}`);
-  if (parsedPathCheck.pathname === '/admin-telemetry') {
-    console.log('🛡️  Admin telemetry client connected');
-    adminClients.add(ws);
-
-    // Send initial snapshot of all connected chargers
-    const snapshot = getFullChargerSnapshot();
-    ws.send(JSON.stringify({
-      type: 'initial_snapshot',
-      data: { chargers: snapshot, count: snapshot.length },
-      timestamp: new Date().toISOString()
-    }));
-
-    ws.on('close', () => {
-      adminClients.delete(ws);
-      console.log('🛡️  Admin telemetry client disconnected');
-    });
-    ws.on('error', () => adminClients.delete(ws));
-    return; // Don't process further — this is an admin client, not a charger
-  }
-
   console.log("Incoming WS connection attempt:", request.url);
 
   // Parse path and query parameters safely to avoid Charger ID corruption
@@ -262,14 +206,6 @@ wss.on("connection", (ws, request) => {
 
   chargers[chargePointId] = ws;
   console.log(`🔌 ChargePoint Connected: ${chargePointId}`);
-
-  // Broadcast charger connection to admin clients
-  broadcastToAdmins('charger_connected', {
-    stationId: chargePointId,
-    websocketUrl: ws.connectionWsUrl || null,
-    latitude: ws.latitude || null,
-    longitude: ws.longitude || null,
-  });
 
   // Capture the connection WebSocket URL for storage / diagnostics
   const protocol = request.headers['x-forwarded-proto'] === 'https' ? 'wss' : 'ws';
@@ -321,7 +257,6 @@ wss.on("connection", (ws, request) => {
 
         if (action === "Heartbeat") {
           telemetry.lastHeartbeatAt = telemetry.lastSeenAt;
-          broadcastToAdmins('heartbeat', { stationId: chargePointId, at: telemetry.lastSeenAt });
         }
 
         if (action === "StatusNotification") {
@@ -329,22 +264,10 @@ wss.on("connection", (ws, request) => {
             at: telemetry.lastSeenAt,
             status: payload?.status,
           };
-          broadcastToAdmins('status_notification', {
-            stationId: chargePointId,
-            status: payload?.status,
-            connectorId: payload?.connectorId,
-            errorCode: payload?.errorCode,
-            at: telemetry.lastSeenAt,
-          });
         }
 
         if (action === "MeterValues") {
           telemetry.lastMeterValues = payload;
-          broadcastToAdmins('meter_values', {
-            stationId: chargePointId,
-            meterValues: payload,
-            at: telemetry.lastSeenAt,
-          });
         }
 
         await handleRequest(
@@ -391,9 +314,6 @@ wss.on("connection", (ws, request) => {
 
     console.log(`❌ ChargePoint Disconnected: ${chargePointId}`);
 
-    // Broadcast disconnect to admin clients
-    broadcastToAdmins('charger_disconnected', { stationId: chargePointId });
-
     try {
       const stationRef = db.collection("stations").doc(chargePointId);
       const stationDoc = await stationRef.get();
@@ -407,6 +327,44 @@ wss.on("connection", (ws, request) => {
       }
     } catch (err) {
       console.error(`Failed to update offline status for ${chargePointId}:`, err);
+    }
+
+    // Automatically terminate any active sessions on this station because it went offline
+    try {
+      const txSnap = await db.collection("transactions")
+        .where("stationId", "==", chargePointId)
+        .where("status", "==", "active")
+        .get();
+      for (const doc of txSnap.docs) {
+        const data = doc.data();
+        await doc.ref.update({
+          status: "completed",
+          endedAt: new Date(),
+          meterStop: data.meterStart || 0
+        });
+        console.log(`Terminated active transaction ${doc.id} (station went offline).`);
+      }
+    } catch (txErr) {
+      console.error(`Failed to terminate active transactions for offline station ${chargePointId}:`, txErr);
+    }
+
+    try {
+      const bookingSnap = await db.collection("bookings")
+        .where("stationId", "==", chargePointId)
+        .where("status", "==", "active")
+        .get();
+      for (const doc of bookingSnap.docs) {
+        const data = doc.data();
+        await doc.ref.update({
+          status: "completed",
+          completedAt: new Date(),
+          endedAt: new Date(),
+          meterStopWh: data.meterStartWh || 0
+        });
+        console.log(`Terminated active booking ${doc.id} (station went offline).`);
+      }
+    } catch (bkErr) {
+      console.error(`Failed to terminate active bookings for offline station ${chargePointId}:`, bkErr);
     }
 
   });
@@ -520,7 +478,7 @@ app.post("/remote-start", async (req, res) => {
     });
   }
 
-  console.log("Connected chargers: ", chargers)
+  console.log("Connected chargers:", chargers)
 
   // Check if the charger is actually connected
   if (!chargers[stationId]) {
@@ -625,102 +583,6 @@ app.post("/remote-stop", async (req, res) => {
 
   }
 
-});
-
-/*
-========================
-ADMIN API ROUTES
-========================
-*/
-
-// List all users from Firestore
-app.get("/admin/users", async (req, res) => {
-  try {
-    const usersSnap = await db.collection("users").get();
-    const users = usersSnap.docs.map(d => ({ id: d.id, ...d.data() }));
-    res.json({ count: users.length, users });
-  } catch (err) {
-    console.error("Failed to fetch users:", err);
-    res.status(500).json({ error: err.message });
-  }
-});
-
-// List all stations from Firestore
-app.get("/admin/stations", async (req, res) => {
-  try {
-    const stationsSnap = await db.collection("stations").get();
-    const stations = stationsSnap.docs.map(d => {
-      const data = d.data();
-      const id = d.id;
-      const liveStatus = computeStationStatus(data.ocppStationId || id);
-      return { id, ...data, live: liveStatus };
-    });
-    res.json({ count: stations.length, stations });
-  } catch (err) {
-    console.error("Failed to fetch stations:", err);
-    res.status(500).json({ error: err.message });
-  }
-});
-
-// Add a new station manually
-app.post("/admin/stations", async (req, res) => {
-  try {
-    const { stationId, name, lat, lng, chargerType, connectorId, pricePerHour, energyRatePerKwh, availableSlots, published } = req.body;
-    if (!stationId) return res.status(400).json({ error: "stationId is required" });
-    const docRef = db.collection("stations").doc(stationId);
-    const docSnap = await docRef.get();
-    const stationData = {
-      name: name || `Station ${stationId}`,
-      ocppStationId: stationId,
-      lat: parseFloat(lat) || 0,
-      lng: parseFloat(lng) || 0,
-      chargerType: chargerType || "Type 2 AC",
-      connectorId: parseInt(connectorId) || 1,
-      pricePerHour: parseFloat(pricePerHour) || 15,
-      energyRatePerKwh: parseFloat(energyRatePerKwh) || 12,
-      availableSlots: parseInt(availableSlots) || 1,
-      published: published !== false,
-      status: docSnap.exists ? (docSnap.data().status || "Unavailable") : "Unavailable",
-      isOnline: docSnap.exists ? (docSnap.data().isOnline || false) : false,
-      lastSeen: docSnap.exists ? (docSnap.data().lastSeen || new Date()) : new Date(),
-    };
-    await docRef.set(stationData, { merge: true });
-    res.json({ success: true, station: { id: stationId, ...stationData } });
-  } catch (err) {
-    console.error("Failed to add station:", err);
-    res.status(500).json({ error: err.message });
-  }
-});
-
-// Update a station
-app.put("/admin/stations/:stationId", async (req, res) => {
-  try {
-    const { stationId } = req.params;
-    const updateData = req.body;
-    delete updateData.id; // Don't overwrite document ID
-    await db.collection("stations").doc(stationId).set(updateData, { merge: true });
-    res.json({ success: true });
-  } catch (err) {
-    console.error("Failed to update station:", err);
-    res.status(500).json({ error: err.message });
-  }
-});
-
-// Delete a station
-app.delete("/admin/stations/:stationId", async (req, res) => {
-  try {
-    const { stationId } = req.params;
-    await db.collection("stations").doc(stationId).delete();
-    res.json({ success: true });
-  } catch (err) {
-    console.error("Failed to delete station:", err);
-    res.status(500).json({ error: err.message });
-  }
-});
-
-// Get connected chargers snapshot
-app.get("/admin/live-chargers", (req, res) => {
-  res.json({ chargers: getFullChargerSnapshot() });
 });
 
 

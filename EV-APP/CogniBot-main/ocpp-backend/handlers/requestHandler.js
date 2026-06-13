@@ -135,6 +135,47 @@ module.exports = async function handleRequest(
           errorCode: payload.errorCode,
           lastSeen: new Date()
         }, { merge: true });
+
+        // If the status changes to Unavailable or Faulted, terminate active sessions
+        const incomingStatus = (payload.status || "").toLowerCase();
+        if (incomingStatus === "unavailable" || incomingStatus === "faulted") {
+          try {
+            const txSnap = await db.collection("transactions")
+              .where("stationId", "==", chargePointId)
+              .where("status", "==", "active")
+              .get();
+            for (const doc of txSnap.docs) {
+              const data = doc.data();
+              await doc.ref.update({
+                status: "completed",
+                endedAt: new Date(),
+                meterStop: data.meterStart || 0
+              });
+              console.log(`Terminated active transaction ${doc.id} (station status became ${payload.status}).`);
+            }
+          } catch (txErr) {
+            console.error(`Failed to terminate active transactions for ${chargePointId} on status change:`, txErr);
+          }
+
+          try {
+            const bookingSnap = await db.collection("bookings")
+              .where("stationId", "==", chargePointId)
+              .where("status", "==", "active")
+              .get();
+            for (const doc of bookingSnap.docs) {
+              const data = doc.data();
+              await doc.ref.update({
+                status: "completed",
+                completedAt: new Date(),
+                endedAt: new Date(),
+                meterStopWh: data.meterStartWh || 0
+              });
+              console.log(`Terminated active booking ${doc.id} (station status became ${payload.status}).`);
+            }
+          } catch (bkErr) {
+            console.error(`Failed to terminate active bookings for ${chargePointId} on status change:`, bkErr);
+          }
+        }
       } else {
         console.log(
           "Skipping Firestore station status (not registered by admin yet):",
