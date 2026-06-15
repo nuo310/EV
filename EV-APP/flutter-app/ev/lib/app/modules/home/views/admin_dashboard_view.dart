@@ -4,7 +4,6 @@ import 'package:get/get.dart';
 import 'package:ev/app/core/theme/app_colors.dart';
 import 'package:ev/app/core/widgets/reusable_widgets.dart';
 import '../controllers/admin_controller.dart';
-import 'dashboard_view.dart'; // For PulsingDot
 
 class AdminDashboardView extends GetView<AdminController> {
   const AdminDashboardView({super.key});

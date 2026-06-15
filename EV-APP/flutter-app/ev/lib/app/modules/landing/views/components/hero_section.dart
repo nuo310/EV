@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'grid_lines_painter.dart';
 import 'package:ev/app/core/theme/app_colors.dart';
-import 'package:ev/app/core/widgets/reusable_widgets.dart';
 import 'package:ev/app/routes/app_pages.dart';
 
 class HeroSection extends StatelessWidget {
