@@ -13,4 +13,4 @@ workflows:
         script: |
           flutter build ios --simulator --debug
     artifacts:
-      - EV-APP/flutter-app/ev/build/ios/iphonesimulator/*.app
+      - **/build/ios/iphonesimulator/*.app
