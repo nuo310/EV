@@ -24,7 +24,7 @@ const WebSocket = require("ws");
 // -------------------------------------------------------------
 // CONFIGURATION
 // -------------------------------------------------------------
-const BACKEND_URL = "ws://51.20.41.4:9221/ocpp/mgch001";
+const BACKEND_URL = "ws://3.6.89.80:9221/ocpp/mgch001";
 const CHARGE_POINT_ID = "mgch001";
 const HEARTBEAT_INTERVAL_MS = 60000;
 const METER_VALUE_INTERVAL_MS = 5000;

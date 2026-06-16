@@ -812,7 +812,7 @@ class AdminDashboardView extends GetView<AdminController> {
                   const SizedBox(height: 16),
                   NeoTextField(
                     label: 'WebSocket Connection URL',
-                    hintText: 'e.g. ws://51.20.41.4:9221/ocpp/mgch001',
+                    hintText: 'e.g. ws://3.6.89.80:9221/ocpp/mgch001',
                     controller: websocketUrlController,
                     enabled: !isEdit,
                   ),

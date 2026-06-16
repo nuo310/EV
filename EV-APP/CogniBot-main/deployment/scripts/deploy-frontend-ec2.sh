@@ -20,7 +20,7 @@ echo "--> Installing client dependencies..."
 npm install
 
 echo "--> Building production assets..."
-# This uses the local .env file we configured with the new IP 51.20.41.4
+# This uses the local .env file we configured with the new IP 3.6.89.80
 npm run build
 
 # 3. Copy build files to Nginx web root directory
@@ -61,5 +61,5 @@ echo "Frontend Deployment Completed successfully! 🎉"
 echo "============================================="
 echo "Next steps:"
 echo "1. Ensure Port 80 (HTTP) is open in your AWS Security Group."
-echo "2. Open http://51.20.41.4 in your browser to view your website!"
+echo "2. Open http://3.6.89.80 in your browser to view your website!"
 echo "============================================="

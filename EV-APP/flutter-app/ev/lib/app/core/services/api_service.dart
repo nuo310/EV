@@ -3,7 +3,7 @@ import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
 
 class ApiService extends GetxService {
-  static const String baseUrl = 'http://51.20.41.4:9221';
+  static const String baseUrl = 'http://3.6.89.80:9221';
   final http.Client _client = http.Client();
 
   /// GET /stations/:stationId/status - Get charger station status
