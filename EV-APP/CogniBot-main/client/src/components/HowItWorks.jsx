@@ -6,7 +6,7 @@ import { Search, Zap, Activity, CheckCircle, Navigation, Satellite, Radio, Credi
    MICRO-TAG COMPONENT
    ───────────────────────────────────────────────────────── */
 const StepTag = ({ text }) => (
-  <div style={{ display: 'inline-flex', padding: '4px 8px', borderRadius: 4, background: '#f8fafc', border: '1px solid #e2e8f0', color: '#16a34a', fontSize: 9, fontWeight: 900, fontFamily: 'monospace', letterSpacing: '0.1em', marginBottom: 12 }}>
+  <div style={{ display: 'inline-flex', padding: '4px 8px', borderRadius: 4, background: '#f8fafc', border: '1px solid #e2e8f0', color: '#D4AF37', fontSize: 9, fontWeight: 900, fontFamily: 'monospace', letterSpacing: '0.1em', marginBottom: 12 }}>
     [{text}]
   </div>
 );
@@ -113,12 +113,12 @@ const HowItWorks = () => {
         
         {/* Header */}
         <div style={{ textAlign: 'center', maxWidth: 720, margin: '0 auto 120px' }}>
-          <motion.div initial={{ opacity: 0, y: 10 }} whileInView={{ opacity: 1, y: 0 }} style={{ display: 'inline-flex', padding: '8px 20px', borderRadius: 99, border: '2px solid #0f172a', background: '#fff', color: '#0f172a', fontSize: 11, fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.12em', marginBottom: 32, boxShadow: '6px 6px 0 #16a34a' }}>
+          <motion.div initial={{ opacity: 0, y: 10 }} whileInView={{ opacity: 1, y: 0 }} style={{ display: 'inline-flex', padding: '8px 20px', borderRadius: 99, border: '2px solid #0f172a', background: '#fff', color: '#0f172a', fontSize: 11, fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.12em', marginBottom: 32, boxShadow: '6px 6px 0 #D4AF37' }}>
             Engineering The Future
           </motion.div>
           <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(3rem, 7vw, 5.5rem)', fontWeight: 800, color: '#0f172a', lineHeight: 0.95, letterSpacing: '-0.04em', marginBottom: 32 }}>
             Designed To <br/>
-            <span style={{ color: '#16a34a', WebkitTextStroke: '1px #0f172a' }}>Work Silently.</span>
+            <span style={{ color: '#D4AF37', WebkitTextStroke: '1px #0f172a' }}>Work Silently.</span>
           </h2>
           <p style={{ fontSize: '1.35rem', color: '#64748b', fontWeight: 600, lineHeight: 1.4, maxWidth: 540, margin: '0 auto' }}>
             We removed the noise. The result is a radically minimal infrastructure that runs with technical precision.
@@ -130,8 +130,8 @@ const HowItWorks = () => {
           
           {/* Main Structural Progress Line */}
           <div style={{ position: 'absolute', left: '50%', top: 0, bottom: 0, width: 4, background: '#f1f5f9', transform: 'translateX(-50%)', borderRadius: 4, overflow: 'hidden' }}>
-            <motion.div style={{ width: '100%', height: lineHeight, background: '#0f172a', borderRadius: 4 }} />
-            <motion.div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: lineHeight, background: '#16a34a', opacity: 0.4, filter: 'blur(8px)' }} />
+            <motion.div style={{ width: '100%', height: lineHeight, background: '#16a34a', borderRadius: 4 }} />
+            <motion.div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: lineHeight, background: '#D4AF37', opacity: 0.3, filter: 'blur(8px)' }} />
           </div>
 
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '32px', width: '100%' }}>

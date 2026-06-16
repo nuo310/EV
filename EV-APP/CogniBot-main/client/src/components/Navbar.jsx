@@ -25,8 +25,7 @@ const Navbar = () => {
 
   // Dynamic Links based on role
   const navLinks = currentUser ? [
-    { name: isAdmin ? 'Admin Panel' : 'Dashboard', href: isAdmin ? '/admin' : '/dashboard', isRoute: true },
-    ...(isAdmin ? [{ name: 'Admin Dashboard', href: '/admin-route', isRoute: true }] : []),
+    { name: isAdmin ? 'Admin Dashboard' : 'Dashboard', href: isAdmin ? '/admin' : '/dashboard', isRoute: true },
     { 
       name: isAdmin ? 'Manage Stations' : 'Find Chargers', 
       href: isAdmin ? '/deploy-charger' : '/find-charger', 
@@ -70,20 +69,19 @@ const Navbar = () => {
           position: 'relative', overflow: 'visible'
         }}
       >
-        <motion.div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: 3, background: '#16a34a', scaleX, transformOrigin: '0%' }} />
+        <motion.div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: 3, background: 'linear-gradient(90deg, #16a34a 0%, #D4AF37 100%)', scaleX, transformOrigin: '0%' }} />
 
         <motion.div variants={itemVariants} style={{ display: 'flex', alignItems: 'center', gap: 24 }}>
           <a href="/" style={{ display: 'flex', alignItems: 'center', gap: 12, textDecoration: 'none' }}>
             <motion.div 
               whileHover={{ rotate: [0, -10, 10, 0] }}
               style={{
-                width: 40, height: 40, borderRadius: 12, background: '#16a34a',
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                border: '2px solid #0f172a', boxShadow: '3px 3px 0 #0f172a'
+                width: 36, height: 36, borderRadius: 8, background: '#16a34a',
+                display: 'flex', alignItems: 'center', justifyContent: 'center'
               }}>
-              <Zap size={22} color="#fff" fill="#fff" />
+              <Zap size={20} color="#fff" fill="#fff" />
             </motion.div>
-            <span style={{ fontFamily: 'var(--font-display)', fontSize: 20, fontWeight: 800, color: '#0f172a', letterSpacing: '-0.03em' }}>ChargeMap</span>
+            <span style={{ fontFamily: 'var(--font-display)', fontSize: 20, fontWeight: 900, color: '#0f172a', letterSpacing: '-0.03em' }}>EV Charge</span>
           </a>
         </motion.div>
 
@@ -102,7 +100,7 @@ const Navbar = () => {
               >
                 {link.name}
                 {hoveredLink === link.name && (
-                  <motion.div layoutId="nav-pill" transition={{ type: 'spring', stiffness: 350, damping: 30 }} style={{ position: 'absolute', inset: 0, background: '#f1f5f9', borderRadius: 12, border: '1px solid #e2e8f0', zIndex: -1 }} />
+                  <motion.div layoutId="nav-pill" transition={{ type: 'spring', stiffness: 350, damping: 30 }} style={{ position: 'absolute', inset: 0, background: '#f8fafc', borderRadius: 12, border: '1px solid rgba(212,175,55,0.4)', boxShadow: '0 2px 8px rgba(212,175,55,0.1)', zIndex: -1 }} />
                 )}
               </button>
             ))}
@@ -138,14 +136,14 @@ const Navbar = () => {
                       >
                          <p style={{ margin: 0, fontSize: 12, fontWeight: 800, color: '#94a3b8', textTransform: 'uppercase' }}>Signed in as</p>
                          <p style={{ margin: 0, fontSize: 15, fontWeight: 700, color: '#0f172a' }}>{currentUser.displayName || currentUser.email}</p>
-                         <div style={{ marginTop: 8, display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#ecfdf5', padding: '8px 12px', borderRadius: 12 }}>
-                           <span style={{ fontSize: 12, fontWeight: 700, color: '#16a34a' }}>Wallet</span>
-                           <span style={{ fontSize: 14, fontWeight: 900, color: '#047857' }}>₹{(currentUser.profile?.walletBalance || 0).toFixed(2)}</span>
+                         <div style={{ marginTop: 8, display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#fffbeb', padding: '8px 12px', borderRadius: 12, border: '1px solid rgba(212,175,55,0.2)' }}>
+                           <span style={{ fontSize: 12, fontWeight: 700, color: '#D4AF37' }}>Wallet</span>
+                           <span style={{ fontSize: 14, fontWeight: 900, color: '#AA7C11' }}>₹{(currentUser.profile?.walletBalance || 0).toFixed(2)}</span>
                          </div>
                       </div>
 
                       <button 
-                        onClick={() => { setProfileOpen(false); navigate(isAdmin ? '/admin-route' : '/dashboard'); }}
+                        onClick={() => { setProfileOpen(false); navigate(isAdmin ? '/admin' : '/dashboard'); }}
                         style={{ border: 'none', background: '#f8fafc', padding: '10px', borderRadius: 12, fontWeight: 700, color: '#0f172a', cursor: 'pointer', textAlign: 'left', display: 'flex', alignItems: 'center', gap: 8 }}
                       >
                          <Activity size={16} /> {isAdmin ? 'Admin Dashboard' : 'My Dashboard'}

@@ -41,7 +41,7 @@ const GLOBAL_CSS = `
   .hard-card-dark {
     background: #0f172a;
     border: 2px solid #0f172a;
-    box-shadow: 8px 8px 0 rgba(22,163,74,0.25);
+    box-shadow: 8px 8px 0 rgba(22,163,74,0.3);
     border-radius: 24px;
   }
 
@@ -57,7 +57,7 @@ const GLOBAL_CSS = `
   }
 
   .booking-card:hover {
-    box-shadow: 12px 12px 0 rgba(22,163,74,0.18);
+    box-shadow: 12px 12px 0 rgba(22,163,74,0.2);
     border-color: #16a34a;
     transform: translateY(-3px);
   }
@@ -77,7 +77,7 @@ const GLOBAL_CSS = `
 const statusStyle = (status = '') => {
   const s = status.toLowerCase();
   if (s === 'confirmed' || s === 'active' || s === 'completed')
-    return { color: '#16a34a', borderColor: '#16a34a', background: '#f0fdf4' };
+    return { color: '#15803d', borderColor: '#16a34a', background: '#f0fdf4' };
   if (s === 'pending')
     return { color: '#d97706', borderColor: '#d97706', background: '#fffbeb' };
   if (s === 'cancelled')
@@ -103,7 +103,7 @@ const StatCard = ({ icon, label, value, accent = false, delay = 0 }) => (
         border: accent ? '2px solid #16a34a' : '1.5px solid #e2e8f0',
         display: 'flex', alignItems: 'center', justifyContent: 'center',
       }}>
-        {React.cloneElement(icon, { size: 16, color: accent ? '#fff' : '#0f172a' })}
+        {React.cloneElement(icon, { size: 16, color: accent ? '#0f172a' : '#0f172a' })}
       </div>
       <span style={{
         fontFamily: 'var(--font-body)', fontSize: 10, fontWeight: 800,
@@ -169,8 +169,8 @@ const BookingCard = ({ booking, idx }) => {
             fontFamily: 'var(--font-display)', fontWeight: 900, fontSize: 22,
             color: '#0f172a', margin: 0, lineHeight: 1,
           }}>
-            <span style={{ fontFamily: 'var(--font-body)', fontSize: 13, fontWeight: 700, color: '#16a34a' }}>₹</span>
-            {booking.amount}
+            <span style={{ fontFamily: 'var(--font-body)', fontSize: 13, fontWeight: 700, color: '#15803d' }}>₹</span>
+            {(booking.amount ?? booking.paidAmount ?? booking.billTotal ?? booking.energyCharge ?? 0).toFixed(2)}
           </p>
         </div>
       </div>
@@ -262,7 +262,7 @@ const Dashboard = () => {
     return () => unsubscribe();
   }, [currentUser]);
 
-  const totalSpent = bookings.reduce((sum, b) => sum + (Number(b.amount) || 0), 0);
+  const totalSpent = bookings.reduce((sum, b) => sum + (Number(b.amount ?? b.paidAmount ?? b.billTotal ?? b.energyCharge) || 0), 0);
 
   return (
     <div style={{ minHeight: '100vh', background: '#fff', paddingTop: 96, paddingBottom: 80, position: 'relative', overflow: 'hidden' }}>

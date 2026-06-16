@@ -182,7 +182,7 @@ export default function CheckoutModal({ isOpen, onClose, amount, kwh, rate, stat
                 <Zap size={22} className="text-slate-950 fill-slate-950" />
               </div>
               <div>
-                <h3 className="text-white font-extrabold text-lg tracking-tight">ChargeMap Pay</h3>
+                <h3 className="text-white font-extrabold text-lg tracking-tight">EV Charge Pay</h3>
                 <p className="text-[10px] text-slate-500 font-mono tracking-wider">MID: 4447763 (CCAvenue Staging)</p>
               </div>
             </div>

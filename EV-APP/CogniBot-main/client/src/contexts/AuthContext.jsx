@@ -6,9 +6,11 @@ import {
     onAuthStateChanged,
     updateProfile,
     GoogleAuthProvider,
-    signInWithPopup
+    signInWithPopup,
+    EmailAuthProvider,
+    linkWithCredential
 } from 'firebase/auth';
-import { doc, getDoc, setDoc, serverTimestamp } from 'firebase/firestore';
+import { doc, getDoc, setDoc, serverTimestamp, onSnapshot } from 'firebase/firestore';
 import { auth, db } from '../lib/firebase';
 
 const AuthContext = createContext();
@@ -42,26 +44,37 @@ export function AuthProvider({ children }) {
     }
 
     async function login(email, password) {
-        const trimmedEmail = email.trim().toLowerCase();
-        if (trimmedEmail === 'admin-ev@gmail.com' && password === 'admin@ev') {
-            try {
-                return await signInWithEmailAndPassword(auth, trimmedEmail, password);
-            } catch (err) {
-                console.log("Login failed for admin-ev@gmail.com:", err.code);
-                // If user doesn't exist or credentials mismatch, we attempt to register it
-                if (err.code === 'auth/user-not-found' || err.code === 'auth/invalid-credential') {
-                    console.log("Super admin account not found. Registering...");
-                    try {
-                        return await signup(trimmedEmail, password, 'Super Admin');
-                    } catch (signUpErr) {
-                        console.error("Auto-registration of super admin failed:", signUpErr);
-                        throw err; // Throw the original login error if signup fails (e.g. password mismatch on existing account)
+        try {
+            return await signInWithEmailAndPassword(auth, email, password);
+        } catch (err) {
+            // If credentials are invalid, the account may only have Google provider.
+            // Try Google sign-in and link the email/password so both work in future.
+            if (err.code === 'auth/invalid-credential' || err.code === 'auth/wrong-password') {
+                try {
+                    const provider = new GoogleAuthProvider();
+                    provider.setCustomParameters({ login_hint: email });
+                    const result = await signInWithPopup(auth, provider);
+
+                    // If the Google email matches, link the password credential
+                    if (result.user && result.user.email?.toLowerCase() === email.trim().toLowerCase()) {
+                        try {
+                            const credential = EmailAuthProvider.credential(email, password);
+                            await linkWithCredential(result.user, credential);
+                        } catch (linkErr) {
+                            // provider-already-linked is fine — means password is already set
+                            if (linkErr.code !== 'auth/provider-already-linked') {
+                                console.warn('Could not link email/password provider:', linkErr.code);
+                            }
+                        }
                     }
+                    return result;
+                } catch (googleErr) {
+                    // If user cancelled Google popup or emails don't match, throw original error
+                    throw err;
                 }
-                throw err;
             }
+            throw err;
         }
-        return signInWithEmailAndPassword(auth, email, password);
     }
 
     async function signInWithGoogle() {
@@ -91,49 +104,64 @@ export function AuthProvider({ children }) {
     }
 
     useEffect(() => {
+        let unsubscribeProfile = null;
         const unsubscribe = onAuthStateChanged(auth, async (user) => {
+            if (unsubscribeProfile) {
+                unsubscribeProfile();
+                unsubscribeProfile = null;
+            }
             if (user) {
-                try {
-                    const docRef = doc(db, 'users', user.uid);
-                    const docSnap = await getDoc(docRef);
-                    let profileData = docSnap.exists() ? docSnap.data() : null;
-                    
-                    const isSuperAdmin = user.email && user.email.toLowerCase().trim() === 'admin-ev@gmail.com';
-                    
-                    if (isSuperAdmin) {
-                        if (!profileData) {
-                            profileData = {
-                                name: 'Super Admin',
-                                email: user.email,
-                                walletBalance: 10000.0,
-                                createdAt: new Date(),
-                                role: 'admin'
-                            };
-                            await setDoc(docRef, profileData);
-                            console.log("Auto-created Firestore document for Super Admin.");
-                        } else if (profileData.role !== 'admin') {
-                            profileData.role = 'admin';
-                            await setDoc(docRef, { role: 'admin' }, { merge: true });
-                            console.log("Enforced role: 'admin' in Firestore for Super Admin.");
+                const docRef = doc(db, 'users', user.uid);
+                const isSuperAdmin = user.email && user.email.toLowerCase().trim() === 'admin-ev@gmail.com';
+
+                unsubscribeProfile = onSnapshot(docRef, async (docSnap) => {
+                    try {
+                        let profileData = docSnap.exists() ? docSnap.data() : null;
+                        
+                        if (isSuperAdmin) {
+                            if (!profileData) {
+                                profileData = {
+                                    name: 'Super Admin',
+                                    email: user.email,
+                                    walletBalance: 10000.0,
+                                    createdAt: new Date(),
+                                    role: 'admin'
+                                };
+                                await setDoc(docRef, profileData);
+                                console.log("Auto-created Firestore document for Super Admin.");
+                            } else if (profileData.role !== 'admin') {
+                                profileData.role = 'admin';
+                                await setDoc(docRef, { role: 'admin' }, { merge: true });
+                                console.log("Enforced role: 'admin' in Firestore for Super Admin.");
+                            }
                         }
-                    }
-                    
-                    if (profileData) {
-                        setCurrentUser({ ...user, profile: profileData });
-                    } else {
+                        
+                        if (profileData) {
+                            setCurrentUser({ ...user, profile: profileData });
+                        } else {
+                            setCurrentUser(user);
+                        }
+                    } catch (error) {
+                        console.error("Error processing user profile updates:", error);
                         setCurrentUser(user);
+                    } finally {
+                        setLoading(false);
                     }
-                } catch (error) {
-                    console.error("Error fetching user profile:", error);
+                }, (error) => {
+                    console.error("Error listening to user profile:", error);
                     setCurrentUser(user);
-                }
+                    setLoading(false);
+                });
             } else {
                 setCurrentUser(null);
+                setLoading(false);
             }
-            setLoading(false);
         });
 
-        return unsubscribe;
+        return () => {
+            unsubscribe();
+            if (unsubscribeProfile) unsubscribeProfile();
+        };
     }, []);
 
     const value = {

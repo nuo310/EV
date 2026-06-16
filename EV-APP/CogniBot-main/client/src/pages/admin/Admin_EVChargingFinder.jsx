@@ -21,7 +21,7 @@ const createIcon = (color) => new L.DivIcon({
 });
 
 const stationIcon = createIcon('#22c55e'); 
-const userIcon = createIcon('#3b82f6');    
+const userIcon = createIcon('#D4AF37');    
 
 function toFiniteNumber(value) {
   if (typeof value === 'number') return Number.isFinite(value) ? value : null;
@@ -333,7 +333,7 @@ const EVChargingFinder = () => {
 {isModalOpen && (
   <div className="fixed inset-0 z-[9999] flex items-end justify-center sm:items-center bg-slate-900/50 backdrop-blur-[2px] p-0 sm:p-4">
     <div
-      className="flex h-[min(92vh,56rem)] w-full max-w-xl flex-col overflow-hidden rounded-t-3xl border-2 border-slate-900 bg-white shadow-[8px_8px_0_0_rgba(22,163,74,0.15)] sm:rounded-3xl sm:h-[min(90vh,52rem)]"
+      className="flex h-[min(92vh,56rem)] w-full max-w-xl flex-col overflow-hidden rounded-t-3xl border-2 border-slate-900 bg-white shadow-[8px_8px_0_0_rgba(212,175,55,0.25)] sm:rounded-3xl sm:h-[min(90vh,52rem)]"
       role="dialog"
       aria-labelledby="station-form-title"
     >

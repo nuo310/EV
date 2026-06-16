@@ -15,7 +15,7 @@ const LiveCounter = () => {
   }, []);
   return (
     <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 20px', borderRadius: 12, background: '#f8fafc', border: '1px solid #e2e8f0' }}>
-       <div style={{ width: 8, height: 8, borderRadius: '50%', background: '#16a34a', boxShadow: '0 0 12px #16a34a' }} />
+       <div style={{ width: 8, height: 8, borderRadius: '50%', background: '#16a34a', boxShadow: '0 0 12px rgba(22,163,74,0.4)' }} />
        <span style={{ fontSize: 13, fontWeight: 800, fontFamily: 'monospace', letterSpacing: '0.05em' }}>{count.toLocaleString()} ACTIVE_DRIVERS</span>
     </div>
   );
@@ -64,7 +64,7 @@ const DownloadSection = () => {
           
           {/* Left: Text & UI */}
           <motion.div initial={{ opacity: 0, x: -40 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }}>
-            <div style={{ display: 'inline-flex', padding: '8px 16px', borderRadius: 99, background: '#f0fdf4', border: '2px solid #0f172a', color: '#0f172a', fontSize: 11, fontWeight: 900, letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: 32, boxShadow: '6px 6px 0 #16a34a' }}>
+            <div style={{ display: 'inline-flex', padding: '8px 16px', borderRadius: 99, background: '#f8fafc', border: '2px solid #16a34a', color: '#16a34a', fontSize: 11, fontWeight: 900, letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: 32, boxShadow: '4px 4px 0 #16a34a' }}>
               Terminal Available
             </div>
             <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(3rem, 6vw, 5rem)', fontWeight: 800, color: '#0f172a', lineHeight: 1, letterSpacing: '-0.04em', marginBottom: 24 }}>
@@ -119,7 +119,7 @@ const DownloadSection = () => {
                     <div style={{ width: 80, height: 80, borderRadius: 20, background: '#16a34a', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 24, boxShadow: '8px 8px 0 #0f172a' }}>
                       <Zap size={40} color="#fff" fill="#fff" />
                     </div>
-                    <h3 style={{ fontFamily: 'var(--font-display)', fontSize: 32, fontWeight: 800, margin: '0 0 12px' }}>ChargeMap</h3>
+                    <h3 style={{ fontFamily: 'var(--font-display)', fontSize: 32, fontWeight: 800, margin: '0 0 12px' }}>EV Charge</h3>
                     <p style={{ color: '#64748b', fontWeight: 600 }}>v1.0.42 STABLE_RELEASE</p>
                     
                     <div style={{ marginTop: 60, width: '100%', height: 4, background: '#f1f5f9', borderRadius: 2 }}>
@@ -140,7 +140,7 @@ const DownloadSection = () => {
                       <div className="glass-card" style={{ padding: 24, borderRadius: 24, textAlign: 'center', minWidth: 200, border: '3px solid #0f172a' }}>
                          <div style={{ position: 'relative', width: 160, height: 160, background: '#fff', padding: 8, border: '2px solid #0f172a', borderRadius: 12, marginBottom: 16 }}>
                             <QrCode size={144} color="#0f172a" />
-                            <div className="animate-scan" style={{ position: 'absolute', left: 0, right: 0, height: 2, background: '#16a34a', boxShadow: '0 0 12px #16a34a', zIndex: 10 }} />
+                             <div className="animate-scan" style={{ position: 'absolute', left: 0, right: 0, height: 2, background: '#D4AF37', boxShadow: '0 0 12px #D4AF37', zIndex: 10 }} />
                          </div>
                          <span style={{ fontSize: 11, fontWeight: 900, letterSpacing: '0.1em' }}>SCAN FOR {showQR.toUpperCase()}</span>
                       </div>
@@ -150,8 +150,8 @@ const DownloadSection = () => {
 
                {/* System Status Tag (Floating) */}
                <motion.div style={{ position: 'absolute', left: '-6rem', bottom: '8rem', zIndex: 50 }}>
-                  <div className="glass-card" style={{ padding: '12px 20px', borderRadius: 16, display: 'flex', alignItems: 'center', gap: 10 }}>
-                     <Globe size={18} color="#16a34a" />
+                   <div className="glass-card" style={{ padding: '12px 20px', borderRadius: 16, display: 'flex', alignItems: 'center', gap: 10 }}>
+                      <Globe size={18} color="#D4AF37" />
                      <span style={{ fontSize: 13, fontWeight: 800 }}>GLOBALSYNC_ACTIVE</span>
                   </div>
                </motion.div>

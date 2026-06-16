@@ -14,7 +14,6 @@ import Login from './pages/Login';
 import Register from './pages/Register';
 import Dashboard from './pages/Dashboard';
 import AdminDashboard from './pages/admin/AdminDashboard';
-import NewAdminDashboard from './admin-dashboard/AdminDashboard';
 import Profile from './pages/Profile';
 import ProtectedRoute from './components/ProtectedRoute';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
@@ -36,7 +35,7 @@ const LandingPage = () => {
   
   if (currentUser) {
     if (currentUser.profile?.role === 'admin') {
-      return <Navigate to="/admin-route" replace />;
+      return <Navigate to="/admin" replace />;
     }
     return <Navigate to="/dashboard" replace />;
   }
@@ -90,11 +89,6 @@ function App() {
               <Route path="/admin" element={
                 <ProtectedRoute adminOnly={true}>
                   <AdminDashboard />
-                </ProtectedRoute>
-              } />
-              <Route path="/admin-route" element={
-                <ProtectedRoute adminOnly={true}>
-                  <NewAdminDashboard />
                 </ProtectedRoute>
               } />
 

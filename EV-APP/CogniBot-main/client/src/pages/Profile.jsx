@@ -72,6 +72,12 @@ const Profile = () => {
   const [name, setName] = useState(profile.name || currentUser?.displayName || '');
   const [isSaving, setIsSaving] = useState(false);
   const [showAppModal, setShowAppModal] = useState(false);
+ 
+  React.useEffect(() => {
+    if (profile.name || currentUser?.displayName) {
+      setName(profile.name || currentUser?.displayName || '');
+    }
+  }, [profile.name, currentUser?.displayName]);
 
   const handleUpdateProfile = async (e) => {
     e.preventDefault();
@@ -137,7 +143,7 @@ const Profile = () => {
 
               <div style={{ display: 'flex', alignItems: 'center', gap: 14, marginBottom: 28, paddingBottom: 24, borderBottom: '1.5px solid #f1f5f9' }}>
                 <div style={{ width: 48, height: 48, borderRadius: 16, background: '#0f172a', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '2px solid #0f172a', flexShrink: 0 }}>
-                  <UserIcon size={22} color="#4ade80" />
+                  <UserIcon size={22} color="#16a34a" />
                 </div>
                 <div>
                   <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 20, fontWeight: 800, color: '#0f172a', margin: 0 }}>Personal Information</h2>
@@ -172,7 +178,7 @@ const Profile = () => {
                     disabled={isSaving}
                     whileHover={{ y: -3, boxShadow: '8px 8px 0 #16a34a' }}
                     whileTap={{ scale: 0.97 }}
-                    style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '14px 32px', borderRadius: 14, background: '#0f172a', color: '#fff', border: '2px solid #0f172a', fontFamily: 'var(--font-body)', fontWeight: 800, fontSize: 15, cursor: isSaving ? 'not-allowed' : 'pointer', opacity: isSaving ? 0.75 : 1, boxShadow: '6px 6px 0 rgba(15,23,42,0.12)', transition: 'box-shadow 0.2s' }}
+                    style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '14px 32px', borderRadius: 14, background: '#0f172a', color: '#fff', border: '2px solid #0f172a', fontFamily: 'var(--font-body)', fontWeight: 800, fontSize: 15, cursor: isSaving ? 'not-allowed' : 'pointer', opacity: isSaving ? 0.75 : 1, boxShadow: '6px 6px 0 rgba(22,163,74,0.25)', transition: 'box-shadow 0.2s' }}
                   >
                     {isSaving ? <Loader2 size={16} style={{ animation: 'spin 1s linear infinite' }} /> : <Save size={16} />}
                     Update Profile
@@ -203,7 +209,7 @@ const Profile = () => {
                     <span style={{ display: 'block', fontFamily: 'var(--font-body)', fontSize: 14, fontWeight: 800, color: '#0f172a', marginBottom: 3 }}>Account Status</span>
                     <span style={{ fontFamily: 'var(--font-body)', fontSize: 12, fontWeight: 600, color: '#64748b' }}>Your account is fully verified.</span>
                   </div>
-                  <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, background: '#dcfce7', color: '#15803d', padding: '8px 14px', borderRadius: 10, border: '1.5px solid #bbf7d0' }}>
+                  <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, background: '#f0fdf4', color: '#16a34a', padding: '8px 14px', borderRadius: 10, border: '1.5px solid rgba(22,163,74,0.3)' }}>
                     <div className="pulse-dot" style={{ width: 6, height: 6, borderRadius: '50%', background: '#16a34a' }} />
                     <span style={{ fontFamily: 'var(--font-body)', fontSize: 12, fontWeight: 800 }}>Active</span>
                   </div>
@@ -248,16 +254,16 @@ const Profile = () => {
                 <div style={{ position: 'relative', zIndex: 10 }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 32 }}>
                     <div style={{ width: 44, height: 44, borderRadius: 14, background: 'rgba(22,163,74,0.15)', border: '1.5px solid rgba(22,163,74,0.4)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                      <Wallet size={20} color="#4ade80" />
+                      <Wallet size={20} color="#16a34a" />
                     </div>
                     <div>
-                      <p style={{ fontFamily: 'var(--font-body)', fontSize: 11, fontWeight: 800, color: '#4ade80', letterSpacing: '0.1em', margin: 0 }}>CHARGE WALLET</p>
+                      <p style={{ fontFamily: 'var(--font-body)', fontSize: 11, fontWeight: 800, color: '#16a34a', letterSpacing: '0.1em', margin: 0 }}>CHARGE WALLET</p>
                       <p style={{ fontFamily: 'var(--font-body)', fontSize: 13, fontWeight: 700, color: '#64748b', margin: 0 }}>Available Balance</p>
                     </div>
                   </div>
 
                   <div style={{ display: 'flex', alignItems: 'baseline', gap: 6, marginBottom: 36 }}>
-                    <span style={{ fontFamily: 'var(--font-display)', fontSize: 28, fontWeight: 800, color: '#4ade80' }}>₹</span>
+                    <span style={{ fontFamily: 'var(--font-display)', fontSize: 28, fontWeight: 800, color: '#16a34a' }}>₹</span>
                     <span style={{ fontFamily: 'var(--font-display)', fontSize: 56, fontWeight: 900, color: '#fff', letterSpacing: '-0.03em', lineHeight: 1 }}>
                       {profile.walletBalance?.toFixed(2) || '0.00'}
                     </span>
@@ -297,7 +303,7 @@ const Profile = () => {
                       <span style={{ fontFamily: 'var(--font-body)', fontSize: 13, fontWeight: 700, color: '#64748b' }}>{item.label}</span>
                     </div>
                     {item.type === 'status'
-                      ? <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, background: '#dcfce7', color: '#15803d', padding: '5px 10px', borderRadius: 8, border: '1px solid #bbf7d0' }}>
+                      ? <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, background: '#f0fdf4', color: '#16a34a', padding: '5px 10px', borderRadius: 8, border: '1px solid rgba(22,163,74,0.3)' }}>
                           <div className="pulse-dot" style={{ width: 5, height: 5, borderRadius: '50%', background: '#16a34a' }} />
                           <span style={{ fontFamily: 'var(--font-body)', fontSize: 11, fontWeight: 800 }}>{item.value}</span>
                         </div>
@@ -334,7 +340,7 @@ const Profile = () => {
               </button>
 
               <div style={{ width: 64, height: 64, background: '#0f172a', borderRadius: 20, display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 24px', border: '2px solid #0f172a', boxShadow: '6px 6px 0 rgba(22,163,74,0.3)' }}>
-                <Smartphone size={28} color="#4ade80" />
+                <Smartphone size={28} color="#16a34a" />
               </div>
 
               <div style={{ display: 'flex', alignItems: 'center', gap: 8, justifyContent: 'center', marginBottom: 14 }}>

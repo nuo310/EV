@@ -86,7 +86,12 @@ const Typewriter = ({ words, delay = 2000 }) => {
   }, [displayText, isDeleting, index, words, delay]);
 
   return (
-    <span style={{ color: '#16a34a', borderRight: '3px solid #16a34a', paddingRight: '4px' }}>
+    <span style={{
+      color: '#16a34a',
+      borderRight: '3px solid #16a34a',
+      paddingRight: '4px',
+      display: 'inline-block'
+    }}>
       {displayText}
     </span>
   );
@@ -239,7 +244,7 @@ const Register = () => {
               <Zap size={36} color="#16a34a" fill="#16a34a" />
             </motion.div>
             <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 36, fontWeight: 800, color: '#0f172a', margin: 0, letterSpacing: '-0.02em' }}>
-              Join ChargeMap
+              Join EV Charge
             </h1>
             <p style={{ fontSize: 14, color: '#64748b', marginTop: 12, fontWeight: 600, letterSpacing: '0.05em' }}>
               Build your <Typewriter words={["network", "profile", "dashboard", "system"]} delay={1500} />
@@ -260,7 +265,7 @@ const Register = () => {
           )}
 
           {/* Form */}
-          <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+          <form onSubmit={handleSubmit} autoComplete="off" style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
 
             {/* Name Input */}
             <motion.div
@@ -276,6 +281,7 @@ const Register = () => {
                 <input
                   type="text"
                   required
+                  autoComplete="off"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   style={{
@@ -323,6 +329,7 @@ const Register = () => {
                 <input
                   type="email"
                   required
+                  autoComplete="off"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   style={{
@@ -370,6 +377,7 @@ const Register = () => {
                 <input
                   type="password"
                   required
+                  autoComplete="new-password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   minLength="6"
@@ -419,6 +427,7 @@ const Register = () => {
                 <input
                   type="password"
                   required
+                  autoComplete="new-password"
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
                   minLength="6"

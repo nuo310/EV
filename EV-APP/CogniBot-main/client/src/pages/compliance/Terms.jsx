@@ -30,7 +30,7 @@ export default function Terms() {
               <BookOpen size={20} className="text-emerald-400" /> 1. Acceptance of Terms
             </h2>
             <p className="leading-relaxed">
-              By registering an account and accessing the ChargeMap application or using any of our EV charging services, you agree to comply with and be bound by these Terms and Conditions. If you do not agree, please do not use the services.
+              By registering an account and accessing the EV Charge application or using any of our EV charging services, you agree to comply with and be bound by these Terms and Conditions. If you do not agree, please do not use the services.
             </p>
           </section>
 
@@ -69,7 +69,7 @@ export default function Terms() {
               <span className="text-emerald-400 font-mono">⚖️</span> 5. Liability & Governing Law
             </h2>
             <p className="leading-relaxed">
-              These terms are governed by and construed in accordance with the laws of India. ChargeMap shall not be liable for damages to electric vehicles, batteries, or property during power fluctuations, grid changes, or due to third-party charger hardware errors.
+              These terms are governed by and construed in accordance with the laws of India. EV Charge shall not be liable for damages to electric vehicles, batteries, or property during power fluctuations, grid changes, or due to third-party charger hardware errors.
             </p>
           </section>
         </div>

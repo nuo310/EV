@@ -17,7 +17,7 @@ export default function About() {
             Infrastructure Intelligence
           </div>
           <h1 className="text-4xl sm:text-5xl font-black tracking-tight text-white mb-6">
-            About <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-green-500">ChargeMap</span>
+            About <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-green-500">EV Charge</span>
           </h1>
           <p className="text-lg text-slate-400 max-w-2xl mx-auto">
             Powering the transition to electric mobility with next-generation high-speed OCPP integrated charging software.
@@ -31,7 +31,7 @@ export default function About() {
             <Award className="text-emerald-400" /> Our Mission
           </h2>
           <p className="text-slate-300 leading-relaxed mb-6">
-            ChargeMap is dedicated to designing, building, and operating the most reliable EV charging terminal. We bridge the gap between complex OCPP hardware communications and consumer payment workflows, delivering a seamless charging experience for every EV owner in India.
+            EV Charge is dedicated to designing, building, and operating the most reliable EV charging terminal. We bridge the gap between complex OCPP hardware communications and consumer payment workflows, delivering a seamless charging experience for every EV owner in India.
           </p>
           <p className="text-slate-300 leading-relaxed">
             By deploying cutting-edge telemetry networks and smart scheduling algorithms, we ensure high station availability, dynamic queue routing, and robust transaction security.
@@ -73,7 +73,7 @@ export default function About() {
 
         {/* Corporate Info Footer */}
         <div className="border-t border-slate-800/80 pt-8 text-center text-xs text-slate-500">
-          <p>ChargeMap Terminal Inc. is registered in India. All rights reserved.</p>
+          <p>EV Charge Terminal Inc. is registered in India. All rights reserved.</p>
         </div>
       </div>
     </div>

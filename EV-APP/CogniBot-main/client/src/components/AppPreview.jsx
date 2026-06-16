@@ -24,7 +24,7 @@ const LiquidBattery = ({ level = 82 }) => (
       initial={{ top: '100%' }}
       animate={{ top: `${100 - level}%` }}
       transition={{ duration: 2.2, ease: 'easeInOut' }}
-      style={{ position: 'absolute', left: '-40%', width: '180%', height: '100%', background: '#16a34a', opacity: 0.2, borderRadius: '45%', animation: 'spin-reverse 12s linear infinite' }}
+      style={{ position: 'absolute', left: '-40%', width: '180%', height: '100%', background: '#D4AF37', opacity: 0.12, borderRadius: '45%', animation: 'spin-reverse 12s linear infinite' }}
     />
 
     <div style={{ position: 'relative', zIndex: 10, textAlign: 'center' }}>
@@ -85,7 +85,7 @@ const AppPreview = () => {
         <div style={{ textAlign: 'center', maxWidth: 680, margin: '0 auto 100px' }}>
           <motion.div 
             initial={{ opacity: 0, scale: 0.8 }} whileInView={{ opacity: 1, scale: 1 }} 
-            style={{ display: 'inline-flex', alignItems: 'center', gap: 10, padding: '8px 18px', borderRadius: 99, background: '#f8fafc', border: '2px solid #0f172a', color: '#0f172a', fontSize: 11, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 24, boxShadow: '4px 4px 0 #16a34a' }}
+            style={{ display: 'inline-flex', alignItems: 'center', gap: 10, padding: '8px 18px', borderRadius: 99, background: '#f8fafc', border: '2px solid #0f172a', color: '#0f172a', fontSize: 11, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 24, boxShadow: '4px 4px 0 #D4AF37' }}
           >
             <Activity size={14} color="#16a34a" /> Live App Preview
           </motion.div>
@@ -138,10 +138,10 @@ const AppPreview = () => {
                         </div>
                         <div style={{ background: '#0f172a', border: '2px solid #0f172a', padding: 16, borderRadius: 16, boxShadow: '4px 4px 0 #16a34a', color: '#fff' }}>
                            <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 8 }}>
-                              <ShieldCheck size={14} color="#16a34a" />
+                              <ShieldCheck size={14} color="#D4AF37" />
                               <span style={{ fontSize: 10, fontWeight: 800, color: '#94a3b8' }}>SECURE</span>
                            </div>
-                           <p style={{ fontFamily: 'var(--font-display)', fontSize: 24, fontWeight: 800, margin: 0 }}>Active</p>
+                           <p style={{ fontFamily: 'var(--font-display)', fontSize: 24, fontWeight: 800, margin: 0, color: '#16a34a' }}>Active</p>
                         </div>
                      </div>
 
@@ -167,7 +167,7 @@ const AppPreview = () => {
                   </div>
                   <p style={{ fontSize: 11, fontWeight: 800, color: '#64748b' }}>NAVIGATION</p>
                   <p style={{ fontFamily: 'var(--font-display)', fontSize: 18, fontWeight: 800, margin: '4px 0' }}>NJ Hub Alpha</p>
-                  <p style={{ fontSize: 13, color: '#16a34a', fontWeight: 700 }}>0.4 mi away</p>
+                  <p style={{ fontSize: 13, color: '#D4AF37', fontWeight: 700 }}>0.4 mi away</p>
                </div>
             </motion.div>
 
@@ -180,7 +180,7 @@ const AppPreview = () => {
                      <div style={{ width: 36, height: 36, borderRadius: '50%', border: '2px solid #16a34a', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                         <Leaf size={18} color="#16a34a" />
                      </div>
-                     <div style={{ background: '#f0fdf4', border: '1px solid #16a34a', borderRadius: 99, padding: '4px 10px', fontSize: 10, fontWeight: 800, color: '#16a34a' }}>+12.4kg</div>
+                     <div style={{ background: '#fffbeb', border: '1px solid #D4AF37', borderRadius: 99, padding: '4px 10px', fontSize: 10, fontWeight: 800, color: '#AA7C11' }}>+12.4kg</div>
                   </div>
                   <p style={{ fontSize: 11, fontWeight: 800, color: '#64748b' }}>TOTAL IMPACT</p>
                   <p style={{ fontFamily: 'var(--font-display)', fontSize: 24, fontWeight: 800, margin: '4px 0' }}>Carbon Offset</p>

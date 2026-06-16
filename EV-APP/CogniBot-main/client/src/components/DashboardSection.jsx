@@ -27,8 +27,8 @@ const DashboardSection = () => {
                 <p style={{ fontFamily: 'var(--font-body)', fontSize: 11, fontWeight: 800, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 8 }}>Energy Delivered</p>
                 <p style={{ fontFamily: 'var(--font-display)', fontSize: '3rem', fontWeight: 900, color: '#0f172a', lineHeight: 1 }}>4.2<span style={{ fontSize: '1.5rem', color: '#94a3b8' }}>MW</span></p>
               </div>
-              <div style={{ background: '#16a34a', padding: 24, borderRadius: 16, border: '2px solid #0f172a', boxShadow: '6px 6px 0 #0f172a', color: '#fff' }}>
-                <p style={{ fontFamily: 'var(--font-body)', fontSize: 11, fontWeight: 800, color: '#dcfce7', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 8 }}>Network Status</p>
+              <div style={{ background: 'linear-gradient(135deg, #0F172A 0%, #1E293B 100%)', padding: 24, borderRadius: 16, border: '2px solid #16a34a', boxShadow: '6px 6px 0 rgba(15,23,42,0.1)', color: '#fff' }}>
+                <p style={{ fontFamily: 'var(--font-body)', fontSize: 11, fontWeight: 800, color: '#D4AF37', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 8 }}>Network Status</p>
                 <p style={{ fontFamily: 'var(--font-display)', fontSize: '3rem', fontWeight: 900, color: '#fff', lineHeight: 1 }}>99.9%</p>
               </div>
             </div>
@@ -71,7 +71,7 @@ const DashboardSection = () => {
               {/* Floating UI overlay */}
               <div style={{ position: 'absolute', top: 24, left: 24, zIndex: 20 }}>
                 <div style={{ background: '#0f172a', color: '#fff', padding: '10px 18px', borderRadius: 12, display: 'flex', alignItems: 'center', gap: 10, fontSize: 13, fontWeight: 800, fontFamily: 'var(--font-display)', letterSpacing: '0.05em' }}>
-                  <Activity size={16} color="#4ade80" /> SCANNING REGION: NORTHEAST_V4
+                  <Activity size={16} color="#16a34a" /> SCANNING REGION: NORTHEAST_V4
                 </div>
               </div>
 
@@ -98,7 +98,7 @@ const DashboardSection = () => {
                 <h3 style={{ fontFamily: 'var(--font-display)', fontSize: 24, fontWeight: 800, margin: '0 0 24px 0' }}>Data Streams</h3>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
                   {[
-                    { label: 'Network Latency', val: '42ms', color: '#16a34a' },
+                    { label: 'Network Latency', val: '42ms', color: '#D4AF37' },
                     { label: 'Packet Throughput', val: '8.4 GB/s', color: '#0f172a' },
                     { label: 'Sync Status', val: 'ESTABLISHED', color: '#16a34a' },
                     { label: 'Auth Handshakes', val: '1,204', color: '#0f172a' }
@@ -124,7 +124,7 @@ const DashboardSection = () => {
                 </div>
                 <div style={{ fontSize: 13, lineHeight: 1.8, color: '#94a3b8' }}>
                   <p>&gt; Initiating secure handshake...</p>
-                  <p style={{ color: '#16a34a' }}>&gt; AUTH SUCCESSFUL [ID_38592]</p>
+                  <p style={{ color: '#D4AF37' }}>&gt; AUTH SUCCESSFUL [ID_38592]</p>
                   <p>&gt; Polling local hubs [Zip: 90210]</p>
                   <p>&gt; Recieved telemetry: Station 04</p>
                   <p>&gt; Load balancing active...</p>

@@ -37,7 +37,7 @@ export default function Contact() {
                 <div>
                   <h3 className="font-semibold text-white mb-1">Registered Address (India)</h3>
                   <p className="text-slate-400 text-sm leading-relaxed">
-                    ChargeMap Terminal Solutions Private Limited<br />
+                    EV Charge Terminal Solutions Private Limited<br />
                     SF-210, Synergy Business Park, Sahakar Marg,<br />
                     Lalkothi, Jaipur, Rajasthan - 302015, India
                   </p>
@@ -52,7 +52,7 @@ export default function Contact() {
                   <h3 className="font-semibold text-white mb-1">Email Queries</h3>
                   <p className="text-slate-400 text-sm">
                     Support: alliancesupport@ccavenue.com<br />
-                    Enquiries: support@chargemap.in
+                    Enquiries: support@evcharge.in
                   </p>
                 </div>
               </div>
@@ -112,7 +112,7 @@ export default function Contact() {
 
         {/* Corporate Info Footer */}
         <div className="border-t border-slate-800/80 pt-8 text-center text-xs text-slate-500">
-          <p>ChargeMap Terminal Solutions Pvt. Ltd. Corporate Identification Number (CIN): U72900RJ2026PTC099881</p>
+          <p>EV Charge Terminal Solutions Pvt. Ltd. Corporate Identification Number (CIN): U72900RJ2026PTC099881</p>
         </div>
       </div>
     </div>

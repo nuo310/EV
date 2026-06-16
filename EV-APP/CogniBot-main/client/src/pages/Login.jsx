@@ -296,7 +296,12 @@ const Typewriter = ({ words, delay = 2000 }) => {
   }, [displayText, isDeleting, index, words, delay]);
 
   return (
-    <span style={{ color: '#16a34a', borderRight: '3px solid #16a34a', paddingRight: '4px' }}>
+    <span style={{
+      color: '#16a34a',
+      borderRight: '3px solid #16a34a',
+      paddingRight: '4px',
+      display: 'inline-block'
+    }}>
       {displayText}
     </span>
   );
@@ -439,7 +444,7 @@ const Login = () => {
             <motion.div
               whileHover={{ rotate: 10, scale: 1.08 }}
               whileTap={{ scale: 0.95 }}
-              style={{ width: 64, height: 64, background: '#16a34a', borderRadius: 20, display: 'flex', alignItems: 'center', justifyContent: 'center', border: '2px solid #0f172a', boxShadow: '8px 8px 0 #0f172a', marginBottom: 28, cursor: 'pointer' }}
+              style={{ width: 64, height: 64, background: '#16a34a', borderRadius: 20, display: 'flex', alignItems: 'center', justifyItems: 'center', border: '2px solid #0f172a', boxShadow: '8px 8px 0 #16a34a', marginBottom: 28, cursor: 'pointer' }}
             >
               <Zap size={36} color="#fff" fill="#fff" />
             </motion.div>
@@ -465,7 +470,7 @@ const Login = () => {
           )}
 
           {/* Form */}
-          <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+          <form onSubmit={handleSubmit} autoComplete="off" style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
 
             {/* Email Input */}
             <motion.div
@@ -481,6 +486,7 @@ const Login = () => {
                 <input
                   type="email"
                   required
+                  autoComplete="off"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   style={{
@@ -533,6 +539,7 @@ const Login = () => {
                 <input
                   type="password"
                   required
+                  autoComplete="new-password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   style={{
@@ -653,51 +660,7 @@ const Login = () => {
             <span>Sign In with Google</span>
           </motion.button>
 
-          {/* Admin Auto-Fill Option */}
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.6, duration: 0.6 }}
-            onClick={() => {
-              setEmail('admin-ev@gmail.com');
-              setPassword('admin@ev');
-              toast('Admin Credentials Auto-filled!', {
-                icon: '⚡',
-                style: {
-                  borderRadius: '16px',
-                  background: '#0f172a',
-                  color: '#fff',
-                  fontWeight: 800,
-                  border: '2px solid #16a34a',
-                },
-              });
-            }}
-            style={{
-              marginTop: 20,
-              padding: '14px',
-              borderRadius: 16,
-              background: '#f8fafc',
-              border: '2px solid #0f172a',
-              textAlign: 'center',
-              cursor: 'pointer',
-              fontWeight: 800,
-              fontSize: 12,
-              color: '#0f172a',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              gap: 8,
-              boxShadow: '4px 4px 0 #16a34a',
-              transition: 'all 0.2s ease',
-              fontFamily: 'var(--font-body)',
-              letterSpacing: '0.05em'
-            }}
-            whileHover={{ y: -2, boxShadow: '6px 6px 0 #16a34a' }}
-            whileTap={{ y: 0, boxShadow: '2px 2px 0 #16a34a' }}
-          >
-            <Zap size={14} color="#16a34a" fill="#16a34a" />
-            <span>AUTO-FILL ADMIN CREDENTIALS</span>
-          </motion.div>
+
 
           {/* Footer */}
           <motion.div

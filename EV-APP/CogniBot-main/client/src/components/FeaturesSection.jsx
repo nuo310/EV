@@ -37,7 +37,7 @@ const FeaturesSection = () => {
 
         {/* Header */}
         <div style={{ textAlign: 'center', maxWidth: 760, margin: '0 auto 80px' }}>
-          <motion.div initial={{ opacity: 0, y: 10 }} whileInView={{ opacity: 1, y: 0 }} style={{ display: 'inline-flex', alignItems: 'center', gap: 10, padding: '8px 16px', borderRadius: 99, background: '#f8fafc', border: '2px solid #0f172a', color: '#0f172a', fontSize: 11, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 24, boxShadow: '4px 4px 0 #16a34a' }}>
+          <motion.div initial={{ opacity: 0, y: 10 }} whileInView={{ opacity: 1, y: 0 }} style={{ display: 'inline-flex', alignItems: 'center', gap: 10, padding: '8px 16px', borderRadius: 99, background: '#f8fafc', border: '2px solid #0f172a', color: '#0f172a', fontSize: 11, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 24, boxShadow: '4px 4px 0 #D4AF37' }}>
             <Cpu size={14} color="#16a34a" /> Hardware & Platform
           </motion.div>
           <motion.h2 initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(2.8rem, 5vw, 4.5rem)', fontWeight: 800, color: '#0f172a', lineHeight: 1.05, letterSpacing: '-0.03em' }}>
@@ -88,7 +88,7 @@ const FeaturesSection = () => {
                  <motion.path animate={{ pathLength: [0, 1] }} d="M 100,180 L 100,240" stroke="#0f172a" strokeWidth="12" strokeLinecap="round" />
                </svg>
 
-               <div style={{ position: 'absolute', bottom: 24, right: 24, background: '#16a34a', color: '#fff', padding: '6px 12px', borderRadius: 8, fontSize: 11, fontWeight: 900, fontFamily: 'monospace' }}>350kW_PEAK</div>
+               <div style={{ position: 'absolute', bottom: 24, right: 24, background: '#D4AF37', color: '#fff', padding: '6px 12px', borderRadius: 8, fontSize: 11, fontWeight: 900, fontFamily: 'monospace' }}>350kW_PEAK</div>
             </div>
           </motion.div>
 
@@ -113,14 +113,14 @@ const FeaturesSection = () => {
             <div style={{ background: 'rgba(255,255,255,0.03)', border: '2px solid rgba(255,255,255,0.1)', borderRadius: 20, padding: 24 }}>
                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 16 }}>
                  <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                    <div style={{ width: 8, height: 8, background: '#16a34a', borderRadius: '50%', boxShadow: '0 0 10px #16a34a' }} />
+                    <div style={{ width: 8, height: 8, background: '#16a34a', borderRadius: '50%', boxShadow: '0 0 10px rgba(22,163,74,0.4)' }} />
                     <span style={{ fontSize: 10, fontWeight: 900, letterSpacing: '0.1em' }}>STREAM_ACTIVE</span>
                  </div>
-                 <span style={{ fontSize: 10, fontWeight: 800, color: '#64748b' }}>426ms_LATENCY</span>
+                 <span style={{ fontSize: 10, fontWeight: 800, color: '#D4AF37' }}>426ms_LATENCY</span>
                </div>
                <div style={{ height: 60, display: 'flex', alignItems: 'end', gap: 4 }}>
                  {[30, 60, 40, 90, 50, 70, 40, 80, 100, 60, 40, 85].map((h, i) => (
-                   <motion.div key={i} animate={{ height: [`${h}%`, `${Math.max(20, Math.random()*100)}%`, `${h}%`] }} transition={{ duration: 3, repeat: Infinity, delay: i * 0.1 }} style={{ flex: 1, background: '#16a34a', borderRadius: 2 }} />
+                    <motion.div key={i} animate={{ height: [`${h}%`, `${Math.max(20, Math.random()*100)}%`, `${h}%`] }} transition={{ duration: 3, repeat: Infinity, delay: i * 0.1 }} style={{ flex: 1, background: '#16a34a', borderRadius: 2 }} />
                  ))}
                </div>
             </div>
@@ -130,25 +130,25 @@ const FeaturesSection = () => {
           <motion.div 
             variants={cardVariants} whileHover="hover"
             initial={{ opacity: 0, y: 40 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: 0.2 }}
-            style={{ gridColumn: 'span 5', background: '#16a34a', borderRadius: 32, border: '3px solid #0f172a', padding: 48, position: 'relative', overflow: 'hidden', boxShadow: '16px 16px 0 #0f172a' }}
+            style={{ gridColumn: 'span 5', background: 'linear-gradient(135deg, #0f172a 0%, #1e293b 100%)', borderRadius: 32, border: '3px solid #16a34a', padding: 48, position: 'relative', overflow: 'hidden', boxShadow: '16px 16px 0 #0f172a' }}
           >
-            <MicroTag text="LEDGER_STRICT" top={24} right={24} color="#0f172a" />
+            <MicroTag text="LEDGER_STRICT" top={24} right={24} color="#D4AF37" />
             
-            <div style={{ width: 56, height: 56, borderRadius: 16, background: '#fff', border: '2px solid #0f172a', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 32 }}>
-              <CreditCard size={28} color="#0f172a" />
+            <div style={{ width: 56, height: 56, borderRadius: 16, background: '#0f172a', border: '2px solid #D4AF37', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 32 }}>
+              <CreditCard size={28} color="#D4AF37" />
             </div>
             
-            <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '2.5rem', fontWeight: 800, color: '#0f172a', margin: '0 0 16px 0', lineHeight: 1.1 }}>Transparent</h3>
-            <p style={{ fontSize: '1.1rem', color: '#0f172a', fontWeight: 700, lineHeight: 1.5, opacity: 0.8, margin: '0 0 40px 0' }}>
+            <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '2.5rem', fontWeight: 800, color: '#fff', margin: '0 0 16px 0', lineHeight: 1.1 }}>Transparent</h3>
+            <p style={{ fontSize: '1.1rem', color: '#94a3b8', fontWeight: 600, lineHeight: 1.5, margin: '0 0 40px 0' }}>
               Real-time rate forecasting. See exactly what you pay before the cable is plugged.
             </p>
 
-            <div style={{ background: '#fff', border: '2px solid #0f172a', borderRadius: 20, padding: 24, boxShadow: '6px 6px 0 rgba(0,0,0,0.05)' }}>
+            <div style={{ background: 'rgba(255, 255, 255, 0.03)', border: '2px solid #D4AF37', borderRadius: 20, padding: 24, boxShadow: '6px 6px 0 rgba(0,0,0,0.2)' }}>
                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4 }}>
-                 <span style={{ fontSize: 11, fontWeight: 800, color: '#94a3b8' }}>EST. RATE</span>
-                 <span style={{ fontSize: 11, fontWeight: 900, color: '#16a34a' }}>+0.2% AVG</span>
+                 <span style={{ fontSize: 11, fontWeight: 800, color: '#64748b' }}>EST. RATE</span>
+                 <span style={{ fontSize: 11, fontWeight: 900, color: '#D4AF37' }}>+0.2% AVG</span>
                </div>
-               <p style={{ fontFamily: 'var(--font-display)', fontSize: 36, fontWeight: 900, color: '#0f172a', margin: 0 }}>$0.34<span style={{ fontSize: 14, color: '#94a3b8' }}>/kWh</span></p>
+               <p style={{ fontFamily: 'var(--font-display)', fontSize: 36, fontWeight: 900, color: '#fff', margin: 0 }}>$0.34<span style={{ fontSize: 14, color: '#64748b' }}>/kWh</span></p>
             </div>
           </motion.div>
 

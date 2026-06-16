@@ -12,6 +12,11 @@ export default {
           light:   '#22C55E',
           dark:    '#15803D',
         },
+        gold: {
+          DEFAULT: '#D4AF37',
+          light:   '#F5E08F',
+          dark:    '#AA7C11',
+        },
         background: '#F8FAFC',
       },
       fontFamily: {

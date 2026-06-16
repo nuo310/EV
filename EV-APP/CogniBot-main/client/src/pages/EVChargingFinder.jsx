@@ -70,15 +70,15 @@ const GLOBAL_CSS = `
   }
   .neo-card {
     background: #fff;
-    border: 2px solid #0f172a;
+    border: 1.5px solid #e2e8f0;
     border-radius: 20px;
-    box-shadow: 4px 4px 0 rgba(15,23,42,0.05);
-    transition: all 0.2s ease;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.03), 0 2px 4px -2px rgba(0, 0, 0, 0.03);
+    transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
   }
   .neo-card:hover {
-    box-shadow: 6px 6px 0 #16a34a;
-    transform: translate(-2px, -2px);
-    border-color: #16a34a;
+    box-shadow: 0 10px 15px -3px rgba(15, 23, 42, 0.05), 0 4px 6px -4px rgba(15, 23, 42, 0.05);
+    transform: translateY(-2px);
+    border-color: #cbd5e1;
   }
   .neo-btn:active {
     transform: scale(0.96) translate(2px, 2px) !important;
@@ -374,6 +374,7 @@ const EVChargingFinder = () => {
         meterStartWh,
         kwhRequested: finalKwh,
         paidAmount: totalAmount,
+        amount: totalAmount,
       });
 
       setKwhInputStation(null);
@@ -418,6 +419,7 @@ const EVChargingFinder = () => {
           energyCharge,
           energyRatePerKwh: rate,
           billTotal: energyCharge,
+          amount: energyCharge,
         });
 
         // Show Bill Popup
@@ -446,28 +448,29 @@ const EVChargingFinder = () => {
     const key = raw.toLowerCase();
     const palette =
       key === 'charging' || key === 'suspendedev' || key === 'suspendedevse'
-        ? { bg: '#dcfce7', fg: '#15803d', border: '#16a34a' }
+        ? { bg: '#e8f5e9', fg: '#2e7d32', border: '#81c784', dot: '#4caf50' }
         : key === 'preparing' || key === 'finishing'
-          ? { bg: '#dbeafe', fg: '#1d4ed8', border: '#3b82f6' }
+          ? { bg: '#e3f2fd', fg: '#1565c0', border: '#90caf9', dot: '#2196f3' }
           : key === 'available'
-            ? { bg: '#f1f5f9', fg: '#334155', border: '#94a3b8' }
-            : { bg: '#fee2e2', fg: '#991b1b', border: '#dc2626' };
+            ? { bg: '#f1f5f9', fg: '#475569', border: '#cbd5e1', dot: '#94a3b8' }
+            : { bg: '#ffebee', fg: '#c62828', border: '#ef9a9a', dot: '#f44336' };
 
     return (
       <span
         style={{
           background: palette.bg,
           color: palette.fg,
-          border: `1.5px solid ${palette.border}`,
-          padding: '2px 8px',
-          borderRadius: '6px',
-          fontSize: '9px',
-          fontWeight: 900,
+          border: `1px solid ${palette.border}`,
+          padding: '3px 10px',
+          borderRadius: '20px',
+          fontSize: '10px',
+          fontWeight: 800,
           display: 'inline-flex',
           alignItems: 'center',
-          gap: '4px',
+          gap: '6px',
         }}
       >
+        <span style={{ width: 6, height: 6, borderRadius: '50%', background: palette.dot }} />
         {raw.toUpperCase()}
       </span>
     );
@@ -565,43 +568,48 @@ const EVChargingFinder = () => {
                   className="neo-card group" 
                   style={{ 
                     padding: '24px', position: 'relative', cursor: 'pointer', 
-                    borderColor: isSelected ? '#16a34a' : '#0f172a',
-                    boxShadow: isSelected ? '6px 6px 0 #16a34a' : '4px 4px 0 rgba(15,23,42,0.05)',
-                    transform: isSelected ? 'translate(-2px, -2px)' : 'none' 
+                    borderColor: isSelected ? '#16a34a' : '#e2e8f0',
+                    borderWidth: isSelected ? '2px' : '1.5px',
+                    boxShadow: isSelected 
+                      ? '0 10px 15px -3px rgba(22, 163, 74, 0.08), 0 4px 6px -4px rgba(22, 163, 74, 0.08)' 
+                      : '0 4px 6px -1px rgba(0, 0, 0, 0.03), 0 2px 4px -2px rgba(0, 0, 0, 0.03)',
+                    transform: isSelected ? 'translateY(-2px)' : 'none',
+                    transition: 'all 0.2s cubic-bezier(0.16, 1, 0.3, 1)',
                   }}
                   onClick={() => handleCardClick(s)}
                 >
-                  <div style={{ position: 'absolute', top: '12px', right: '12px', display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '6px' }}>
-                    <span style={{ fontSize: '8px', fontWeight: 900, color: '#94a3b8', letterSpacing: '0.06em' }}>
-                      CONNECTOR (OCPP)
-                    </span>
-                    <div style={{ display: 'flex', gap: '6px', alignItems: 'center' }}>
-                      {renderStatusBadge(conn.label)}
-                      {isStationConsideredOnline(s) ? (
-                        <span style={{ background: '#dcfce7', color: '#15803d', border: '1.5px solid #16a34a', padding: '2px 8px', borderRadius: '6px', fontSize: '9px', fontWeight: 900, display: 'flex', alignItems: 'center', gap: '4px' }}>
-                          <Wifi size={10} /> ONLINE
-                        </span>
-                      ) : (
-                        <span style={{ background: '#fee2e2', color: '#991b1b', border: '1.5px solid #dc2626', padding: '2px 8px', borderRadius: '6px', fontSize: '9px', fontWeight: 900, display: 'flex', alignItems: 'center', gap: '4px' }}>
-                          <WifiOff size={10} /> OFFLINE
-                        </span>
-                      )}
-                    </div>
-                  </div>
-
-                  <div style={{ marginBottom: '18px' }}>
-                    <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '1.4rem', fontWeight: 900, color: '#0f172a', margin: '0 0 4px 0', textTransform: 'lowercase' }}>
-                      {s.name}
-                    </h3>
-                    <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
-                        <span style={{ fontSize: '10px', fontWeight: 900, color: '#3b82f6', background: '#eff6ff', padding: '2px 6px', borderRadius: '4px', border: '1px solid #bfdbfe' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '16px', marginBottom: '18px' }}>
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '1.3rem', fontWeight: 800, color: '#0f172a', margin: '0 0 8px 0', textTransform: 'none', wordBreak: 'break-word', lineHeight: 1.2 }}>
+                        {s.name}
+                      </h3>
+                      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', alignItems: 'center' }}>
+                        <span style={{ fontSize: '10px', fontWeight: 800, color: '#3b82f6', background: '#eff6ff', padding: '3px 8px', borderRadius: '6px', border: '1.5px solid #bfdbfe' }}>
                           {s.status}
                         </span>
                         {s.distanceStr && (
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '4px', color: '#64748b', fontSize: '11px', fontWeight: 800 }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '4px', color: '#64748b', fontSize: '11px', fontWeight: 700 }}>
                             <Navigation size={12} /> {s.distanceStr}km
                           </div>
                         )}
+                      </div>
+                    </div>
+                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '6px', flexShrink: 0 }}>
+                      <span style={{ fontSize: '9px', fontWeight: 800, color: '#94a3b8', letterSpacing: '0.05em' }}>
+                        CONNECTOR (OCPP)
+                      </span>
+                      <div style={{ display: 'flex', gap: '6px', alignItems: 'center' }}>
+                        {renderStatusBadge(conn.label)}
+                        {isStationConsideredOnline(s) ? (
+                          <span style={{ background: '#dcfce7', color: '#15803d', border: '1.5px solid #16a34a', padding: '3px 10px', borderRadius: '20px', fontSize: '10px', fontWeight: 800, display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                            <Wifi size={10} /> ONLINE
+                          </span>
+                        ) : (
+                          <span style={{ background: '#fee2e2', color: '#991b1b', border: '1.5px solid #dc2626', padding: '3px 10px', borderRadius: '20px', fontSize: '10px', fontWeight: 800, display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                            <WifiOff size={10} /> OFFLINE
+                          </span>
+                        )}
+                      </div>
                     </div>
                   </div>
 
@@ -629,15 +637,15 @@ const EVChargingFinder = () => {
                     </div>
                   </div>
 
-                  <div style={{ paddingTop: '16px', borderTop: '2px solid #f1f5f9' }}>
-                    <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', marginBottom: '12px', flexWrap: 'wrap', gap: '10px' }}>
+                  <div style={{ paddingTop: '16px', borderTop: '2.5px solid #f1f5f9' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
                       <div>
-                        <span style={{ fontFamily: 'var(--font-display)', fontSize: '26px', fontWeight: 900, color: '#0f172a' }}>₹{energyRateForStation(s)}</span>
-                        <span style={{ fontSize: '10px', fontWeight: 700, color: '#64748b', marginLeft: '8px' }}>/kWh</span>
-                        <p style={{ margin: '4px 0 0 0', fontSize: '9px', fontWeight: 800, color: '#94a3b8', fontFamily: 'monospace' }}>
-                          SYNC: {s.lastSeen?.toDate ? s.lastSeen.toDate().toLocaleTimeString() : 'N/A'}
-                        </p>
+                        <span style={{ fontFamily: 'var(--font-display)', fontSize: '24px', fontWeight: 900, color: '#0f172a' }}>₹{energyRateForStation(s)}</span>
+                        <span style={{ fontSize: '12px', fontWeight: 600, color: '#64748b', marginLeft: '6px' }}>/kWh</span>
                       </div>
+                      <span style={{ fontSize: '10px', color: '#64748b', fontWeight: 700, fontFamily: 'monospace' }}>
+                        SYNC: {s.lastSeen?.toDate ? s.lastSeen.toDate().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' }) : 'N/A'}
+                      </span>
                     </div>
                       {!currentUser && (
                       <p style={{ margin: '0 0 10px 0', fontSize: '11px', fontWeight: 700, color: '#b45309' }}>Sign in to control charger.</p>
@@ -650,20 +658,20 @@ const EVChargingFinder = () => {
                           marginBottom: '12px',
                           padding: '14px 16px',
                           borderRadius: '14px',
-                          border: '2px solid #16a34a',
-                          background: 'linear-gradient(135deg, #dcfce7 0%, #ecfdf5 100%)',
+                          border: '1.5px solid #a7f3d0',
+                          background: 'linear-gradient(135deg, #f0fdf4 0%, #ecfdf5 100%)',
                         }}
                       >
                         <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                          <BatteryCharging size={28} color="#15803d" className="animate-pulse" />
+                          <BatteryCharging size={28} color="#16a34a" className="animate-pulse" />
                           <div style={{ flex: 1 }}>
                             <p style={{ margin: 0, fontSize: '10px', fontWeight: 900, color: '#15803d', letterSpacing: '0.05em' }}>YOUR SESSION · LIVE</p>
                             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '4px' }}>
-                                <p style={{ margin: 0, fontSize: '16px', fontWeight: 900, color: '#14532d' }}>₹{live.energyCharge}</p>
-                                <p style={{ margin: 0, fontSize: '13px', fontWeight: 700, color: '#166534' }}>{live.energyKwh} kWh</p>
+                                <p style={{ margin: 0, fontSize: '16px', fontWeight: 900, color: '#0f172a' }}>₹{live.energyCharge}</p>
+                                <p style={{ margin: 0, fontSize: '13px', fontWeight: 700, color: '#15803d' }}>{live.energyKwh} kWh</p>
                             </div>
                             {formatSessionElapsed(ub.startedAt) && (
-                              <p style={{ margin: '6px 0 0 0', fontSize: '11px', fontWeight: 700, color: '#166534', fontFamily: 'monospace' }}>
+                              <p style={{ margin: '6px 0 0 0', fontSize: '11px', fontWeight: 700, color: '#15803d', fontFamily: 'monospace' }}>
                                 Duration: {formatSessionElapsed(ub.startedAt)}
                               </p>
                             )}
@@ -672,23 +680,24 @@ const EVChargingFinder = () => {
                       </div>
                     )}
                     
-                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', alignItems: 'center' }} onClick={(e) => e.stopPropagation()}>
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', alignItems: 'center', width: '100%' }} onClick={(e) => e.stopPropagation()}>
                       {showStart && (
                         <button
                           type="button"
                           onClick={() => handleStartCharging(s)}
                           disabled={isStationBooking || !isStationConsideredOnline(s) || !conn.isAvailable}
                           style={{
+                            width: '100%',
                             background: (isStationBooking || !isStationConsideredOnline(s) || !conn.isAvailable) ? '#e2e8f0' : '#16a34a',
                             color: (isStationBooking || !isStationConsideredOnline(s) || !conn.isAvailable) ? '#94a3b8' : '#fff',
-                            border: `2px solid ${(isStationBooking || !isStationConsideredOnline(s) || !conn.isAvailable) ? '#cbd5e1' : '#15803d'}`,
-                            padding: '10px 22px',
+                            border: 'none',
+                            padding: '12px 24px',
                             borderRadius: '12px',
-                            fontWeight: 800,
+                            fontWeight: 700,
                             fontSize: '14px',
-                            boxShadow: (isStationBooking || !isStationConsideredOnline(s) || !conn.isAvailable) ? 'none' : '4px 4px 0 #0f172a',
+                            boxShadow: (isStationBooking || !isStationConsideredOnline(s) || !conn.isAvailable) ? 'none' : '0 4px 10px rgba(22, 163, 74, 0.2)',
                             cursor: (isStationBooking || !isStationConsideredOnline(s) || !conn.isAvailable) ? 'not-allowed' : 'pointer',
-                            opacity: 1,
+                            transition: 'all 0.2s ease',
                           }}
                         >
                           {isStationBooking ? <Loader2 className="animate-spin" size={16} /> : 'Start charging'}
@@ -700,15 +709,16 @@ const EVChargingFinder = () => {
                           onClick={() => handleStopCharging(s)}
                           disabled={isStationBooking}
                           style={{
-                            background: '#fff',
+                            width: '100%',
+                            background: '#fee2e2',
                             color: '#b91c1c',
-                            border: '2px solid #b91c1c',
-                            padding: '10px 22px',
+                            border: '1.5px solid #fca5a5',
+                            padding: '12px 24px',
                             borderRadius: '12px',
-                            fontWeight: 800,
+                            fontWeight: 700,
                             fontSize: '14px',
-                            boxShadow: '4px 4px 0 #0f172a',
                             cursor: isStationBooking ? 'wait' : 'pointer',
+                            transition: 'all 0.2s ease',
                           }}
                         >
                           {isStationBooking ? <Loader2 className="animate-spin" size={16} /> : 'Stop charging'}
@@ -751,7 +761,7 @@ const EVChargingFinder = () => {
             return (
             <Marker key={s.id} position={[s.lat, s.lng]} icon={stationIcon}>
               <Popup>
-                <div style={{ padding: '20px', minWidth: '240px' }}>
+                <div style={{ padding: '20px', minWidth: '260px' }}>
                   <p style={{ fontFamily: 'var(--font-display)', fontSize: '18px', fontWeight: 900, margin: '0 0 10px 0' }}>{s.name}</p>
                   <p style={{ fontSize: '9px', fontWeight: 900, color: '#94a3b8', margin: '0 0 6px 0' }}>CONNECTOR (OCPP)</p>
                   <div style={{ marginBottom: '10px' }}>
@@ -766,11 +776,11 @@ const EVChargingFinder = () => {
                     <p style={{ fontSize: '11px', color: '#b45309', fontWeight: 700 }}>Sign in to control charger.</p>
                   )}
                   {pubUb?.status === 'active' && pubLive && (
-                    <div style={{ padding: '10px', borderRadius: '10px', border: '2px solid #16a34a', background: '#ecfdf5', marginBottom: '10px' }}>
+                    <div style={{ padding: '10px', borderRadius: '10px', border: '1.5px solid #a7f3d0', background: '#f0fdf4', marginBottom: '10px' }}>
                       <p style={{ fontSize: '10px', fontWeight: 900, color: '#15803d', margin: 0 }}>YOUR SESSION · LIVE</p>
-                      <p style={{ fontSize: '14px', fontWeight: 900, color: '#14532d', margin: '6px 0 0 0' }}>₹{pubLive.energyCharge} <span style={{ fontSize: '12px', fontWeight: 'normal' }}>({pubLive.energyKwh} kWh)</span></p>
+                      <p style={{ fontSize: '14px', fontWeight: 900, color: '#0f172a', margin: '6px 0 0 0' }}>₹{pubLive.energyCharge} <span style={{ fontSize: '12px', fontWeight: 'normal' }}>({pubLive.energyKwh} kWh)</span></p>
                       {formatSessionElapsed(pubUb.startedAt) && (
-                        <p style={{ fontSize: '11px', fontWeight: 700, margin: '4px 0 0 0', fontFamily: 'monospace', color: '#166534' }}>{formatSessionElapsed(pubUb.startedAt)}</p>
+                        <p style={{ fontSize: '11px', fontWeight: 700, margin: '4px 0 0 0', fontFamily: 'monospace', color: '#15803d' }}>{formatSessionElapsed(pubUb.startedAt)}</p>
                       )}
                     </div>
                   )}
@@ -787,8 +797,9 @@ const EVChargingFinder = () => {
                         padding: '12px',
                         borderRadius: '10px',
                         fontWeight: 800,
-                        border: `2px solid ${(pubLoading || !isStationConsideredOnline(s) || !pubConn.isAvailable) ? '#cbd5e1' : 'transparent'}`,
+                        border: 'none',
                         cursor: (pubLoading || !isStationConsideredOnline(s) || !pubConn.isAvailable) ? 'not-allowed' : 'pointer',
+                        boxShadow: (pubLoading || !isStationConsideredOnline(s) || !pubConn.isAvailable) ? 'none' : '0 4px 10px rgba(22, 163, 74, 0.2)',
                       }}
                     >
                       {pubLoading ? '…' : 'Start charging'}
@@ -802,12 +813,12 @@ const EVChargingFinder = () => {
                       style={{
                         marginTop: 8,
                         width: '100%',
-                        background: '#fff',
+                        background: '#fee2e2',
                         color: '#b91c1c',
                         padding: '12px',
                         borderRadius: '10px',
                         fontWeight: 800,
-                        border: '2px solid #b91c1c',
+                        border: '1.5px solid #fca5a5',
                         cursor: pubLoading ? 'wait' : 'pointer',
                       }}
                     >
@@ -844,9 +855,9 @@ const EVChargingFinder = () => {
             onClick={(e) => e.stopPropagation()}
             style={{
               background: '#fff',
-              border: '2px solid #0f172a',
+              border: '1.5px solid #e2e8f0',
               borderRadius: '20px',
-              boxShadow: '8px 8px 0 #16a34a',
+              boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1)',
               maxWidth: '440px',
               width: '100%',
               padding: '24px 28px',
@@ -883,7 +894,7 @@ const EVChargingFinder = () => {
                 <span style={{ color: '#64748b' }}>Rate per kWh</span>
                 <span style={{ fontWeight: 800 }}>₹{receiptModal.ratePerKwh}</span>
               </div>
-              <div style={{ borderTop: '2px solid #0f172a', paddingTop: '12px', marginTop: '8px', display: 'flex', justifyContent: 'space-between', fontSize: '18px', fontWeight: 900, color: '#16a34a' }}>
+              <div style={{ borderTop: '1.5px solid #e2e8f0', paddingTop: '12px', marginTop: '8px', display: 'flex', justifyContent: 'space-between', fontSize: '18px', fontWeight: 900, color: '#16a34a' }}>
                 <span>Total Cost</span>
                 <span>₹{receiptModal.billTotal}</span>
               </div>
@@ -978,7 +989,7 @@ const EVChargingFinder = () => {
             {/* kWh Number Input Selector */}
             <div style={{ marginBottom: '24px' }}>
               <label style={{ display: 'block', fontSize: '10px', fontWeight: 900, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '8px' }}>
-                Target Capacity (Kilowatt-hours)
+                Target Capacity (Kilowatt-hour)
               </label>
               <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
                 <input
@@ -999,9 +1010,9 @@ const EVChargingFinder = () => {
                     outline: 'none',
                   }}
                 />
-                <span style={{ fontSize: '16px', fontWeight: 800, color: '#34d399' }}>kWh</span>
+                <span style={{ fontSize: '16px', fontWeight: 800, color: '#16a34a' }}>kWh</span>
               </div>
-
+ 
               {/* Quick selectors presets */}
               <div style={{ display: 'flex', gap: '8px', marginTop: '12px' }}>
                 {[10, 20, 30, 50].map((val) => (
@@ -1010,8 +1021,8 @@ const EVChargingFinder = () => {
                     type="button"
                     onClick={() => setKwhInputValue(val)}
                     style={{
-                      background: kwhInputValue === val ? 'rgba(16,185,129,0.1)' : '#020617',
-                      border: kwhInputValue === val ? '2px solid #10b981' : '2px solid #1e293b',
+                      background: kwhInputValue === val ? 'rgba(22,163,74,0.15)' : '#020617',
+                      border: kwhInputValue === val ? '2px solid #16a34a' : '2px solid #1e293b',
                       color: kwhInputValue === val ? '#34d399' : '#94a3b8',
                       borderRadius: '8px',
                       padding: '6px 12px',
@@ -1039,8 +1050,8 @@ const EVChargingFinder = () => {
                 <span style={{ fontWeight: 800, color: '#f8fafc' }}>~{Math.round((kwhInputValue / 7.4) * 10) / 10} hours (at 7.4 kW)</span>
               </div>
               <div style={{ borderTop: '1px solid #1e293b', paddingTop: '10px', marginTop: '8px', display: 'flex', justifyContent: 'space-between', fontSize: '15px', fontWeight: 900 }}>
-                <span style={{ color: '#fff' }}>Tariff Subtotal</span>
-                <span style={{ color: '#34d399' }}>₹{Math.round(kwhInputValue * energyRateForStation(kwhInputStation) * 100) / 100}</span>
+                <div style={{ color: '#fff' }}>Tariff Subtotal</div>
+                <div style={{ color: '#16a34a' }}>₹{Math.round(kwhInputValue * energyRateForStation(kwhInputStation) * 100) / 100}</div>
               </div>
             </div>
 
@@ -1050,7 +1061,7 @@ const EVChargingFinder = () => {
               onClick={handleConfirmKwh}
               style={{
                 width: '100%',
-                background: '#10b981',
+                background: '#16a34a',
                 border: 'none',
                 color: '#020617',
                 padding: '14px',
@@ -1062,7 +1073,7 @@ const EVChargingFinder = () => {
                 alignItems: 'center',
                 justifyContent: 'center',
                 gap: '8px',
-                boxShadow: '0 4px 14px rgba(16,185,129,0.3)',
+                boxShadow: '0 4px 14px rgba(22,163,74,0.3)',
               }}
             >
               Confirm & Start Charging
