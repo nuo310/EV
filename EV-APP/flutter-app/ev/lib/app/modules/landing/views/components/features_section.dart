@@ -27,16 +27,16 @@ class FeaturesSection extends StatelessWidget {
                 border: Border.all(color: AppColors.border, width: 2.0),
                 boxShadow: const [
                   BoxShadow(
-                    color: AppColors.primary,
-                    offset: Offset(3.0, 3.0),
-                    blurRadius: 0,
-                  ),
-                ],
+                color: AppColors.gold,
+                offset: Offset(3.0, 3.0),
+                blurRadius: 0,
               ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  const Icon(Icons.memory, color: AppColors.primary, size: 14),
+            ],
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Icon(Icons.memory, color: AppColors.primary, size: 14),
                   const SizedBox(width: 8),
                   Text(
                     'HARDWARE & PLATFORM',
@@ -166,7 +166,7 @@ class FeaturesSection extends StatelessWidget {
                         child: Container(
                           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                           decoration: BoxDecoration(
-                            color: AppColors.primary,
+                            color: AppColors.gold,
                             borderRadius: BorderRadius.circular(6),
                             border: Border.all(color: AppColors.border, width: 1.5),
                           ),
@@ -218,7 +218,7 @@ class FeaturesSection extends StatelessWidget {
           // Bento Card 2: Live Ingestion (Dark theme widget)
           NeoCard(
             backgroundColor: AppColors.border,
-            shadowColor: AppColors.primary.withAlpha(80),
+            shadowColor: AppColors.gold.withAlpha(80),
             padding: const EdgeInsets.all(24),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -278,9 +278,10 @@ class FeaturesSection extends StatelessWidget {
           ),
           const SizedBox(height: 28),
 
-          // Bento Card 3: Transparent Pricing (Green theme widget)
+          // Bento Card 3: Transparent Pricing (Dark/Gold theme widget)
           NeoCard(
-            backgroundColor: AppColors.primary,
+            backgroundColor: AppColors.border,
+            borderColor: AppColors.primary,
             shadowColor: AppColors.border,
             padding: const EdgeInsets.all(24),
             child: Column(
@@ -292,13 +293,13 @@ class FeaturesSection extends StatelessWidget {
                     Container(
                       padding: const EdgeInsets.all(10),
                       decoration: BoxDecoration(
-                        color: Colors.white,
+                        color: AppColors.border,
                         borderRadius: BorderRadius.circular(10),
-                        border: Border.all(color: AppColors.border, width: 2.0),
+                        border: Border.all(color: AppColors.gold, width: 2.0),
                       ),
                       child: const Icon(
                         Icons.credit_card_rounded,
-                        color: AppColors.text,
+                        color: AppColors.gold,
                         size: 20,
                       ),
                     ),
@@ -308,7 +309,7 @@ class FeaturesSection extends StatelessWidget {
                         fontFamily: 'monospace',
                         fontSize: 9,
                         fontWeight: FontWeight.w900,
-                        color: AppColors.text,
+                        color: AppColors.gold,
                       ),
                     ),
                   ],
@@ -320,7 +321,7 @@ class FeaturesSection extends StatelessWidget {
                     fontFamily: 'Space Grotesk',
                     fontSize: 24,
                     fontWeight: FontWeight.w900,
-                    color: AppColors.border,
+                    color: Colors.white,
                   ),
                 ),
                 const SizedBox(height: 8),
@@ -328,8 +329,8 @@ class FeaturesSection extends StatelessWidget {
                   'Real-time rate forecasting. See exactly what you pay before the cable is plugged.',
                   style: TextStyle(
                     fontSize: 13,
-                    fontWeight: FontWeight.w900,
-                    color: AppColors.border,
+                    fontWeight: FontWeight.w600,
+                    color: AppColors.textLight,
                     height: 1.4,
                   ),
                 ),
@@ -339,9 +340,9 @@ class FeaturesSection extends StatelessWidget {
                 Container(
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
-                    color: Colors.white,
+                    color: Colors.white.withAlpha(8),
                     borderRadius: BorderRadius.circular(16),
-                    border: Border.all(color: AppColors.border, width: 2.0),
+                    border: Border.all(color: AppColors.gold, width: 2.0),
                   ),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -365,7 +366,7 @@ class FeaturesSection extends StatelessWidget {
                               fontFamily: 'Space Grotesk',
                               fontSize: 20,
                               fontWeight: FontWeight.w900,
-                              color: AppColors.text,
+                              color: Colors.white,
                             ),
                           ),
                         ],
@@ -373,16 +374,16 @@ class FeaturesSection extends StatelessWidget {
                       Container(
                         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                         decoration: BoxDecoration(
-                          color: const Color(0xFFECFDF5),
+                          color: Colors.transparent,
                           borderRadius: BorderRadius.circular(6),
-                          border: Border.all(color: AppColors.primary, width: 1.0),
+                          border: Border.all(color: AppColors.gold, width: 1.0),
                         ),
                         child: const Text(
                           '+0.2% AVG',
                           style: TextStyle(
                             fontSize: 9,
                             fontWeight: FontWeight.w900,
-                            color: AppColors.primary,
+                            color: AppColors.gold,
                           ),
                         ),
                       ),
@@ -408,7 +409,7 @@ class BlueprintPainter extends CustomPainter {
       ..strokeWidth = 2.0;
 
     final fillPaint = Paint()
-      ..color = AppColors.primary.withAlpha(20)
+      ..color = AppColors.gold.withAlpha(20)
       ..style = PaintingStyle.fill;
 
     // Draw Connector Body Shield outline
@@ -420,6 +421,11 @@ class BlueprintPainter extends CustomPainter {
     canvas.drawRRect(rect, strokePaint);
 
     // Draw plug connector nodes (two circles)
+    final greenFillPaint = Paint()
+      ..color = AppColors.primary
+      ..style = PaintingStyle.fill;
+    canvas.drawCircle(Offset(size.width * 0.40, size.height * 0.45), 6, greenFillPaint);
+    canvas.drawCircle(Offset(size.width * 0.60, size.height * 0.45), 6, greenFillPaint);
     canvas.drawCircle(Offset(size.width * 0.40, size.height * 0.45), 6, strokePaint);
     canvas.drawCircle(Offset(size.width * 0.60, size.height * 0.45), 6, strokePaint);
 
@@ -520,7 +526,7 @@ class _LiveBarsWidgetState extends State<LiveBarsWidget> {
                   fontFamily: 'monospace',
                   fontSize: 8,
                   fontWeight: FontWeight.w700,
-                  color: AppColors.textLight,
+                  color: AppColors.gold,
                 ),
               ),
             ],

@@ -25,7 +25,7 @@ class AppPreviewSection extends StatelessWidget {
                 border: Border.all(color: AppColors.border, width: 2.0),
                 boxShadow: const [
                   BoxShadow(
-                    color: AppColors.primary,
+                    color: AppColors.gold,
                     offset: Offset(4.0, 4.0),
                     blurRadius: 0,
                   ),
@@ -347,7 +347,7 @@ class AppPreviewSection extends StatelessWidget {
                   style: TextStyle(
                     fontSize: 12,
                     fontWeight: FontWeight.w800,
-                    color: AppColors.primary,
+                    color: AppColors.gold,
                   ),
                 ),
               ],
@@ -363,7 +363,7 @@ class AppPreviewSection extends StatelessWidget {
                 Container(
                   padding: const EdgeInsets.all(10),
                   decoration: BoxDecoration(
-                    color: const Color(0xFFF0FDF4),
+                    color: const Color(0xFFFFFBEB),
                     borderRadius: BorderRadius.circular(12),
                     border: Border.all(color: AppColors.primary, width: 1.5),
                   ),
@@ -415,16 +415,16 @@ class AppPreviewSection extends StatelessWidget {
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                   decoration: BoxDecoration(
-                    color: const Color(0xFFE8FDF0),
+                    color: const Color(0xFFFFFBEB),
                     borderRadius: BorderRadius.circular(6),
-                    border: Border.all(color: AppColors.primary, width: 1.0),
+                    border: Border.all(color: AppColors.gold, width: 1.0),
                   ),
                   child: const Text(
                     '+12.4kg',
                     style: TextStyle(
                       fontSize: 10,
                       fontWeight: FontWeight.w900,
-                      color: AppColors.primary,
+                      color: AppColors.gold,
                     ),
                   ),
                 ),
@@ -557,7 +557,7 @@ class LiquidWavePainter extends CustomPainter {
 
     // Overlay second sine wave shifted by 180 deg for depth
     final paintAlt = Paint()
-      ..color = AppColors.primary.withAlpha(35)
+      ..color = AppColors.gold.withAlpha(35)
       ..style = PaintingStyle.fill;
 
     final pathAlt = Path();

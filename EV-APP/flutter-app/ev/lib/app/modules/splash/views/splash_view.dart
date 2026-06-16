@@ -31,7 +31,7 @@ class SplashView extends GetView<SplashController> {
               const SizedBox(height: 36),
               // App Title
               const Text(
-                'ChargeMap Mobile',
+                'EV Charge Mobile',
                 style: TextStyle(
                   fontFamily: 'Space Grotesk',
                   fontSize: 32,

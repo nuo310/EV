@@ -134,7 +134,7 @@ class HomeView extends GetView<HomeController> {
                     ),
                     const SizedBox(width: 12),
                     const Text(
-                      'ChargeMap',
+                      'EV Charge',
                       style: TextStyle(
                         fontFamily: 'Space Grotesk',
                         fontSize: 22,

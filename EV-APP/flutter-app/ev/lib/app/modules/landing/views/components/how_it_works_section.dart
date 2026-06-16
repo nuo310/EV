@@ -55,7 +55,7 @@ class HowItWorksSection extends StatelessWidget {
                 border: Border.all(color: AppColors.border, width: 2.0),
                 boxShadow: const [
                   BoxShadow(
-                    color: AppColors.primary,
+                    color: AppColors.gold,
                     offset: Offset(4.0, 4.0),
                     blurRadius: 0,
                   ),
@@ -100,7 +100,7 @@ class HowItWorksSection extends StatelessWidget {
                 foreground: Paint()
                   ..style = PaintingStyle.stroke
                   ..strokeWidth = 1.0
-                  ..color = AppColors.primary,
+                  ..color = AppColors.gold,
               ),
             ),
           ),
@@ -138,7 +138,7 @@ class HowItWorksSection extends StatelessWidget {
                     heightFactor: 0.85,
                     child: Container(
                       decoration: BoxDecoration(
-                        color: AppColors.border,
+                        color: AppColors.primary,
                         borderRadius: BorderRadius.circular(2),
                       ),
                     ),
@@ -206,7 +206,7 @@ class HowItWorksSection extends StatelessWidget {
                                           fontFamily: 'monospace',
                                           fontSize: 9,
                                           fontWeight: FontWeight.w900,
-                                          color: AppColors.primary,
+                                          color: AppColors.gold,
                                         ),
                                       ),
                                     ),

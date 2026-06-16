@@ -6,6 +6,7 @@ class NeoCard extends StatelessWidget {
   final Widget child;
   final Color backgroundColor;
   final Color shadowColor;
+  final Color borderColor;
   final double borderRadius;
   final double borderWidth;
   final double shadowOffset;
@@ -16,10 +17,11 @@ class NeoCard extends StatelessWidget {
     super.key,
     required this.child,
     this.backgroundColor = Colors.white,
-    this.shadowColor = AppColors.border,
-    this.borderRadius = 20.0,
-    this.borderWidth = 2.0,
-    this.shadowOffset = 6.0,
+    this.shadowColor = const Color(0x0F000000),
+    this.borderColor = const Color(0xFFE2E8F0),
+    this.borderRadius = 16.0,
+    this.borderWidth = 1.0,
+    this.shadowOffset = 4.0,
     this.onTap,
     this.padding,
   });
@@ -31,15 +33,19 @@ class NeoCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: backgroundColor,
         borderRadius: BorderRadius.circular(borderRadius),
-        border: Border.all(color: AppColors.border, width: borderWidth),
-        boxShadow: [
-          BoxShadow(
-            color: shadowColor,
-            offset: Offset(shadowOffset, shadowOffset),
-            blurRadius: 0.0, // Hard shadows have no blur
-            spreadRadius: 0.0,
-          ),
-        ],
+        border: Border.all(color: borderColor, width: borderWidth),
+        boxShadow: shadowOffset == 0.0
+            ? null
+            : [
+                BoxShadow(
+                  color: shadowColor == AppColors.border
+                      ? const Color(0x0F000000)
+                      : shadowColor,
+                  offset: Offset(0, shadowOffset / 2),
+                  blurRadius: shadowOffset * 1.5,
+                  spreadRadius: 0.0,
+                ),
+              ],
       ),
       child: child,
     );
@@ -62,6 +68,7 @@ class NeoButton extends StatefulWidget {
   final double width;
   final double height;
   final TextStyle? textStyle;
+  final Color? borderColor;
 
   const NeoButton({
     super.key,
@@ -74,6 +81,7 @@ class NeoButton extends StatefulWidget {
     this.width = double.infinity,
     this.height = 50.0,
     this.textStyle,
+    this.borderColor,
   });
 
   @override
@@ -104,16 +112,21 @@ class _NeoButtonState extends State<NeoButton> {
               )
             : Matrix4.identity(),
         decoration: BoxDecoration(
-          color: isEnabled ? widget.backgroundColor : const Color(0xFFE2E8F0),
-          borderRadius: BorderRadius.circular(14),
-          border: Border.all(color: AppColors.border, width: 2.0),
-          boxShadow: _isPressed || !isEnabled
+          color: isEnabled ? widget.backgroundColor : const Color(0xFFF1F5F9),
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(
+            color: isEnabled
+                ? (widget.borderColor ?? widget.backgroundColor)
+                : const Color(0xFFE2E8F0),
+            width: 1.0,
+          ),
+          boxShadow: _isPressed || !isEnabled || widget.shadowOffset == 0.0
               ? []
               : [
                   BoxShadow(
-                    color: AppColors.border,
-                    offset: Offset(widget.shadowOffset, widget.shadowOffset),
-                    blurRadius: 0.0,
+                    color: widget.backgroundColor.withValues(alpha: 0.15),
+                    offset: Offset(0, widget.shadowOffset),
+                    blurRadius: widget.shadowOffset * 2,
                   ),
                 ],
         ),
@@ -134,7 +147,7 @@ class _NeoButtonState extends State<NeoButton> {
                 widget.text,
                 style: TextStyle(
                   color: isEnabled ? widget.textColor : const Color(0xFF94A3B8),
-                  fontWeight: FontWeight.w900,
+                  fontWeight: FontWeight.w700,
                   fontSize: 16,
                 ).merge(widget.textStyle),
               ),
@@ -178,7 +191,7 @@ class NeoTextField extends StatelessWidget {
           label.toUpperCase(),
           style: const TextStyle(
             color: AppColors.textMuted,
-            fontWeight: FontWeight.w900,
+            fontWeight: FontWeight.w700,
             fontSize: 11,
             letterSpacing: 1.2,
           ),
@@ -187,11 +200,11 @@ class NeoTextField extends StatelessWidget {
         Container(
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(12),
-            boxShadow: const [
+            boxShadow: [
               BoxShadow(
-                color: AppColors.border,
-                offset: Offset(3.0, 3.0),
-                blurRadius: 0.0,
+                color: Colors.black.withValues(alpha: 0.02),
+                offset: const Offset(0, 2),
+                blurRadius: 4,
               ),
             ],
           ),
@@ -203,7 +216,7 @@ class NeoTextField extends StatelessWidget {
             enabled: enabled,
             style: const TextStyle(
               color: AppColors.text,
-              fontWeight: FontWeight.w700,
+              fontWeight: FontWeight.w600,
               fontSize: 15,
             ),
             decoration: InputDecoration(
@@ -212,33 +225,34 @@ class NeoTextField extends StatelessWidget {
                   ? Icon(prefixIcon, color: AppColors.textMuted, size: 20)
                   : null,
               filled: true,
-              fillColor: enabled ? Colors.white : const Color(0xFFF1F5F9),
+              fillColor: enabled ? Colors.white : const Color(0xFFF8FAFC),
+              contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
                 borderSide: const BorderSide(
-                  color: AppColors.border,
-                  width: 2.0,
+                  color: Color(0xFFE2E8F0),
+                  width: 1.0,
                 ),
               ),
               enabledBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
                 borderSide: const BorderSide(
-                  color: AppColors.border,
-                  width: 2.0,
+                  color: Color(0xFFE2E8F0),
+                  width: 1.0,
                 ),
               ),
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
                 borderSide: const BorderSide(
                   color: AppColors.primary,
-                  width: 2.0,
+                  width: 1.0,
                 ),
               ),
               disabledBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
                 borderSide: const BorderSide(
-                  color: AppColors.border,
-                  width: 2.0,
+                  color: Color(0xFFE2E8F0),
+                  width: 1.0,
                 ),
               ),
             ),

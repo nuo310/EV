@@ -11,9 +11,9 @@ class FooterSection extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       width: double.infinity,
-      decoration: BoxDecoration(
+      decoration: const BoxDecoration(
         color: Colors.white,
-        border: Border(top: BorderSide(color: AppColors.border, width: 2.0)),
+        border: Border(top: BorderSide(color: Color(0xFFE2E8F0), width: 1.0)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -25,7 +25,7 @@ class FooterSection extends StatelessWidget {
           CustomPaint(
             painter: const GridLinesPainter(),
             child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 48),
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 24),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -36,17 +36,7 @@ class FooterSection extends StatelessWidget {
                         padding: const EdgeInsets.all(8),
                         decoration: BoxDecoration(
                           color: AppColors.primary,
-                          borderRadius: BorderRadius.circular(10),
-                          border: Border.all(
-                            color: AppColors.border,
-                            width: 2.0,
-                          ),
-                          boxShadow: const [
-                            BoxShadow(
-                              color: AppColors.border,
-                              offset: Offset(3.0, 3.0),
-                            ),
-                          ],
+                          borderRadius: BorderRadius.circular(8),
                         ),
                         child: const Icon(
                           Icons.bolt,
@@ -56,44 +46,38 @@ class FooterSection extends StatelessWidget {
                       ),
                       const SizedBox(width: 12),
                       const Text(
-                        'ChargeMap',
+                        'EV Charge',
                         style: TextStyle(
                           fontFamily: 'Space Grotesk',
                           fontSize: 22,
-                          fontWeight: FontWeight.w900,
+                          fontWeight: FontWeight.w700,
                           color: AppColors.text,
                         ),
                       ),
                     ],
                   ),
-                  const SizedBox(height: 18),
+                  const SizedBox(height: 14),
                   const Text(
                     'High-performance EV charging infrastructure terminal. Real-time telemetry, smart routing, and global connectivity.',
                     style: TextStyle(
-                      fontSize: 13,
-                      fontWeight: FontWeight.w600,
+                      fontSize: 12,
+                      fontWeight: FontWeight.w500,
                       color: AppColors.textMuted,
                       height: 1.5,
                     ),
                   ),
-                  const SizedBox(height: 24),
+                  const SizedBox(height: 16),
 
                   // ISO Certified Badge
                   Container(
                     padding: const EdgeInsets.symmetric(
-                      horizontal: 14,
-                      vertical: 8,
+                      horizontal: 10,
+                      vertical: 6,
                     ),
                     decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(10),
-                      border: Border.all(color: AppColors.border, width: 2.0),
-                      boxShadow: const [
-                        BoxShadow(
-                          color: AppColors.border,
-                          offset: Offset(4.0, 4.0),
-                        ),
-                      ],
+                      color: const Color(0xFFF8FAFC),
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(color: const Color(0xFFE2E8F0), width: 1.0),
                     ),
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
@@ -101,38 +85,103 @@ class FooterSection extends StatelessWidget {
                         const Icon(
                           Icons.verified_user_rounded,
                           color: AppColors.primary,
-                          size: 16,
+                          size: 14,
                         ),
-                        const SizedBox(width: 8),
-                        Text(
-                          'ISO_15118_CERTIFIED',
+                        const SizedBox(width: 6),
+                        const Text(
+                          'ISO_15118',
                           style: TextStyle(
                             fontFamily: 'monospace',
-                            fontSize: 10,
-                            fontWeight: FontWeight.w900,
-                            color: AppColors.text.withAlpha(220),
+                            fontSize: 9,
+                            fontWeight: FontWeight.w700,
+                            color: AppColors.textMuted,
                             letterSpacing: 0.5,
                           ),
                         ),
                       ],
                     ),
                   ),
-                  const SizedBox(height: 48),
+                  const SizedBox(height: 28),
 
                   // 2. NAV LINKS ACCORDIONS / LISTS
                   const Text(
-                    'COMPLIANCE & LEGAL',
+                    'LEGAL & COMPLIANCE',
                     style: TextStyle(
-                      fontSize: 10,
+                      fontSize: 9,
                       fontWeight: FontWeight.w900,
-                      color: AppColors.textMuted,
+                      color: AppColors.textLight,
                       letterSpacing: 0.8,
                     ),
                   ),
-                  const SizedBox(height: 14),
-
-              
-                  const SizedBox(height: 40),
+                  const SizedBox(height: 12),
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // Column 1
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: const [
+                          Text(
+                            'About Us',
+                            style: TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w600,
+                              color: AppColors.textMuted,
+                            ),
+                          ),
+                          SizedBox(height: 10),
+                          Text(
+                            'Contact Us',
+                            style: TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w600,
+                              color: AppColors.textMuted,
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(width: 40),
+                      // Column 2
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: const [
+                          Text(
+                            'Terms & Conditions',
+                            style: TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w600,
+                              color: AppColors.textMuted,
+                            ),
+                          ),
+                          SizedBox(height: 10),
+                          Text(
+                            'Privacy Policy',
+                            style: TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w600,
+                              color: AppColors.textMuted,
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(width: 40),
+                      // Column 3
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: const [
+                          Text(
+                            'Refund Policy',
+                            style: TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w600,
+                              color: AppColors.textMuted,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 28),
 
                   // 3. BOTTOM FOOTNOTE & SOCIAL CHIPS
                   Container(color: const Color(0xFFE2E8F0), height: 1.0),
@@ -148,11 +197,11 @@ class FooterSection extends StatelessWidget {
                       const SizedBox(width: 8),
                       Expanded(
                         child: Text(
-                          '© ${DateTime.now().year} ChargeMap Terminal Inc.\nSYNCING_GLOBAL_ACTIVE',
+                          '© ${DateTime.now().year} EV Charge Terminal Inc.\nSYNCING_GLOBAL_ACTIVE',
                           style: const TextStyle(
                             fontFamily: 'monospace',
                             fontSize: 10,
-                            fontWeight: FontWeight.w900,
+                            fontWeight: FontWeight.w700,
                             color: AppColors.textLight,
                           ),
                         ),
@@ -186,7 +235,7 @@ class FooterSection extends StatelessWidget {
                           style: const TextStyle(
                             fontFamily: 'monospace',
                             fontSize: 9,
-                            fontWeight: FontWeight.w900,
+                            fontWeight: FontWeight.w700,
                             color: AppColors.textLight,
                           ),
                         ),
@@ -201,7 +250,6 @@ class FooterSection extends StatelessWidget {
       ),
     );
   }
-
 }
 
 /// Top Metric Dashboard inside Footer

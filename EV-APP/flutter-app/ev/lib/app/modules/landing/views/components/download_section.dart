@@ -19,7 +19,7 @@ class DownloadSection extends StatelessWidget {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
             decoration: BoxDecoration(
-              color: const Color(0xFFF0FDF4),
+              color: const Color(0xFFF8FAFC),
               borderRadius: BorderRadius.circular(99),
               border: Border.all(color: AppColors.border, width: 2.0),
               boxShadow: const [
@@ -128,7 +128,7 @@ class DownloadSection extends StatelessWidget {
                       ),
                       const SizedBox(height: 16),
                       const Text(
-                        'ChargeMap Terminal',
+                        'EV Charge Terminal',
                         style: TextStyle(
                           fontFamily: 'Space Grotesk',
                           fontSize: 20,

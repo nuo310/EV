@@ -28,6 +28,12 @@ class HeroSection extends StatelessWidget {
                 color: const Color(0xFFF8FAFC),
                 borderRadius: BorderRadius.circular(99),
                 border: Border.all(color: AppColors.border, width: 2.0),
+                boxShadow: const [
+                  BoxShadow(
+                    color: AppColors.gold,
+                    offset: Offset(4.0, 4.0),
+                  ),
+                ],
               ),
               child: Row(
                 mainAxisSize: MainAxisSize.min,
@@ -179,9 +185,9 @@ class HeroSection extends StatelessWidget {
                               ],
                             ),
                             const SizedBox(height: 14),
-                            const TelemetryRow(label: 'Network Load', value: '94%', percent: 0.94),
+                            const TelemetryRow(label: 'Network Load', value: '94%', percent: 0.94, color: AppColors.primary),
                             const SizedBox(height: 10),
-                            const TelemetryRow(label: 'Data Flow', value: '12GB/s', percent: 0.60),
+                            const TelemetryRow(label: 'Data Flow', value: '12GB/s', percent: 0.60, color: AppColors.gold),
                           ],
                         ),
                       ),
@@ -320,8 +326,8 @@ class _TypewriterTextState extends State<TypewriterText> {
         height: 1.0,
         letterSpacing: -1.0,
         decoration: TextDecoration.underline,
-        decorationColor: AppColors.primary,
-        decorationThickness: 2.0,
+        decorationColor: AppColors.gold,
+        decorationThickness: 3.0,
       ),
     );
   }
@@ -444,7 +450,7 @@ class PhoneShellWidget extends StatelessWidget {
                         painter: PathMockPainter(),
                         child: const SizedBox.expand(),
                       ),
-                      // User Indicator Dot (Blue)
+                      // User Indicator Dot (Dark Slate)
                       Positioned(
                         left: 40,
                         bottom: 40,
@@ -452,16 +458,13 @@ class PhoneShellWidget extends StatelessWidget {
                           width: 16,
                           height: 16,
                           decoration: BoxDecoration(
-                            color: Colors.blueAccent,
+                            color: AppColors.border,
                             shape: BoxShape.circle,
                             border: Border.all(color: Colors.white, width: 2.0),
-                            boxShadow: [
-                              BoxShadow(color: Colors.blueAccent.withAlpha(100), blurRadius: 8, spreadRadius: 2),
-                            ],
                           ),
                         ),
                       ),
-                      // Station indicator (Green)
+                      // Station indicator (Gold)
                       Positioned(
                         right: 40,
                         top: 60,
@@ -469,11 +472,11 @@ class PhoneShellWidget extends StatelessWidget {
                           width: 24,
                           height: 24,
                           decoration: BoxDecoration(
-                            color: AppColors.primary,
+                            color: AppColors.gold,
                             shape: BoxShape.circle,
                             border: Border.all(color: Colors.white, width: 3.0),
                             boxShadow: [
-                              BoxShadow(color: AppColors.primary.withAlpha(150), blurRadius: 12, spreadRadius: 4),
+                              BoxShadow(color: AppColors.gold.withAlpha(150), blurRadius: 12, spreadRadius: 4),
                             ],
                           ),
                           child: const Icon(Icons.bolt, color: Colors.white, size: 12),
@@ -573,11 +576,14 @@ class TelemetryRow extends StatelessWidget {
   final String value;
   final double percent;
 
+  final Color color;
+
   const TelemetryRow({
     super.key,
     required this.label,
     required this.value,
     required this.percent,
+    this.color = AppColors.primary,
   });
 
   @override
@@ -620,7 +626,7 @@ class TelemetryRow extends StatelessWidget {
               alignment: Alignment.centerLeft,
               widthFactor: percent,
               child: Container(
-                color: AppColors.primary,
+                color: color,
               ),
             ),
           ),

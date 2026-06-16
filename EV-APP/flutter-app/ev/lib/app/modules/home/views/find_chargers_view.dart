@@ -332,7 +332,7 @@ class FindChargersView extends GetView<HomeController> {
             topLeft: Radius.circular(24),
             topRight: Radius.circular(24),
           ),
-          border: Border.all(color: AppColors.border, width: 3.0),
+          border: Border.all(color: const Color(0xFFE2E8F0), width: 1.0),
         ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -343,7 +343,7 @@ class FindChargersView extends GetView<HomeController> {
               children: [
                 Expanded(
                   child: Text(
-                    name.toLowerCase(),
+                    name,
                     style: const TextStyle(
                       fontFamily: 'Space Grotesk',
                       fontSize: 20,
@@ -361,7 +361,7 @@ class FindChargersView extends GetView<HomeController> {
             const SizedBox(height: 12),
             Row(
               children: [
-                _buildBadge(status, const Color(0xFF3B82F6), const Color(0xFFEFF6FF), const Color(0xFFBFDBFE)),
+                _buildStatusBadge(status),
                 const SizedBox(width: 8),
                 if (distance != '--')
                   Row(
@@ -502,344 +502,354 @@ class FindChargersView extends GetView<HomeController> {
 
     return Padding(
       padding: const EdgeInsets.only(bottom: 20),
-      child: Container(
-        padding: const EdgeInsets.all(24),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(20),
-          border: Border.all(
-            color: isCharging ? AppColors.primary : AppColors.border,
-            width: isCharging ? 2.5 : 2.0,
-          ),
-          boxShadow: [
-            BoxShadow(
-              color: isCharging ? AppColors.primary : const Color(0x0F0F172A),
-              offset: isCharging ? const Offset(6.0, 6.0) : const Offset(4.0, 4.0),
-            ),
-          ],
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Top Right Badges
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        name.toLowerCase(),
-                        style: const TextStyle(
-                          fontFamily: 'Space Grotesk',
-                          fontSize: 20,
-                          fontWeight: FontWeight.w900,
-                          color: AppColors.text,
-                        ),
-                      ),
-                      const SizedBox(height: 6),
-                      Row(
-                        children: [
-                          _buildBadge(status, const Color(0xFF3B82F6), const Color(0xFFEFF6FF), const Color(0xFFBFDBFE)),
-                          const SizedBox(width: 8),
-                          if (distance != '--')
-                            Row(
-                              children: [
-                                const Icon(Icons.navigation_rounded, size: 12, color: AppColors.textMuted),
-                                const SizedBox(width: 4),
-                                Text(
-                                  distance,
-                                  style: const TextStyle(
-                                    fontSize: 11,
-                                    fontWeight: FontWeight.w800,
-                                    color: AppColors.textMuted,
-                                  ),
-                                ),
-                              ],
-                            ),
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
-                // Connector + Online badges
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  children: [
-                    const Text(
-                      'CONNECTOR (OCPP)',
-                      style: TextStyle(
-                        fontSize: 8,
-                        fontWeight: FontWeight.w900,
-                        color: AppColors.textLight,
-                        letterSpacing: 0.5,
-                      ),
-                    ),
-                    const SizedBox(height: 6),
-                    Row(
-                      children: [
-                        _buildStatusBadge(status),
-                        const SizedBox(width: 6),
-                        isOnline
-                            ? _buildBadge('ONLINE', const Color(0xFF15803D), const Color(0xFFDCFCE7), const Color(0xFF16A34A))
-                            : _buildBadge('OFFLINE', const Color(0xFF991B1B), const Color(0xFFFEE2E2), const Color(0xFFDC2626)),
-                      ],
-                    ),
-                  ],
+      child: GestureDetector(
+        onTap: () {
+          controller.selectedStationId.value = id;
+        },
+        child: Obx(() {
+          final bool isSelected = controller.selectedStationId.value == id;
+          return Container(
+            padding: const EdgeInsets.all(24),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(20),
+              border: Border.all(
+                color: (isSelected || isCharging) ? AppColors.primary : const Color(0xFFE2E8F0),
+                width: (isSelected || isCharging) ? 2.0 : 1.0,
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color: (isSelected || isCharging)
+                      ? AppColors.primary.withValues(alpha: 0.08)
+                      : Colors.black.withValues(alpha: 0.03),
+                  blurRadius: (isSelected || isCharging) ? 16 : 8,
+                  offset: (isSelected || isCharging) ? const Offset(0, 8) : const Offset(0, 4),
                 ),
               ],
             ),
-            const SizedBox(height: 18),
-
-            // Hardware + Diagnostics Grid
-            Row(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Expanded(
-                  child: Container(
-                    padding: const EdgeInsets.all(10),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFF8FAFC),
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: const Color(0xFFE2E8F0), width: 1.5),
+                // Top Right Badges
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            name,
+                            style: const TextStyle(
+                              fontFamily: 'Space Grotesk',
+                              fontSize: 20,
+                              fontWeight: FontWeight.w900,
+                              color: AppColors.text,
+                            ),
+                          ),
+                          const SizedBox(height: 6),
+                          Row(
+                            children: [
+                              _buildBadge(status, const Color(0xFF1D4ED8), const Color(0xFFDBEAFE), const Color(0xFFBFDBFE), dotColor: const Color(0xFF3B82F6)),
+                              const SizedBox(width: 8),
+                              if (distance != '--')
+                                Row(
+                                  children: [
+                                    const Icon(Icons.navigation_rounded, size: 12, color: AppColors.textMuted),
+                                    const SizedBox(width: 4),
+                                    Text(
+                                      distance,
+                                      style: const TextStyle(
+                                        fontSize: 11,
+                                        fontWeight: FontWeight.w800,
+                                        color: AppColors.textMuted,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                            ],
+                          ),
+                        ],
+                      ),
                     ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+                    // Connector + Online badges
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.end,
                       children: [
                         const Text(
-                          'HARDWARE',
+                          'CONNECTOR (OCPP)',
                           style: TextStyle(
-                            fontFamily: 'monospace',
-                            fontSize: 9,
-                            fontWeight: FontWeight.w800,
+                            fontSize: 8,
+                            fontWeight: FontWeight.w900,
                             color: AppColors.textLight,
+                            letterSpacing: 0.5,
                           ),
                         ),
-                        const SizedBox(height: 4),
-                        Text(
-                          '$vendor $model',
-                          style: const TextStyle(
-                            fontSize: 12,
-                            fontWeight: FontWeight.w800,
-                            color: AppColors.text,
-                          ),
-                        ),
-                        Text(
-                          'CID: $connectorId \u2022 $chargerType',
-                          style: const TextStyle(
-                            fontSize: 10,
-                            color: AppColors.textMuted,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 10),
-                Expanded(
-                  child: Container(
-                    padding: const EdgeInsets.all(10),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFF1F5F9),
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: const Color(0xFFE2E8F0), width: 1.5),
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const Text(
-                          'DIAGNOSTICS',
-                          style: TextStyle(
-                            fontFamily: 'monospace',
-                            fontSize: 9,
-                            fontWeight: FontWeight.w800,
-                            color: AppColors.textLight,
-                          ),
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          'Slots: $availableSlots',
-                          style: const TextStyle(
-                            fontSize: 12,
-                            fontWeight: FontWeight.w800,
-                            color: AppColors.textMuted,
-                          ),
-                        ),
+                        const SizedBox(height: 6),
                         Row(
                           children: [
-                            if (errorCode != 'NoError')
-                              const Icon(Icons.error_outline_rounded, size: 10, color: AppColors.error),
-                            if (errorCode != 'NoError') const SizedBox(width: 2),
-                            Expanded(
-                              child: Text(
-                                errorCode,
-                                style: TextStyle(
-                                  fontSize: 10,
-                                  color: errorCode == 'NoError' ? AppColors.textMuted : AppColors.error,
-                                ),
-                              ),
-                            ),
+                            _buildStatusBadge(status),
+                            const SizedBox(width: 6),
+                            isOnline
+                                ? _buildBadge('ONLINE', const Color(0xFF15803D), const Color(0xFFDCFCE7), const Color(0xFF16A34A), dotColor: const Color(0xFF16A34A))
+                                : _buildBadge('OFFLINE', const Color(0xFF991B1B), const Color(0xFFFEE2E2), const Color(0xFFDC2626), dotColor: const Color(0xFFEF4444)),
                           ],
                         ),
                       ],
                     ),
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 16),
-
-            // Divider
-            Container(height: 2.0, color: const Color(0xFFF1F5F9)),
-            const SizedBox(height: 16),
-
-            // Price + Actions Row
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: [
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      crossAxisAlignment: CrossAxisAlignment.baseline,
-                      textBaseline: TextBaseline.alphabetic,
-                      children: [
-                        Text(
-                          '\u20b9$ratePerKwh',
-                          style: const TextStyle(
-                            fontFamily: 'Space Grotesk',
-                            fontSize: 26,
-                            fontWeight: FontWeight.w900,
-                            color: AppColors.text,
-                          ),
-                        ),
-                        const SizedBox(width: 8),
-                        const Text(
-                          '/kWh',
-                          style: TextStyle(
-                            fontSize: 10,
-                            fontWeight: FontWeight.w700,
-                            color: AppColors.textMuted,
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      'SYNC: ${DateTime.now().hour.toString().padLeft(2, '0')}:${DateTime.now().minute.toString().padLeft(2, '0')}',
-                      style: const TextStyle(
-                        fontFamily: 'monospace',
-                        fontSize: 9,
-                        fontWeight: FontWeight.w800,
-                        color: AppColors.textLight,
-                      ),
-                    ),
                   ],
                 ),
-                // Action Buttons
+                const SizedBox(height: 18),
+
+                // Hardware + Diagnostics Grid
                 Row(
                   children: [
-                    if (!isCharging)
-                      _buildActionButton(
-                        text: 'Start charging',
-                        enabled: canStart,
-                        color: AppColors.primary,
-                        onTap: canStart
-                            ? () => controller.openConfigureCharge(id)
-                            : null,
-                      ),
-                    if (isCharging)
-                      _buildActionButton(
-                        text: 'Stop charging',
-                        enabled: true,
-                        color: AppColors.error,
-                        isOutlined: true,
-                        onTap: () => controller.stopChargingSession(id),
-                      ),
-                  ],
-                ),
-              ],
-            ),
-
-            // Live Active Session UI (if this station is charging)
-            if (isCharging)
-              Obx(() {
-                final elapsed = controller.formatElapsed(controller.chargingElapsedSeconds.value);
-                final energy = controller.chargingEnergyKwh.value.toStringAsFixed(2);
-                final cost = controller.chargingCost.value.toStringAsFixed(2);
-                return Container(
-                  margin: const EdgeInsets.only(top: 16),
-                  padding: const EdgeInsets.all(14),
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(14),
-                    border: Border.all(color: AppColors.primary, width: 2.0),
-                    gradient: const LinearGradient(
-                      colors: [Color(0xFFDCFCE7), Color(0xFFECFDF5)],
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                    ),
-                  ),
-                  child: Row(
-                    children: [
-                      const Icon(Icons.battery_charging_full_rounded, size: 28, color: Color(0xFF15803D)),
-                      const SizedBox(width: 12),
-                      Expanded(
+                    Expanded(
+                      child: Container(
+                        padding: const EdgeInsets.all(10),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFF8FAFC),
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(color: const Color(0xFFE2E8F0), width: 1.0),
+                        ),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             const Text(
-                              'YOUR SESSION \u00b7 LIVE',
+                              'HARDWARE',
                               style: TextStyle(
-                                fontSize: 10,
-                                fontWeight: FontWeight.w900,
-                                color: Color(0xFF15803D),
-                                letterSpacing: 0.5,
+                                fontFamily: 'monospace',
+                                fontSize: 9,
+                                fontWeight: FontWeight.w800,
+                                color: AppColors.textLight,
                               ),
                             ),
                             const SizedBox(height: 4),
+                            Text(
+                              '$vendor $model',
+                              style: const TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.w800,
+                                color: AppColors.text,
+                              ),
+                            ),
+                            Text(
+                              'CID: $connectorId \u2022 $chargerType',
+                              style: const TextStyle(
+                                fontSize: 10,
+                                color: AppColors.textMuted,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: Container(
+                        padding: const EdgeInsets.all(10),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFF1F5F9),
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(color: const Color(0xFFE2E8F0), width: 1.0),
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Text(
+                              'DIAGNOSTICS',
+                              style: TextStyle(
+                                fontFamily: 'monospace',
+                                fontSize: 9,
+                                fontWeight: FontWeight.w800,
+                                color: AppColors.textLight,
+                              ),
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              'Slots: $availableSlots',
+                              style: const TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.w800,
+                                color: AppColors.textMuted,
+                              ),
+                            ),
                             Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
-                                Text(
-                                  '\u20b9$cost',
-                                  style: const TextStyle(
-                                    fontFamily: 'Space Grotesk',
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.w900,
-                                    color: Color(0xFF14532D),
+                                if (errorCode != 'NoError')
+                                  const Icon(Icons.error_outline_rounded, size: 10, color: AppColors.error),
+                                if (errorCode != 'NoError') const SizedBox(width: 2),
+                                Expanded(
+                                  child: Text(
+                                    errorCode,
+                                    style: TextStyle(
+                                      fontSize: 10,
+                                      color: errorCode == 'NoError' ? AppColors.textMuted : AppColors.error,
+                                    ),
                                   ),
                                 ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 16),
+
+                // Divider
+                const Divider(height: 1, color: Color(0xFFF1F5F9)),
+                const SizedBox(height: 16),
+
+                // Price + Actions Row
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          crossAxisAlignment: CrossAxisAlignment.baseline,
+                          textBaseline: TextBaseline.alphabetic,
+                          children: [
+                            Text(
+                              '\u20b9$ratePerKwh',
+                              style: const TextStyle(
+                                fontFamily: 'Space Grotesk',
+                                fontSize: 26,
+                                fontWeight: FontWeight.w900,
+                                color: AppColors.text,
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            const Text(
+                              '/kWh',
+                              style: TextStyle(
+                                fontSize: 10,
+                                fontWeight: FontWeight.w700,
+                                color: AppColors.textMuted,
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          'SYNC: ${DateTime.now().hour.toString().padLeft(2, '0')}:${DateTime.now().minute.toString().padLeft(2, '0')}',
+                          style: const TextStyle(
+                            fontFamily: 'monospace',
+                            fontSize: 9,
+                            fontWeight: FontWeight.w800,
+                            color: AppColors.textLight,
+                          ),
+                        ),
+                      ],
+                    ),
+                    // Action Buttons
+                    Row(
+                      children: [
+                        if (!isCharging)
+                          _buildActionButton(
+                            text: 'Start charging',
+                            enabled: canStart,
+                            color: AppColors.primary,
+                            onTap: canStart
+                                ? () => controller.openConfigureCharge(id)
+                                : null,
+                          ),
+                        if (isCharging)
+                          _buildActionButton(
+                            text: 'Stop charging',
+                            enabled: true,
+                            color: AppColors.error,
+                            isOutlined: true,
+                            onTap: () => controller.stopChargingSession(id),
+                          ),
+                      ],
+                    ),
+                  ],
+                ),
+
+                // Live Active Session UI (if this station is charging)
+                if (isCharging)
+                  Obx(() {
+                    final elapsed = controller.formatElapsed(controller.chargingElapsedSeconds.value);
+                    final energy = controller.chargingEnergyKwh.value.toStringAsFixed(2);
+                    final cost = controller.chargingCost.value.toStringAsFixed(2);
+                    return Container(
+                      margin: const EdgeInsets.only(top: 16),
+                      padding: const EdgeInsets.all(14),
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(14),
+                        border: Border.all(color: AppColors.primary, width: 2.0),
+                        gradient: const LinearGradient(
+                          colors: [Color(0xFFDCFCE7), Color(0xFFECFDF5)],
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                        ),
+                      ),
+                      child: Row(
+                        children: [
+                          const Icon(Icons.battery_charging_full_rounded, size: 28, color: Color(0xFF15803D)),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                const Text(
+                                  'YOUR SESSION \u00b7 LIVE',
+                                  style: TextStyle(
+                                    fontSize: 10,
+                                    fontWeight: FontWeight.w900,
+                                    color: Color(0xFF15803D),
+                                    letterSpacing: 0.5,
+                                  ),
+                                ),
+                                const SizedBox(height: 4),
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Text(
+                                      '\u20b9$cost',
+                                      style: const TextStyle(
+                                        fontFamily: 'Space Grotesk',
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.w900,
+                                        color: Color(0xFF14532D),
+                                      ),
+                                    ),
+                                    Text(
+                                      '$energy kWh',
+                                      style: const TextStyle(
+                                        fontSize: 13,
+                                        fontWeight: FontWeight.w700,
+                                        color: Color(0xFF166534),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                const SizedBox(height: 6),
                                 Text(
-                                  '$energy kWh',
+                                  'Duration: $elapsed',
                                   style: const TextStyle(
-                                    fontSize: 13,
+                                    fontFamily: 'monospace',
+                                    fontSize: 11,
                                     fontWeight: FontWeight.w700,
                                     color: Color(0xFF166534),
                                   ),
                                 ),
                               ],
                             ),
-                            const SizedBox(height: 6),
-                            Text(
-                              'Duration: $elapsed',
-                              style: const TextStyle(
-                                fontFamily: 'monospace',
-                                fontSize: 11,
-                                fontWeight: FontWeight.w700,
-                                color: Color(0xFF166534),
-                              ),
-                            ),
-                          ],
-                        ),
+                          ),
+                        ],
                       ),
-                    ],
-                  ),
-                );
-              }),
-          ],
-        ),
-      ),
+                    );
+                  }),
+              ],
+            ),
+          );
+        })),
     );
   }
 
@@ -1256,20 +1266,23 @@ class FindChargersView extends GetView<HomeController> {
     return GestureDetector(
       onTap: enabled ? onTap : null,
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 10),
+        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
         decoration: BoxDecoration(
           color: isOutlined
               ? Colors.white
-              : (enabled ? color : const Color(0xFFE2E8F0)),
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(
-            color: isOutlined
-                ? color
-                : (enabled ? color : const Color(0xFFCBD5E1)),
-            width: 2.0,
-          ),
-          boxShadow: enabled
-              ? [BoxShadow(color: AppColors.border, offset: const Offset(4.0, 4.0))]
+              : (enabled ? color : const Color(0xFFF1F5F9)),
+          borderRadius: BorderRadius.circular(14),
+          border: isOutlined
+              ? Border.all(color: color, width: 1.5)
+              : Border.all(color: enabled ? color : const Color(0xFFE2E8F0), width: 1.0),
+          boxShadow: (enabled && !isOutlined)
+              ? [
+                  BoxShadow(
+                    color: color.withValues(alpha: 0.2),
+                    blurRadius: 10,
+                    offset: const Offset(0, 4),
+                  ),
+                ]
               : [],
         ),
         child: Text(
@@ -1288,38 +1301,64 @@ class FindChargersView extends GetView<HomeController> {
 
   Widget _buildStatusBadge(String status) {
     final key = status.toLowerCase();
-    Color bg, fg, border;
+    Color bg, fg, border, dot;
     if (key == 'charging' || key == 'suspendedev') {
       bg = const Color(0xFFDCFCE7);
       fg = const Color(0xFF15803D);
       border = const Color(0xFF16A34A);
+      dot = const Color(0xFF16A34A);
     } else if (key == 'preparing' || key == 'finishing') {
       bg = const Color(0xFFDBEAFE);
       fg = const Color(0xFF1D4ED8);
       border = const Color(0xFF3B82F6);
+      dot = const Color(0xFF3B82F6);
     } else if (key == 'available') {
       bg = const Color(0xFFF1F5F9);
       fg = const Color(0xFF334155);
-      border = const Color(0xFF94A3B8);
+      border = const Color(0xFFCBD5E1);
+      dot = const Color(0xFF94A3B8);
     } else {
       bg = const Color(0xFFFEE2E2);
       fg = const Color(0xFF991B1B);
       border = const Color(0xFFDC2626);
+      dot = const Color(0xFFEF4444);
     }
-    return _buildBadge(status.toUpperCase(), fg, bg, border);
+    return _buildBadge(status.toUpperCase(), fg, bg, border, dotColor: dot);
   }
 
-  Widget _buildBadge(String text, Color fg, Color bg, Color border) {
+  Widget _buildBadge(String text, Color fg, Color bg, Color border, {Color? dotColor}) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
       decoration: BoxDecoration(
         color: bg,
-        borderRadius: BorderRadius.circular(6),
-        border: Border.all(color: border, width: 1.5),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: border, width: 1.0),
       ),
-      child: Text(
-        text.toUpperCase(),
-        style: TextStyle(fontSize: 9, fontWeight: FontWeight.w900, color: fg),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          if (dotColor != null) ...[
+            Container(
+              width: 6,
+              height: 6,
+              decoration: BoxDecoration(
+                color: dotColor,
+                shape: BoxShape.circle,
+              ),
+            ),
+            const SizedBox(width: 6),
+          ],
+          Text(
+            text.toUpperCase(),
+            style: TextStyle(
+              fontSize: 9,
+              fontWeight: FontWeight.w900,
+              color: fg,
+              letterSpacing: 0.2,
+            ),
+          ),
+        ],
       ),
     );
   }

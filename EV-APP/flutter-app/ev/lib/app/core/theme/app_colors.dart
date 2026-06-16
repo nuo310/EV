@@ -10,6 +10,9 @@ class AppColors {
   static const Color accent = Color(0xFF3B82F6); // Blue
   static const Color warning = Color(0xFFF59E0B); // Amber
   static const Color error = Color(0xFFEF4444); // Red
+  static const Color gold = Color(0xFFD4AF37); // Gold
+  static const Color goldLight = Color(0xFFF5E08F); // Light Gold
+  static const Color goldDark = Color(0xFFAA7C11); // Dark Gold
 
   // Neutral Shades
   static const Color text = Color(0xFF0F172A); // Slate 900

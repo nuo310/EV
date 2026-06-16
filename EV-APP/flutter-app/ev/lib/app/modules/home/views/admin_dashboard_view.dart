@@ -114,16 +114,29 @@ class AdminDashboardView extends GetView<AdminController> {
     return GestureDetector(
       onTap: () => controller.activeTab.value = tab,
       child: AnimatedContainer(
-        duration: const Duration(milliseconds: 100),
+        duration: const Duration(milliseconds: 150),
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
         decoration: BoxDecoration(
           color: isActive ? AppColors.primary : Colors.white,
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: AppColors.border, width: 2.0),
+          border: Border.all(
+            color: isActive ? AppColors.primary : const Color(0xFFE2E8F0),
+            width: 1.0,
+          ),
           boxShadow: isActive
-              ? []
-              : const [
-                  BoxShadow(color: AppColors.border, offset: Offset(3.0, 3.0)),
+              ? [
+                  BoxShadow(
+                    color: AppColors.primary.withValues(alpha: 0.15),
+                    offset: const Offset(0, 4),
+                    blurRadius: 8,
+                  ),
+                ]
+              : [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.03),
+                    offset: const Offset(0, 2),
+                    blurRadius: 4,
+                  ),
                 ],
         ),
         child: Row(
@@ -139,7 +152,7 @@ class AdminDashboardView extends GetView<AdminController> {
               style: TextStyle(
                 fontFamily: 'Space Grotesk',
                 fontSize: 13,
-                fontWeight: FontWeight.w900,
+                fontWeight: FontWeight.w600,
                 color: isActive ? Colors.white : AppColors.text,
               ),
             ),
@@ -332,10 +345,11 @@ class AdminDashboardView extends GetView<AdminController> {
   }) {
     return Expanded(
       child: NeoCard(
-        backgroundColor: accent ? AppColors.border : Colors.white,
+        backgroundColor: accent ? const Color(0xFFDCFCE7) : Colors.white,
+        borderColor: accent ? const Color(0xFF86EFAC) : const Color(0xFFE2E8F0),
         shadowColor: accent
-            ? AppColors.primary.withValues(alpha: 0.2)
-            : AppColors.border.withValues(alpha: 0.08),
+            ? const Color(0x0F16A34A)
+            : const Color(0x0F000000),
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 20),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -346,13 +360,13 @@ class AdminDashboardView extends GetView<AdminController> {
                   width: 32,
                   height: 32,
                   decoration: BoxDecoration(
-                    color: accent ? AppColors.primary : const Color(0xFFF8FAFC),
+                    color: accent ? const Color(0xFF16A34A) : const Color(0xFFF1F5F9),
                     borderRadius: BorderRadius.circular(8),
                     border: Border.all(
                       color: accent
-                          ? AppColors.primary
+                          ? const Color(0xFF16A34A)
                           : const Color(0xFFE2E8F0),
-                      width: 1.5,
+                      width: 1.0,
                     ),
                   ),
                   child: Icon(
@@ -370,10 +384,10 @@ class AdminDashboardView extends GetView<AdminController> {
                     style: TextStyle(
                       fontFamily: 'Space Grotesk',
                       fontSize: 8,
-                      fontWeight: FontWeight.w800,
+                      fontWeight: FontWeight.w600,
                       letterSpacing: 0.5,
                       color: accent
-                          ? const Color(0xFF94A3B8)
+                          ? const Color(0xFF15803D)
                           : AppColors.textMuted,
                     ),
                   ),
@@ -386,8 +400,8 @@ class AdminDashboardView extends GetView<AdminController> {
               style: TextStyle(
                 fontFamily: 'Space Grotesk',
                 fontSize: 20,
-                fontWeight: FontWeight.w900,
-                color: accent ? Colors.white : AppColors.text,
+                fontWeight: FontWeight.w700,
+                color: accent ? const Color(0xFF14532D) : AppColors.text,
                 height: 1.0,
               ),
             ),
@@ -435,11 +449,15 @@ class AdminDashboardView extends GetView<AdminController> {
                       decoration: BoxDecoration(
                         color: AppColors.primary,
                         borderRadius: BorderRadius.circular(12),
-                        border: Border.all(color: AppColors.border, width: 2.0),
-                        boxShadow: const [
+                        border: Border.all(
+                          color: AppColors.primary,
+                          width: 1.0,
+                        ),
+                        boxShadow: [
                           BoxShadow(
-                            color: AppColors.border,
-                            offset: Offset(3.0, 3.0),
+                            color: AppColors.primary.withValues(alpha: 0.2),
+                            offset: const Offset(0, 4),
+                            blurRadius: 8,
                           ),
                         ],
                       ),
@@ -451,7 +469,7 @@ class AdminDashboardView extends GetView<AdminController> {
                             'ADD NEW',
                             style: TextStyle(
                               fontFamily: 'Space Grotesk',
-                              fontWeight: FontWeight.w900,
+                              fontWeight: FontWeight.w700,
                               color: Colors.white,
                             ),
                           ),
@@ -529,7 +547,12 @@ class AdminDashboardView extends GetView<AdminController> {
                       ? const Color(0xFFDCFCE7)
                       : const Color(0xFFF1F5F9),
                   borderRadius: BorderRadius.circular(10),
-                  border: Border.all(color: AppColors.border, width: 2.0),
+                  border: Border.all(
+                    color: isOnline
+                        ? const Color(0xFF86EFAC)
+                        : const Color(0xFFE2E8F0),
+                    width: 1.0,
+                  ),
                 ),
                 child: Icon(
                   Icons.ev_station_rounded,
@@ -612,14 +635,14 @@ class AdminDashboardView extends GetView<AdminController> {
                 decoration: BoxDecoration(
                   color: const Color(0xFFF1F5F9),
                   borderRadius: BorderRadius.circular(6),
-                  border: Border.all(color: const Color(0xFFCBD5E1)),
+                  border: Border.all(color: const Color(0xFFE2E8F0)),
                 ),
                 child: Text(
                   connector.toUpperCase(),
                   style: const TextStyle(
                     fontFamily: 'Space Grotesk',
                     fontSize: 9,
-                    fontWeight: FontWeight.w900,
+                    fontWeight: FontWeight.w700,
                     color: AppColors.textMuted,
                   ),
                 ),
@@ -629,13 +652,13 @@ class AdminDashboardView extends GetView<AdminController> {
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                 decoration: BoxDecoration(
                   color: isPublished
-                      ? const Color(0xFFE0F2FE)
+                      ? const Color(0xFFDCFCE7)
                       : const Color(0xFFF1F5F9),
                   borderRadius: BorderRadius.circular(6),
                   border: Border.all(
                     color: isPublished
-                        ? const Color(0xFF0284C7)
-                        : const Color(0xFFCBD5E1),
+                        ? const Color(0xFF86EFAC)
+                        : const Color(0xFFE2E8F0),
                   ),
                 ),
                 child: Text(
@@ -643,9 +666,9 @@ class AdminDashboardView extends GetView<AdminController> {
                   style: TextStyle(
                     fontFamily: 'Space Grotesk',
                     fontSize: 9,
-                    fontWeight: FontWeight.w900,
+                    fontWeight: FontWeight.w700,
                     color: isPublished
-                        ? const Color(0xFF0284C7)
+                        ? const Color(0xFF16A34A)
                         : AppColors.textMuted,
                   ),
                 ),
@@ -763,7 +786,7 @@ class AdminDashboardView extends GetView<AdminController> {
             backgroundColor: AppColors.background,
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(20),
-              side: const BorderSide(color: AppColors.border, width: 3.0),
+              side: const BorderSide(color: Color(0xFFE2E8F0), width: 1.0),
             ),
             child: SingleChildScrollView(
               padding: const EdgeInsets.all(24),
@@ -895,8 +918,8 @@ class AdminDashboardView extends GetView<AdminController> {
                               color: Colors.white,
                               borderRadius: BorderRadius.circular(12),
                               border: Border.all(
-                                color: AppColors.border,
-                                width: 2.0,
+                                color: const Color(0xFFE2E8F0),
+                                width: 1.0,
                               ),
                             ),
                             alignment: Alignment.center,
@@ -904,7 +927,7 @@ class AdminDashboardView extends GetView<AdminController> {
                               'CANCEL',
                               style: TextStyle(
                                 fontFamily: 'Space Grotesk',
-                                fontWeight: FontWeight.w900,
+                                fontWeight: FontWeight.w700,
                                 color: AppColors.text,
                               ),
                             ),
@@ -1060,19 +1083,37 @@ class AdminDashboardView extends GetView<AdminController> {
     return GestureDetector(
       onTap: () => controller.userFilterType.value = filterType,
       child: AnimatedContainer(
-        duration: const Duration(milliseconds: 100),
+        duration: const Duration(milliseconds: 150),
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
         decoration: BoxDecoration(
-          color: isSelected ? AppColors.text : Colors.white,
+          color: isSelected ? AppColors.primary : Colors.white,
           borderRadius: BorderRadius.circular(20),
-          border: Border.all(color: AppColors.border, width: 2.0),
+          border: Border.all(
+            color: isSelected ? AppColors.primary : const Color(0xFFE2E8F0),
+            width: 1.0,
+          ),
+          boxShadow: isSelected
+              ? [
+                  BoxShadow(
+                    color: AppColors.primary.withValues(alpha: 0.15),
+                    offset: const Offset(0, 4),
+                    blurRadius: 8,
+                  ),
+                ]
+              : [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.02),
+                    offset: const Offset(0, 2),
+                    blurRadius: 4,
+                  ),
+                ],
         ),
         child: Text(
           label,
           style: TextStyle(
             fontFamily: 'Space Grotesk',
             fontSize: 11,
-            fontWeight: FontWeight.w900,
+            fontWeight: FontWeight.w600,
             color: isSelected ? Colors.white : AppColors.text,
           ),
         ),
@@ -1128,13 +1169,13 @@ class AdminDashboardView extends GetView<AdminController> {
                 decoration: BoxDecoration(
                   color: const Color(0xFFF1F5F9),
                   borderRadius: BorderRadius.circular(8),
-                  border: Border.all(color: AppColors.border, width: 1.5),
+                  border: Border.all(color: const Color(0xFFE2E8F0), width: 1.0),
                 ),
                 child: Text(
                   '₹${wallet.toStringAsFixed(2)}',
                   style: const TextStyle(
                     fontFamily: 'Space Grotesk',
-                    fontWeight: FontWeight.w900,
+                    fontWeight: FontWeight.w700,
                     fontSize: 14,
                     color: AppColors.text,
                   ),
@@ -1188,13 +1229,17 @@ class AdminDashboardView extends GetView<AdminController> {
               const SizedBox(width: 12),
               NeoButton(
                 text: 'CREDIT ₹200',
-                backgroundColor: AppColors.accent,
-                textColor: AppColors.text,
+                backgroundColor: const Color(0xFFDCFCE7),
+                textColor: const Color(0xFF16A34A),
+                borderColor: const Color(0xFF86EFAC),
                 icon: Icons.add_card_rounded,
                 width: 130,
-                height: 36, // smaller height
-                shadowOffset: 2.0,
-                textStyle: const TextStyle(fontSize: 12),
+                height: 36,
+                shadowOffset: 0.0,
+                textStyle: const TextStyle(
+                  fontSize: 11,
+                  fontWeight: FontWeight.w700,
+                ),
                 onPressed: () => controller.rechargeUserWallet(uid),
               ),
             ],
