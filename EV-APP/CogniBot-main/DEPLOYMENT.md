@@ -223,3 +223,120 @@ curl http://localhost:9221/
   sudo systemctl status nginx
   sudo tail -f /var/log/nginx/error.log
   ```
+
+---
+
+## 🌐 Step 7: Configure Custom Domain & SSL (HTTPS)
+
+To connect a custom domain (e.g., `evchargeon.in`) and configure secure HTTPS/WSS protocols:
+
+### 1. GoDaddy DNS Records Configuration
+Ask your client or log in to GoDaddy to add the following DNS records:
+
+| Type | Host | Value | Purpose |
+| :--- | :--- | :--- | :--- |
+| **A** | `@` | `3.6.89.80` | Maps apex domain `evchargeon.in` to EC2 |
+| **CNAME** | `www` | `evchargeon.in` | Maps `www.evchargeon.in` to apex domain |
+
+### 2. Verify DNS Propagation
+DNS updates can take anywhere from **5 minutes to 24 hours** to propagate globally. You can verify propagation by running the following command from your local terminal:
+```bash
+nslookup evchargeon.in
+```
+Verify that the output points to `3.6.89.80`.
+
+### 3. Nginx API & WebSocket Reverse Proxy Configuration
+To enable SSL and avoid Mixed Content errors in the browser, Nginx serves the React frontend and routes all `/api/*` and WebSocket `/ocpp/*` requests locally.
+
+We have configured `/etc/nginx/sites-available/default` as follows:
+```nginx
+server {
+    listen 80 default_server;
+    listen [::]:80 default_server;
+
+    server_name evchargeon.in www.evchargeon.in _;
+
+    root /var/www/client;
+    index index.html;
+
+    # Frontend React routes
+    location / {
+        try_files $uri $uri/ /index.html;
+    }
+
+    # API Proxy (rewrites /api/... to /...)
+    location /api/ {
+        proxy_pass http://127.0.0.1:9221/;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection 'upgrade';
+        proxy_set_header Host $host;
+        proxy_cache_bypass $http_upgrade;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+
+    # OCPP WebSocket Proxy
+    location /ocpp/ {
+        proxy_pass http://127.0.0.1:9221/ocpp/;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection 'upgrade';
+        proxy_set_header Host $host;
+        proxy_cache_bypass $http_upgrade;
+        proxy_read_timeout 3600s;
+        proxy_send_timeout 3600s;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+
+    # Alternate WS /ws/1.6/ Proxy
+    location /ws/ {
+        proxy_pass http://127.0.0.1:9221/ws/;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection 'upgrade';
+        proxy_set_header Host $host;
+        proxy_cache_bypass $http_upgrade;
+        proxy_read_timeout 3600s;
+        proxy_send_timeout 3600s;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+}
+```
+
+Apply the changes and test Nginx:
+```bash
+sudo nginx -t
+sudo systemctl reload nginx
+```
+
+### 4. Install Certbot & Generate SSL Certificates
+1. Connect to your EC2 instance via SSH.
+2. Install Certbot and its Nginx plugin:
+   ```bash
+   sudo apt update
+   sudo apt install certbot python3-certbot-nginx -y
+   ```
+3. Run Certbot to generate and install SSL certificates:
+   ```bash
+   sudo certbot --nginx -d evchargeon.in -d www.evchargeon.in
+   ```
+   *Follow the interactive prompts to enter your email and accept the Let's Encrypt terms.* Certbot will automatically rewrite your Nginx configuration to support HTTPS and redirect HTTP traffic to HTTPS.
+
+### 5. Final Code Configuration
+After generating the SSL certificates:
+1. **Web Client**: Ensure the `VITE_OCPP_REMOTE_START_BASE_URL` in `client/.env` is set to `/api` (this enables relative proxying over HTTPS). Rebuild and deploy:
+   ```bash
+   npm run build
+   sudo cp -r dist/* /var/www/client/
+   ```
+2. **Flutter App**: Update the backend service URL in `api_service.dart` to:
+   ```dart
+   static const String baseUrl = 'https://evchargeon.in/api';
+   ```
+

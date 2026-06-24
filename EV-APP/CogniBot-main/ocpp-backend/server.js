@@ -600,6 +600,82 @@ app.post("/remote-stop", async (req, res) => {
 
   }
 
+});/*
+========================
+ADMIN STATION CRUD ROUTES
+========================
+*/
+
+app.post("/admin/stations", async (req, res) => {
+  try {
+    const { stationId, ...rest } = req.body;
+    if (!stationId) {
+      return res.status(400).json({ error: "stationId is required" });
+    }
+    
+    // Parse coordinates and numbers correctly
+    const data = {
+      ...rest,
+      lat: rest.lat !== undefined && rest.lat !== "" ? parseFloat(rest.lat) : null,
+      lng: rest.lng !== undefined && rest.lng !== "" ? parseFloat(rest.lng) : null,
+      pricePerHour: rest.pricePerHour !== undefined ? parseFloat(rest.pricePerHour) : 15,
+      energyRatePerKwh: rest.energyRatePerKwh !== undefined ? parseFloat(rest.energyRatePerKwh) : 12,
+      availableSlots: rest.availableSlots !== undefined ? parseInt(rest.availableSlots) : 1,
+      connectorId: rest.connectorId !== undefined ? parseInt(rest.connectorId) : 1,
+      published: rest.published !== false,
+      isOnline: rest.isOnline !== false,
+      lastSeen: new Date(),
+    };
+    
+    await db.collection("stations").doc(stationId).set(data, { merge: true });
+    res.status(201).json({ success: true, stationId });
+  } catch (err) {
+    console.error("Error creating station:", err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.put("/admin/stations/:stationId", async (req, res) => {
+  try {
+    const { stationId } = req.params;
+    const body = req.body;
+    
+    const updateData = {};
+    if (body.name !== undefined) updateData.name = body.name;
+    if (body.websocketUrl !== undefined) updateData.websocketUrl = body.websocketUrl;
+    if (body.lat !== undefined && body.lat !== "") updateData.lat = parseFloat(body.lat);
+    if (body.lng !== undefined && body.lng !== "") updateData.lng = parseFloat(body.lng);
+    if (body.chargerType !== undefined) updateData.chargerType = body.chargerType;
+    if (body.connectorId !== undefined) updateData.connectorId = parseInt(body.connectorId);
+    if (body.pricePerHour !== undefined) updateData.pricePerHour = parseFloat(body.pricePerHour);
+    if (body.energyRatePerKwh !== undefined) updateData.energyRatePerKwh = parseFloat(body.energyRatePerKwh);
+    if (body.availableSlots !== undefined) updateData.availableSlots = parseInt(body.availableSlots);
+    if (body.published !== undefined) updateData.published = Boolean(body.published);
+    if (body.isOnline !== undefined) updateData.isOnline = Boolean(body.isOnline);
+    if (body.vendor !== undefined) updateData.vendor = body.vendor;
+    if (body.model !== undefined) updateData.model = body.model;
+    if (body.status !== undefined) updateData.status = body.status;
+    if (body.errorCode !== undefined) updateData.errorCode = body.errorCode;
+    
+    updateData.lastSeen = new Date();
+    
+    await db.collection("stations").doc(stationId).set(updateData, { merge: true });
+    res.json({ success: true, stationId });
+  } catch (err) {
+    console.error("Error updating station:", err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.delete("/admin/stations/:stationId", async (req, res) => {
+  try {
+    const { stationId } = req.params;
+    await db.collection("stations").doc(stationId).delete();
+    res.json({ success: true, stationId });
+  } catch (err) {
+    console.error("Error deleting station:", err);
+    res.status(500).json({ error: err.message });
+  }
 });
 
 
