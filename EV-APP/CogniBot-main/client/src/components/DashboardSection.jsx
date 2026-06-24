@@ -12,13 +12,96 @@ const DashboardSection = () => {
     { label: 'Stations', Icon: BatteryCharging },
   ];
 
+  const DASHBOARD_CSS = `
+    .dash-layout {
+      display: flex;
+      flex-direction: row;
+      height: 620px;
+    }
+    .dash-sidebar {
+      width: 240px;
+      background: #fff;
+      border-right: 2px solid #0f172a;
+      padding: 32px 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      flex-shrink: 0;
+    }
+    .dash-stats-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 24px;
+      margin-bottom: 32px;
+      position: relative;
+      z-index: 10;
+    }
+    .dash-live-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+      height: 100%;
+    }
+    .dash-stations-container {
+      background: #fff;
+      border: 4px solid #0f172a;
+      border-radius: 24px;
+      height: 100%;
+      overflow: hidden;
+      box-shadow: 12px 12px 0 rgba(15,23,42,0.05);
+    }
+    .dash-stations-table {
+      width: 100%;
+    }
+    @media (max-width: 1023px) {
+      .dash-layout {
+        flex-direction: column !important;
+        height: auto !important;
+      }
+      .dash-sidebar {
+        width: 100% !important;
+        border-right: none !important;
+        border-bottom: 2px solid #0f172a !important;
+        padding: 16px 20px !important;
+        flex-direction: row !important;
+        overflow-x: auto !important;
+        gap: 12px !important;
+      }
+      .dash-sidebar::-webkit-scrollbar {
+        display: none;
+      }
+      .sidebar-header-text {
+        display: none !important;
+      }
+      .dash-stats-grid {
+        grid-template-columns: 1fr !important;
+        gap: 16px !important;
+      }
+      .dash-live-grid {
+        grid-template-columns: 1fr !important;
+        gap: 16px !important;
+      }
+      .dash-stations-container {
+        overflow-x: auto !important;
+      }
+      .dash-stations-table {
+        min-width: 580px !important;
+      }
+    }
+    @media (min-width: 768px) and (max-width: 1023px) {
+      .dash-stats-grid {
+        grid-template-columns: repeat(2, 1fr) !important;
+      }
+    }
+  `;
+
   const renderContent = () => {
     switch (activeModule) {
       case 'Overview':
         return (
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} key="overview">
             {/* Top Stats */}
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 24, marginBottom: 32, position: 'relative', zIndex: 10 }}>
+            <div className="dash-stats-grid">
               <div style={{ background: '#fff', padding: 24, borderRadius: 16, border: '2px solid #0f172a', boxShadow: '6px 6px 0 rgba(15,23,42,0.1)' }}>
                 <p style={{ fontFamily: 'var(--font-body)', fontSize: 11, fontWeight: 800, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 8 }}>Available Bays</p>
                 <p style={{ fontFamily: 'var(--font-display)', fontSize: '3rem', fontWeight: 900, color: '#0f172a', lineHeight: 1 }}>1,048</p>
@@ -92,7 +175,7 @@ const DashboardSection = () => {
       case 'Live Data':
         return (
           <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} key="live" style={{ height: '100%' }}>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 24, height: '100%' }}>
+            <div className="dash-live-grid">
               {/* Column 1: Telemetry */}
               <div style={{ background: '#fff', border: '2px solid #0f172a', borderRadius: 24, padding: 32, boxShadow: '8px 8px 0 rgba(15,23,42,0.05)', position: 'relative' }}>
                 <h3 style={{ fontFamily: 'var(--font-display)', fontSize: 24, fontWeight: 800, margin: '0 0 24px 0' }}>Data Streams</h3>
@@ -104,7 +187,7 @@ const DashboardSection = () => {
                     { label: 'Auth Handshakes', val: '1,204', color: '#0f172a' }
                   ].map((s, i) => (
                     <div key={i}>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}>
+                      <div style={{ display: 'flex', justifyItems: 'space-between', justifyContent: 'space-between', marginBottom: 8 }}>
                         <span style={{ fontSize: 12, fontWeight: 700, color: '#64748b' }}>{s.label}</span>
                         <span style={{ fontSize: 12, fontWeight: 800, color: s.color }}>{s.val}</span>
                       </div>
@@ -117,7 +200,7 @@ const DashboardSection = () => {
               </div>
 
               {/* Column 2: Terminal Output */}
-              <div style={{ background: '#0f172a', color: '#fff', borderRadius: 24, padding: 32, fontFamily: 'var(--font-display)', overflow: 'hidden', position: 'relative' }}>
+              <div style={{ background: '#0f172a', color: '#fff', borderRadius: 24, padding: 32, fontFamily: 'var(--font-display)', overflow: 'hidden', position: 'relative' }} className="min-h-[220px]">
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 20, color: '#16a34a' }}>
                   <Terminal size={18} />
                   <span style={{ fontSize: 12, fontWeight: 800 }}>LIVE LOGS</span>
@@ -138,32 +221,34 @@ const DashboardSection = () => {
       case 'Stations':
         return (
           <motion.div initial={{ opacity: 0, filter: 'blur(10px)' }} animate={{ opacity: 1, filter: 'blur(0px)' }} key="stations" style={{ height: '100%' }}>
-            <div style={{ background: '#fff', border: '4px solid #0f172a', borderRadius: 24, height: '100%', overflow: 'hidden', boxShadow: '12px 12px 0 rgba(15,23,42,0.05)' }}>
-              {/* Header list header */}
-              <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr 1fr', padding: '20px 32px', borderBottom: '2px solid #0f172a', background: '#f8fafc', color: '#94a3b8', fontSize: 11, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.1em' }}>
-                <span>Hub Location</span>
-                <span>Status</span>
-                <span>Power Output</span>
-                <span>Load</span>
-              </div>
-              {/* List items */}
-              {[
-                { l: 'NYC 5th Ave Hub', s: 'Available', p: '350kW', ld: '12%', active: true },
-                { l: 'NJ Turnpike Plaza', s: 'Charging', p: '150kW', ld: '84%', active: false },
-                { l: 'Boston Seaport', s: 'Available', p: '350kW', ld: '04%', active: true },
-                { l: 'Philly Center', s: 'Maintenance', p: '25kW', ld: '--', active: false },
-                { l: 'D.C. Capitol Hill', s: 'Available', p: '150kW', ld: '40%', active: false }
-              ].map((st, i) => (
-                <div key={i} style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr 1fr', padding: '24px 32px', borderBottom: i === 4 ? 'none' : '1px solid #e2e8f0', fontSize: 15, fontWeight: 700, color: '#0f172a', fontFamily: 'var(--font-display)' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                    <div style={{ width: 8, height: 8, borderRadius: '50%', background: st.s === 'Available' ? '#16a34a' : (st.s === 'Charging' ? '#334155' : '#cbd5e1') }} />
-                    {st.l}
-                  </div>
-                  <span style={{ color: st.s === 'Available' ? '#16a34a' : '#0f172a' }}>{st.s}</span>
-                  <span>{st.p}</span>
-                  <span>{st.ld}</span>
+            <div className="dash-stations-container">
+              <div className="dash-stations-table">
+                {/* Header list header */}
+                <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr 1fr', padding: '20px 32px', borderBottom: '2px solid #0f172a', background: '#f8fafc', color: '#94a3b8', fontSize: 11, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.1em' }}>
+                  <span>Hub Location</span>
+                  <span>Status</span>
+                  <span>Power Output</span>
+                  <span>Load</span>
                 </div>
-              ))}
+                {/* List items */}
+                {[
+                  { l: 'NYC 5th Ave Hub', s: 'Available', p: '350kW', ld: '12%', active: true },
+                  { l: 'NJ Turnpike Plaza', s: 'Charging', p: '150kW', ld: '84%', active: false },
+                  { l: 'Boston Seaport', s: 'Available', p: '350kW', ld: '04%', active: true },
+                  { l: 'Philly Center', s: 'Maintenance', p: '25kW', ld: '--', active: false },
+                  { l: 'D.C. Capitol Hill', s: 'Available', p: '150kW', ld: '40%', active: false }
+                ].map((st, i) => (
+                  <div key={i} style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr 1fr', padding: '24px 32px', borderBottom: i === 4 ? 'none' : '1px solid #e2e8f0', fontSize: 15, fontWeight: 700, color: '#0f172a', fontFamily: 'var(--font-display)' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                      <div style={{ width: 8, height: 8, borderRadius: '50%', background: st.s === 'Available' ? '#16a34a' : (st.s === 'Charging' ? '#334155' : '#cbd5e1') }} />
+                      {st.l}
+                    </div>
+                    <span style={{ color: st.s === 'Available' ? '#16a34a' : '#0f172a' }}>{st.s}</span>
+                    <span>{st.p}</span>
+                    <span>{st.ld}</span>
+                  </div>
+                ))}
+              </div>
             </div>
           </motion.div>
         );
@@ -172,25 +257,26 @@ const DashboardSection = () => {
   };
 
   return (
-    <section style={{ padding: '120px 0', background: '#fff', position: 'relative', overflow: 'hidden', fontFamily: 'var(--font-body)' }}>
+    <section className="py-16 md:py-24 lg:py-32" style={{ background: '#fff', position: 'relative', overflow: 'hidden', fontFamily: 'var(--font-body)' }}>
+      <style>{DASHBOARD_CSS}</style>
 
       {/* Background Frame */}
       <div className="grid-lines" style={{ position: 'absolute', inset: 0, opacity: 0.8, pointerEvents: 'none' }} />
       <div style={{ position: 'absolute', top: '20%', left: 0, right: 0, height: 1, background: '#e2e8f0', pointerEvents: 'none' }} />
 
       {/* Huge Background Text */}
-      <div style={{ position: 'absolute', bottom: '-5%', left: '0', pointerEvents: 'none', fontFamily: 'var(--font-display)', fontSize: '18vw', fontWeight: 900, color: '#f1f5f9', letterSpacing: '-0.05em', whiteSpace: 'nowrap', userSelect: 'none' }}>
+      <div style={{ position: 'absolute', bottom: '-5%', left: '0', pointerEvents: 'none', fontFamily: 'var(--font-display)', fontSize: '18vw', fontWeight: 900, color: '#f1f5f9', letterSpacing: '-0.05em', whiteSpace: 'nowrap', userSelect: 'none' }} className="hidden xl:block">
         ANALYTICS
       </div>
 
       <div style={{ maxWidth: 1280, margin: '0 auto', padding: '0 24px', position: 'relative', zIndex: 10 }}>
 
         {/* Header */}
-        <div style={{ textAlign: 'center', maxWidth: 680, margin: '0 auto 80px' }}>
+        <div style={{ textAlign: 'center', maxWidth: 680, margin: '0 auto 60px' }}>
           <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} style={{ display: 'inline-block', padding: '6px 14px', borderRadius: 99, background: '#f8fafc', border: '1px solid #16a34a', color: '#16a34a', fontSize: 11, fontWeight: 800, letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: 24 }}>
             Omnipotent Analytics
           </motion.div>
-          <motion.h2 initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(2.8rem, 5vw, 4.5rem)', fontWeight: 800, color: '#0f172a', lineHeight: 1.05, letterSpacing: '-0.03em', marginBottom: 20 }}>
+          <motion.h2 initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(2.2rem, 5vw, 4.5rem)', fontWeight: 800, color: '#0f172a', lineHeight: 1.05, letterSpacing: '-0.03em', marginBottom: 20 }}>
             Fleet-level visibility.<br />
             Zero blind spots.
           </motion.h2>
@@ -223,11 +309,11 @@ const DashboardSection = () => {
             </div>
           </div>
 
-          <div style={{ display: 'flex', height: 620 }}>
+          <div className="dash-layout">
 
             {/* Sidebar */}
-            <div style={{ width: 240, background: '#fff', borderRight: '2px solid #0f172a', padding: '32px 24px', display: 'flex', flexDirection: 'column', gap: 4 }}>
-              <p style={{ fontFamily: 'var(--font-display)', fontSize: 13, fontWeight: 800, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 16 }}>Modules</p>
+            <div className="dash-sidebar">
+              <p style={{ fontFamily: 'var(--font-display)', fontSize: 13, fontWeight: 800, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 16 }} className="sidebar-header-text">Modules</p>
               {navLinks.map(({ label, Icon }) => {
                 const isActive = activeModule === label;
                 return (
@@ -238,7 +324,7 @@ const DashboardSection = () => {
                       padding: '12px 16px', borderRadius: 12, display: 'flex', alignItems: 'center', gap: 12,
                       background: isActive ? '#0f172a' : 'transparent', color: isActive ? '#fff' : '#0f172a',
                       fontFamily: 'var(--font-display)', fontSize: 15, fontWeight: 700, cursor: 'pointer',
-                      transition: 'all 0.2s'
+                      transition: 'all 0.2s', flexShrink: 0
                     }}
                     className="sidebar-item"
                   >

@@ -220,8 +220,23 @@ const CSS = `
     .admin-hero-right { display: none !important; }
   }
   @media (max-width: 520px) {
-    .admin-stat-grid { grid-template-columns: 1fr !important; }
     .admin-hide-sm { display: none !important; }
+  }
+
+  .admin-overview-row {
+    display: flex;
+    align-items: center;
+    background: #fff;
+    border: 2px solid #0f172a;
+    border-radius: 18px;
+    padding: 16px 24px;
+    box-shadow: 4px 4px 0 #0f172a;
+    transition: transform 0.15s, box-shadow 0.15s, background-color 0.15s;
+  }
+  .admin-overview-row:hover {
+    background-color: var(--surface);
+    transform: translate(-2px, -2px);
+    box-shadow: 6px 6px 0 #0f172a;
   }
 `;
 
@@ -263,12 +278,12 @@ const Ticker = ({ items }) => (
 const StatusBadge = ({ status = 'Unavailable' }) => {
   const s = (status || '').toLowerCase();
   const map = {
-    available:  { color: '#16a34a', bg: '#f0fdf4', label: 'Available' },
-    charging:   { color: '#2563eb', bg: '#eff6ff', label: 'Charging' },
-    preparing:  { color: '#d97706', bg: '#fffbeb', label: 'Preparing' },
-    faulted:    { color: '#dc2626', bg: '#fef2f2', label: 'Faulted' },
-    unavailable:{ color: '#64748b', bg: '#f1f5f9', label: 'Unavailable' },
-    finishing:  { color: '#7c3aed', bg: '#ede9fe', label: 'Finishing' },
+    available: { color: '#16a34a', bg: '#f0fdf4', label: 'Available' },
+    charging: { color: '#2563eb', bg: '#eff6ff', label: 'Charging' },
+    preparing: { color: '#d97706', bg: '#fffbeb', label: 'Preparing' },
+    faulted: { color: '#dc2626', bg: '#fef2f2', label: 'Faulted' },
+    unavailable: { color: '#64748b', bg: '#f1f5f9', label: 'Unavailable' },
+    finishing: { color: '#7c3aed', bg: '#ede9fe', label: 'Finishing' },
   };
   const m = map[s] || map.unavailable;
   return <span className="admin-badge" style={{ color: m.color, background: m.bg, borderColor: m.color }}>{m.label}</span>;
@@ -292,6 +307,7 @@ const AddStationModal = ({ onClose, onSave, editing }) => {
   const [form, setForm] = useState({
     stationId: editing?.id || editing?.ocppStationId || '',
     name: editing?.name || '',
+    websocketUrl: editing?.websocketUrl || '',
     lat: editing?.lat || '',
     lng: editing?.lng || '',
     chargerType: editing?.chargerType || 'Type 2 AC',
@@ -300,6 +316,11 @@ const AddStationModal = ({ onClose, onSave, editing }) => {
     energyRatePerKwh: editing?.energyRatePerKwh || 12,
     availableSlots: editing?.availableSlots || 1,
     published: editing?.published !== false,
+    vendor: editing?.vendor || '',
+    model: editing?.model || '',
+    status: editing?.status || 'Available',
+    errorCode: editing?.errorCode || 'NoError',
+    isOnline: editing?.isOnline !== false,
   });
   const [saving, setSaving] = useState(false);
 
@@ -341,6 +362,12 @@ const AddStationModal = ({ onClose, onSave, editing }) => {
             placeholder="e.g. Main Street Charger" />
         </div>
 
+        <div style={fieldStyle}>
+          <label style={labelStyle}>WebSocket Connection URL</label>
+          <input className="admin-input" value={form.websocketUrl} onChange={e => setForm({ ...form, websocketUrl: e.target.value })}
+            placeholder="e.g. ws://localhost:9221/ocpp/CHARGER-001" />
+        </div>
+
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14, ...fieldStyle }}>
           <div>
             <label style={labelStyle}>Latitude</label>
@@ -368,6 +395,17 @@ const AddStationModal = ({ onClose, onSave, editing }) => {
           </div>
         </div>
 
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14, ...fieldStyle }}>
+          <div>
+            <label style={labelStyle}>Vendor</label>
+            <input className="admin-input" value={form.vendor} onChange={e => setForm({ ...form, vendor: e.target.value })} placeholder="e.g. Alfen" />
+          </div>
+          <div>
+            <label style={labelStyle}>Model</label>
+            <input className="admin-input" value={form.model} onChange={e => setForm({ ...form, model: e.target.value })} placeholder="e.g. Eve Double" />
+          </div>
+        </div>
+
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 14, ...fieldStyle }}>
           <div>
             <label style={labelStyle}>₹/Hour</label>
@@ -383,10 +421,36 @@ const AddStationModal = ({ onClose, onSave, editing }) => {
           </div>
         </div>
 
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 24 }}>
-          <input type="checkbox" checked={form.published} onChange={e => setForm({ ...form, published: e.target.checked })}
-            style={{ width: 18, height: 18, accentColor: '#16a34a' }} />
-          <span style={{ fontFamily: 'var(--display)', fontSize: 14, fontWeight: 700, color: '#0f172a' }}>Publish to users</span>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14, ...fieldStyle }}>
+          <div>
+            <label style={labelStyle}>Connector Status</label>
+            <select className="admin-input" value={form.status} onChange={e => setForm({ ...form, status: e.target.value })}>
+              <option>Available</option>
+              <option>Preparing</option>
+              <option>Charging</option>
+              <option>Faulted</option>
+              <option>Unavailable</option>
+              <option>Finishing</option>
+            </select>
+          </div>
+          <div>
+            <label style={labelStyle}>OCPP Error Code</label>
+            <input className="admin-input" value={form.errorCode} onChange={e => setForm({ ...form, errorCode: e.target.value })} placeholder="e.g. NoError" />
+          </div>
+        </div>
+
+        <div style={{ display: 'flex', gap: 24, marginBottom: 24 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+            <input type="checkbox" checked={form.published} onChange={e => setForm({ ...form, published: e.target.checked })}
+              style={{ width: 18, height: 18, accentColor: '#16a34a' }} />
+            <span style={{ fontFamily: 'var(--display)', fontSize: 14, fontWeight: 700, color: '#0f172a' }}>Publish to users</span>
+          </div>
+
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+            <input type="checkbox" checked={form.isOnline} onChange={e => setForm({ ...form, isOnline: e.target.checked })}
+              style={{ width: 18, height: 18, accentColor: '#16a34a' }} />
+            <span style={{ fontFamily: 'var(--display)', fontSize: 14, fontWeight: 700, color: '#0f172a' }}>Is Online</span>
+          </div>
         </div>
 
         <div style={{ display: 'flex', gap: 12, justifyContent: 'flex-end' }}>
@@ -453,7 +517,7 @@ const CommandCenter = ({ stations, liveChargers }) => {
 
   return (
     <div>
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20, marginBottom: 24 }}>
+      <div style={{ gap: 20, marginBottom: 24 }} className="grid grid-cols-1 md:grid-cols-2">
         <div style={{ background: '#fff', border: '2px solid #0f172a', borderRadius: 18, padding: 24, boxShadow: '6px 6px 0 #0f172a' }}>
           <h3 style={{ fontFamily: 'var(--display)', fontWeight: 800, fontSize: '1.1rem', color: '#0f172a', marginBottom: 20 }}>
             <Terminal size={18} style={{ verticalAlign: 'middle', marginRight: 8 }} />
@@ -581,7 +645,8 @@ export default function AdminDashboard() {
       const enriched = usersList.map(user => {
         const ub = bookings.filter(b => b.userId === user.id)
           .sort((a, b) => (b.timestamp?.toMillis?.() || 0) - (a.timestamp?.toMillis?.() || 0));
-        return { ...user, totalBookings: ub.length, latestBooking: ub[0] || null };
+        const totalRevenue = ub.reduce((sum, b) => sum + (b.amount || b.paidAmount || b.billTotal || b.energyCharge || 0), 0);
+        return { ...user, totalBookings: ub.length, latestBooking: ub[0] || null, totalRevenue };
       });
       const stationsList = stationsSnap.docs.map(d => ({ id: d.id, ...d.data() }));
       setStats({ revenue, energy, users: usersSnap.size, totalStations: stationsSnap.size });
@@ -680,42 +745,31 @@ export default function AdminDashboard() {
       <style>{CSS}</style>
 
       {/* ══════ HERO HEADER ══════ */}
-      <header style={{ background: '#0f172a', position: 'relative', overflow: 'hidden', paddingTop: 96, paddingBottom: 72 }}>
-        <div style={{ position: 'absolute', inset: 0, backgroundImage: 'linear-gradient(rgba(255,255,255,0.035) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.035) 1px, transparent 1px)', backgroundSize: '40px 40px' }} />
+      <header style={{ background: '#f8fafc', borderBottom: '2px solid #0f172a', position: 'relative', overflow: 'hidden', paddingTop: 96, paddingBottom: 72 }}>
+        <div style={{ position: 'absolute', inset: 0, backgroundImage: 'linear-gradient(rgba(15,23,42,0.04) 1px, transparent 1px), linear-gradient(90deg, rgba(15,23,42,0.04) 1px, transparent 1px)', backgroundSize: '40px 40px' }} />
         <div className="admin-scan-wipe" style={{ position: 'absolute', top: 0, bottom: 0, width: 2, background: 'linear-gradient(to bottom, transparent, #16a34a, transparent)', opacity: 0.45, zIndex: 1 }} />
-        <div style={{ position: 'absolute', bottom: -12, left: 0, fontFamily: 'var(--display)', fontSize: '16vw', fontWeight: 900, color: 'rgba(255,255,255,0.03)', letterSpacing: '-0.06em', userSelect: 'none', whiteSpace: 'nowrap', zIndex: 0, lineHeight: 1 }}>ADMIN</div>
+        <div style={{ position: 'absolute', bottom: -12, left: 0, fontFamily: 'var(--display)', fontSize: '16vw', fontWeight: 900, color: 'rgba(15,23,42,0.02)', letterSpacing: '-0.06em', userSelect: 'none', whiteSpace: 'nowrap', zIndex: 0, lineHeight: 1 }}>ADMIN</div>
 
-        <div style={{ maxWidth: 1280, margin: '0 auto', padding: '0 32px', position: 'relative', zIndex: 10 }}>
+        <div style={{ maxWidth: 1280, margin: '0 auto', padding: '0 32px', position: 'relative', marginTop: '40px', zIndex: 10 }}>
           <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', alignItems: 'flex-end', gap: 32 }}>
             <motion.div initial={{ opacity: 0, x: -30 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1] }}>
               {/* Status pill */}
-              <div style={{ display: 'inline-flex', alignItems: 'center', gap: 10, padding: '8px 18px', borderRadius: 99, border: '2px solid rgba(255,255,255,0.12)', background: 'rgba(255,255,255,0.06)', marginBottom: 28, backdropFilter: 'blur(12px)', boxShadow: '0 4px 12px rgba(22, 163, 74, 0.15)' }}>
+              {/* <div style={{ display: 'inline-flex', alignItems: 'center', gap: 10, padding: '8px 18px', borderRadius: 99, border: '2px solid rgba(255,255,255,0.12)', background: 'rgba(255,255,255,0.06)', marginBottom: 28, backdropFilter: 'blur(12px)', boxShadow: '0 4px 12px rgba(22, 163, 74, 0.15)' }}>
                 <span className="admin-pulse-dot" style={{ width: 8, height: 8, borderRadius: '50%', background: wsConnected ? '#16a34a' : '#ef4444', display: 'inline-block', flexShrink: 0 }} />
                 <span style={{ fontFamily: 'var(--mono)', fontSize: 10, fontWeight: 700, color: wsConnected ? '#4ade80' : '#f87171', letterSpacing: '0.14em' }}>
                   {wsConnected ? 'TELEMETRY STREAM ACTIVE' : 'TELEMETRY RECONNECTING'}
                 </span>
-              </div>
+              </div> */}
 
-              <h1 style={{ fontFamily: 'var(--display)', fontSize: 'clamp(2.4rem, 5.5vw, 4.2rem)', fontWeight: 900, color: '#fff', lineHeight: 0.96, letterSpacing: '-0.04em', margin: '0 0 20px' }}>
+              <h1 style={{ fontFamily: 'var(--display)', fontSize: 'clamp(2.4rem, 5.5vw, 4.2rem)', fontWeight: 900, color: '#0f172a', lineHeight: 0.96, letterSpacing: '-0.04em', margin: '0 0 20px' }}>
                 Admin<br />
                 <span style={{ color: '#16a34a' }}>Dashboard</span>
               </h1>
 
-              <p style={{ color: '#64748b', fontSize: '1.05rem', lineHeight: 1.65, maxWidth: 460, margin: 0 }}>
-                Full control over stations, users, live telemetry &amp; OCPP commands — unified in one terminal.
+              <p style={{ color: '#475569', fontSize: '1.05rem', lineHeight: 1.65, maxWidth: 460, margin: 0 }}>
+                Manage your EV charging network with real-time insights, station controls, user management, and live operational analytics
               </p>
 
-              {synced && (
-                <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 20 }}>
-                  <Clock size={12} color="#475569" />
-                  <span style={{ fontFamily: 'var(--mono)', fontSize: 10, color: '#475569', fontWeight: 700, letterSpacing: '0.08em' }}>
-                    LAST SYNC {synced.toLocaleTimeString()}
-                  </span>
-                  <button onClick={fetchData} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#16a34a', display: 'flex', padding: 0, marginLeft: 4 }}>
-                    <RefreshCw size={13} style={{ animation: spinning ? 'admin-spin 0.9s linear infinite' : 'none' }} />
-                  </button>
-                </div>
-              )}
             </motion.div>
 
             {/* Right: telemetry cards */}
@@ -726,15 +780,15 @@ export default function AdminDashboard() {
                 { label: 'Chargers Online', value: `${onlineCount}`, icon: Cpu, color: '#16a34a', bar: stats.totalStations > 0 ? (onlineCount / stats.totalStations * 100) : 0 },
                 { label: 'Total Stations', value: `${stats.totalStations}`, icon: Server, color: '#16a34a', bar: 100 },
               ].map((item, i) => (
-                <div key={i} style={{ background: 'rgba(255,255,255,0.06)', border: '2px solid rgba(255,255,255,0.10)', borderRadius: 18, padding: '18px 22px', backdropFilter: 'blur(16px)', minWidth: 148, boxShadow: '4px 4px 0 rgba(255,255,255,0.04)' }}>
+                <div key={i} style={{ background: '#fff', border: '2px solid #0f172a', borderRadius: 18, padding: '18px 22px', minWidth: 148, boxShadow: '4px 4px 0 #0f172a' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10 }}>
                     <item.icon size={14} color={item.color} />
-                    <span style={{ fontFamily: 'var(--mono)', fontSize: 9, fontWeight: 700, color: '#475569', letterSpacing: '0.1em', textTransform: 'uppercase' }}>{item.label}</span>
+                    <span style={{ fontFamily: 'var(--mono)', fontSize: 9, fontWeight: 700, color: '#64748b', letterSpacing: '0.1em', textTransform: 'uppercase' }}>{item.label}</span>
                   </div>
-                  <div style={{ fontFamily: 'var(--display)', fontSize: '1.5rem', fontWeight: 900, color: '#fff', marginBottom: 12 }}>{item.value}</div>
-                  <div style={{ height: 3, background: 'rgba(255,255,255,0.08)', borderRadius: 2, overflow: 'hidden' }}>
+                  <div style={{ fontFamily: 'var(--display)', fontSize: '1.5rem', fontWeight: 900, color: '#0f172a', marginBottom: 12 }}>{item.value}</div>
+                  <div style={{ height: 3, background: 'rgba(15,23,42,0.08)', borderRadius: 2, overflow: 'hidden' }}>
                     <motion.div initial={{ width: 0 }} animate={{ width: `${item.bar}%` }} transition={{ delay: 0.6 + i * 0.1, duration: 1 }}
-                       style={{ height: '100%', background: item.color, borderRadius: 2 }} />
+                      style={{ height: '100%', background: item.color, borderRadius: 2 }} />
                   </div>
                 </div>
               ))}
@@ -745,7 +799,7 @@ export default function AdminDashboard() {
       </header>
 
       {/* ══════ TICKER ══════ */}
-      <Ticker items={ticker} />
+      {/* <Ticker items={ticker} /> */}
 
       {/* ══════ TABS + MAIN CONTENT ══════ */}
       <div style={{ position: 'relative' }}>
@@ -768,10 +822,10 @@ export default function AdminDashboard() {
               {/* Stat Cards */}
               <div className="admin-stat-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 20, marginBottom: 48 }}>
                 {statCards.map(({ title, icon: Icon, color, bg, accent, to, prefix = '', suffix = '', decimals = 0 }, i) => (
-                  <motion.div key={title} className={`admin-neo-card stat-accent-${accent}`}
+                  <motion.div key={title} className={`admin-neo-card stat-accent-${accent} p-4 sm:p-6 lg:p-7`}
                     initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.1 + i * 0.08, duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
-                    style={{ borderRadius: 20, padding: '28px 26px', position: 'relative', overflow: 'hidden' }}>
+                    style={{ borderRadius: 20, position: 'relative', overflow: 'hidden' }}>
                     <div style={{ position: 'absolute', top: 0, right: 0, width: 80, height: 80, background: color, opacity: 0.06, borderRadius: '0 18px 0 80px' }} />
                     <div style={{ width: 50, height: 50, borderRadius: 14, background: bg, border: `2px solid ${color}`, display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 20, boxShadow: `3px 3px 0 ${color}` }}>
                       <Icon size={22} color={color} />
@@ -806,7 +860,7 @@ export default function AdminDashboard() {
                 <div style={{ padding: 24 }}>
                   {loading ? (
                     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(250px, 1fr))', gap: 16 }}>
-                      {[1,2,3].map(i => <div key={i} className="admin-shimmer" style={{ height: 120, borderRadius: 14 }} />)}
+                      {[1, 2, 3].map(i => <div key={i} className="admin-shimmer" style={{ height: 120, borderRadius: 14 }} />)}
                     </div>
                   ) : stations.length === 0 ? (
                     <div style={{ padding: 40, textAlign: 'center' }}>
@@ -814,27 +868,62 @@ export default function AdminDashboard() {
                       <p style={{ fontFamily: 'var(--mono)', fontSize: 11, color: '#94a3b8', fontWeight: 700 }}>NO STATIONS REGISTERED</p>
                     </div>
                   ) : (
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(250px, 1fr))', gap: 16 }}>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                      {/* Header Row */}
+                      <div className="admin-hide-sm" style={{ display: 'flex', alignItems: 'center', padding: '0 24px', marginBottom: 4 }}>
+                        <div style={{ flex: '2', fontFamily: 'var(--mono)', fontSize: 9, fontWeight: 700, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.1em' }}>CHARGER STATION</div>
+                        <div style={{ flex: '1', fontFamily: 'var(--mono)', fontSize: 9, fontWeight: 700, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.1em', display: 'flex', justifyContent: 'center' }}>CONNECTOR TYPE</div>
+                        <div style={{ flex: '1', fontFamily: 'var(--mono)', fontSize: 9, fontWeight: 700, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.1em', display: 'flex', justifyContent: 'center' }}>LIVE STATE</div>
+                        <div style={{ flex: '1', fontFamily: 'var(--mono)', fontSize: 9, fontWeight: 700, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.1em', display: 'flex', justifyContent: 'center' }}>NETWORK STATUS</div>
+                        <div style={{ width: 80 }} />
+                      </div>
+
                       {stations.slice(0, 6).map(s => {
                         const live = liveChargers.find(c => c.id === (s.ocppStationId || s.id));
                         const isOnline = live?.connected || s.isOnline;
                         return (
-                          <div key={s.id} className="admin-station-card">
-                            <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 3, background: isOnline ? '#16a34a' : '#e2e8f0', borderRadius: '16px 16px 0 0' }} />
-                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 12 }}>
-                              <div>
-                                <div style={{ fontFamily: 'var(--display)', fontWeight: 800, fontSize: 14, color: '#0f172a', marginBottom: 2 }}>
+                          <div 
+                            key={s.id} 
+                            className="admin-overview-row flex flex-col md:flex-row items-start md:items-center gap-3 md:gap-0 p-4 md:p-5"
+                          >
+                            {/* Station Info */}
+                            <div style={{ flex: '2', display: 'flex', alignItems: 'center', gap: 12 }} className="w-full">
+                              <div style={{ width: 32, height: 32, borderRadius: 8, background: '#f8fafc', border: '1.5px solid #0f172a', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                                <Cpu size={14} color="#0f172a" />
+                              </div>
+                              <div style={{ overflow: 'hidden' }}>
+                                <div style={{ fontFamily: 'var(--display)', fontWeight: 800, fontSize: 14, color: '#0f172a', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                                   {s.name || s.id}
                                 </div>
-                                <div style={{ fontFamily: 'var(--mono)', fontSize: 10, color: '#94a3b8' }}>{s.ocppStationId || s.id}</div>
+                                <div style={{ fontFamily: 'var(--mono)', fontSize: 10, color: '#64748b', marginTop: 1 }}>{s.ocppStationId || s.id}</div>
                               </div>
-                              <OnlineBadge online={isOnline} />
                             </div>
-                            <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-                              <StatusBadge status={live?.status || s.status} />
-                              <span className="admin-badge" style={{ color: '#64748b', background: '#f8fafc', borderColor: '#e2e8f0' }}>
+
+                            {/* Charger Type */}
+                            <div className="hidden md:flex" style={{ flex: '1', justifyContent: 'center' }}>
+                              <span className="admin-badge" style={{ color: '#0f172a', background: '#f8fafc', borderColor: '#0f172a', fontSize: 10 }}>
                                 {s.chargerType || 'N/A'}
                               </span>
+                            </div>
+
+                            {/* Operational Status & Connection status grouped on mobile */}
+                            <div style={{ flex: '1', display: 'flex', gap: 8 }} className="w-full md:w-auto justify-start md:justify-center">
+                              <StatusBadge status={live?.status || s.status} />
+                              <OnlineBadge online={isOnline} />
+                            </div>
+
+                            {/* Actions */}
+                            <div style={{ display: 'flex', justifyContent: 'flex-end' }} className="w-full md:w-20 md:flex-shrink-0">
+                              <button
+                                className="admin-btn admin-btn-ghost w-full md:w-auto text-center justify-center"
+                                style={{ padding: '6px 12px', borderRadius: 8, fontSize: 11, border: '1.5px solid #0f172a' }}
+                                onClick={() => {
+                                  setTab('stations');
+                                  setStationSearch(s.ocppStationId || s.id);
+                                }}
+                              >
+                                Manage
+                              </button>
                             </div>
                           </div>
                         );
@@ -997,7 +1086,7 @@ export default function AdminDashboard() {
                   <table style={{ width: '100%', borderCollapse: 'collapse' }}>
                     <thead>
                       <tr style={{ borderBottom: '2px solid #f1f5f9' }}>
-                        {['User Details', 'Role', 'Bookings', 'Wallet', 'Latest Station', 'Payment'].map(h => (
+                        {['User Details', 'Role', 'Bookings', 'Revenue', 'Latest Station', 'Payment'].map(h => (
                           <th key={h} style={{ padding: '13px 16px', fontFamily: 'var(--mono)', fontSize: 9, fontWeight: 700, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.14em', textAlign: 'left', background: '#fafafa' }}>{h}</th>
                         ))}
                       </tr>
@@ -1043,8 +1132,8 @@ export default function AdminDashboard() {
                               </span>
                             </td>
                             <td style={{ padding: '16px' }}>
-                              <span style={{ fontFamily: 'var(--display)', fontWeight: 800, fontSize: 14, color: '#0f172a' }}>
-                                ₹{(u.walletBalance || 0).toFixed(2)}
+                              <span style={{ fontFamily: 'var(--display)', fontWeight: 800, fontSize: 14, color: u.totalRevenue > 0 ? '#16a34a' : '#94a3b8' }}>
+                                ₹{(u.totalRevenue || 0).toFixed(2)}
                               </span>
                             </td>
                             <td style={{ padding: '16px' }}>

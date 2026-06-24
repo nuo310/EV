@@ -2,7 +2,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { MapContainer, TileLayer, Marker, Popup, useMapEvents, useMap } from 'react-leaflet';
 import { collection, getDocs, doc, setDoc, serverTimestamp } from 'firebase/firestore';
 import { db } from '../../lib/firebase';
-import { Plus, X, Loader2, Zap, Pencil, MapPin, Cpu, Radio, Activity, Eye } from 'lucide-react';
+import { Plus, X, Loader2, Zap, Pencil, MapPin, Cpu, Radio, Activity, Eye, Map, List } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 const fieldClass =
@@ -87,6 +87,19 @@ const EVChargingFinder = () => {
   const [stations, setStations] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [viewMode, setViewMode] = useState('list'); // 'list' or 'map'
+  const [isMinimized, setIsMinimized] = useState(false);
+  const [prevViewMode, setPrevViewMode] = useState('list');
+
+  const startMapPicking = () => {
+    setPrevViewMode(viewMode);
+    setViewMode('map');
+    setIsMinimized(true);
+    toast("Tap on the map to set the station coordinates", {
+      icon: '📍',
+      duration: 4000
+    });
+  };
   
   const defaultNewStation = () => ({
     name: '',
@@ -153,16 +166,19 @@ const EVChargingFinder = () => {
     setEditingDocId(null);
     setNewStation(defaultNewStation());
     setIsModalOpen(true);
+    setIsMinimized(false);
   };
 
   const openEditStationModal = (s) => {
     setEditingDocId(s.id);
     setNewStation(stationDocToForm(s));
     setIsModalOpen(true);
+    setIsMinimized(false);
   };
 
   const closeModal = () => {
     setIsModalOpen(false);
+    setIsMinimized(false);
     setEditingDocId(null);
     setNewStation(defaultNewStation());
   };
@@ -182,7 +198,9 @@ const EVChargingFinder = () => {
       click(e) {
         if (isModalOpen) {
           setNewStation(prev => ({ ...prev, lat: e.latlng.lat.toFixed(6), lng: e.latlng.lng.toFixed(6) }));
-          toast.success("Location captured for Ahmedabad area!");
+          setIsMinimized(false);
+          setViewMode('map');
+          toast.success("Location captured successfully!");
         }
       },
     });
@@ -240,10 +258,75 @@ const EVChargingFinder = () => {
   if (loading) return <div className="h-screen flex items-center justify-center bg-white"><Loader2 className="animate-spin text-green-500" size={40} /></div>;
 
   return (
-    <div className="flex w-full mt-16 h-[calc(100vh-64px)] overflow-hidden bg-white relative">
+    <div style={{ display: 'flex', width: '100%', height: 'calc(100vh - 110px)', marginTop: '110px', overflow: 'hidden', background: '#fff', position: 'relative' }}>
       
+      {/* Mobile view toggle button */}
+      <div 
+        className="fixed bottom-6 left-1/2 -translate-x-1/2 z-[10000] md:hidden"
+      >
+        <button
+          onClick={() => setViewMode(viewMode === 'list' ? 'map' : 'list')}
+          style={{
+            background: '#0f172a',
+            color: '#fff',
+            border: '2px solid #0f172a',
+            borderRadius: '30px',
+            padding: '12px 24px',
+            fontWeight: 800,
+            fontSize: '14px',
+            boxShadow: '0 8px 24px rgba(15, 23, 42, 0.25), 4px 4px 0 #22c55e',
+            cursor: 'pointer',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '8px',
+            whiteSpace: 'nowrap'
+          }}
+        >
+          {viewMode === 'list' ? (
+            <>
+              <Map size={16} color="#22c55e" fill="#22c55e" /> Show Map
+            </>
+          ) : (
+            <>
+              <List size={16} color="#22c55e" /> Show List
+            </>
+          )}
+        </button>
+      </div>
+
+      {/* Floating Minimize Selector Banner */}
+      {isModalOpen && isMinimized && (
+        <div className="fixed top-28 left-1/2 -translate-x-1/2 z-[10000] w-full max-w-sm px-4">
+          <div className="flex items-center justify-between gap-3 bg-slate-900 border-2 border-green-500 text-white rounded-2xl p-4 shadow-[0_8px_30px_rgba(0,0,0,0.35)]">
+            <div className="flex items-center gap-2">
+              <div className="animate-bounce">
+                <MapPin size={20} className="text-green-400 fill-green-400" />
+              </div>
+              <div>
+                <p className="text-xs font-black uppercase text-green-400 tracking-wider">Map Pin Mode</p>
+                <p className="text-[10px] text-slate-300">Tap anywhere on the map to set location</p>
+              </div>
+            </div>
+            <button
+              type="button"
+              onClick={() => {
+                setIsMinimized(false);
+                setViewMode(prevViewMode);
+              }}
+              className="px-3 py-1.5 text-[11px] font-bold bg-white text-slate-900 rounded-lg hover:bg-slate-100 transition-colors"
+            >
+              Cancel
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* SIDEBAR: Floating look with top/left margins */}
-      <aside className="w-80 md:w-96 flex flex-col border border-slate-200 z-10 bg-white shrink-0 mt-4 ml-4 mb-4 rounded-3xl shadow-xl overflow-hidden">
+      <aside className={`flex flex-col border border-slate-200 z-10 bg-white shrink-0 shadow-xl overflow-hidden ${
+        viewMode === 'list' 
+          ? 'w-full h-full mt-0 ml-0 mb-0 rounded-none border-none' 
+          : 'hidden md:flex md:w-96 md:mt-4 md:ml-4 md:mb-4 md:rounded-3xl'
+      } md:w-96 md:mt-4 md:ml-4 md:mb-4 md:rounded-3xl md:border md:shadow-xl`}>
         <div className="p-6 border-b flex justify-between items-center bg-white">
           <div>
             <h2 className="text-xl font-bold text-slate-800 tracking-tight">Stations</h2>
@@ -299,7 +382,7 @@ const EVChargingFinder = () => {
       </aside>
 
       {/* WHITE MINIMALIST MAP */}
-      <main className="flex-1 relative z-0">
+      <main className={`flex-1 relative z-0 ${viewMode === 'map' ? 'block' : 'hidden md:block'}`}>
         <MapContainer center={[23.0225, 72.5714]} zoom={12} style={{ height: '100%', width: '100%' }}>
           <TileLayer 
             url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png" 
@@ -307,6 +390,22 @@ const EVChargingFinder = () => {
           />
           <MapEvents />
           <MyLocationMarker />
+          {/* New / Edited Station temporary selection marker */}
+          {isModalOpen && isValidLatLng(newStation.lat, newStation.lng) && (
+            <Marker 
+              position={[parseFloat(newStation.lat), parseFloat(newStation.lng)]} 
+              icon={createIcon('#3b82f6')}
+            >
+              <Popup>
+                <div className="p-1 text-center min-w-[140px]">
+                  <p className="font-bold text-slate-900 text-xs">Selected Location</p>
+                  <p className="text-[10px] text-slate-500 font-mono mt-0.5">
+                    {parseFloat(newStation.lat).toFixed(6)}, {parseFloat(newStation.lng).toFixed(6)}
+                  </p>
+                </div>
+              </Popup>
+            </Marker>
+          )}
           {stations
             .map((s) => ({ ...s, lat: toFiniteNumber(s.lat), lng: toFiniteNumber(s.lng) }))
             .filter((s) => isValidLatLng(s.lat, s.lng))
@@ -330,7 +429,7 @@ const EVChargingFinder = () => {
         </MapContainer>
       </main>
 
-{isModalOpen && (
+{isModalOpen && !isMinimized && (
   <div className="fixed inset-0 z-[9999] flex items-end justify-center sm:items-center bg-slate-900/50 backdrop-blur-[2px] p-0 sm:p-4">
     <div
       className="flex h-[min(92vh,56rem)] w-full max-w-xl flex-col overflow-hidden rounded-t-3xl border-2 border-slate-900 bg-white shadow-[8px_8px_0_0_rgba(212,175,55,0.25)] sm:rounded-3xl sm:h-[min(90vh,52rem)]"
@@ -487,11 +586,23 @@ const EVChargingFinder = () => {
             </div>
 
             <div className={sectionShell}>
-              <h3 className={sectionTitle}>
-                <MapPin className="h-4 w-4 text-green-600" strokeWidth={2.5} />
-                Map location
-              </h3>
-              <p className="-mt-2 mb-3 text-[11px] text-slate-500">Click the map behind this dialog (or type decimals below).</p>
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-3">
+                <h3 className="flex items-center gap-2 text-sm font-bold text-slate-900">
+                  <MapPin className="h-4 w-4 text-green-600" strokeWidth={2.5} />
+                  Map location
+                </h3>
+                <button
+                  type="button"
+                  onClick={startMapPicking}
+                  className="flex items-center justify-center gap-1.5 px-3 py-1.5 text-xs font-bold text-slate-700 bg-slate-100 hover:bg-slate-200 border border-slate-200 rounded-xl transition-all cursor-pointer shadow-sm"
+                >
+                  <MapPin size={12} className="text-green-600 fill-green-600/20" />
+                  Pick location on map
+                </button>
+              </div>
+              <p className="-mt-2 mb-3 text-[11px] text-slate-500">
+                Enter coordinates below, or click the button above to pick a point directly on the map.
+              </p>
               <div className="grid gap-4 sm:grid-cols-2">
                 <div>
                   <label className={labelClass} htmlFor="st-lat">Latitude</label>

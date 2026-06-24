@@ -3,7 +3,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { Calendar, Activity, Zap, ArrowRight, Radio, Cpu } from 'lucide-react';
 import { motion } from 'framer-motion';
 // Switched to onSnapshot for real-time updates
-import { collection, query, where, onSnapshot } from 'firebase/firestore'; 
+import { collection, query, where, onSnapshot } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 
 /* ─────────────────────────────────────────────────────────
@@ -93,8 +93,8 @@ const StatCard = ({ icon, label, value, accent = false, delay = 0 }) => (
     initial={{ opacity: 0, y: 16 }}
     animate={{ opacity: 1, y: 0 }}
     transition={{ delay, duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-    className={accent ? 'hard-card-dark' : 'hard-card'}
-    style={{ padding: '24px 28px', display: 'flex', flexDirection: 'column', gap: 14 }}
+    className={`${accent ? 'hard-card-dark' : 'hard-card'} p-4 sm:p-6`}
+    style={{ display: 'flex', flexDirection: 'column', gap: 12 }}
   >
     <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
       <div style={{
@@ -125,9 +125,9 @@ const BookingCard = ({ booking, idx }) => {
   const st = statusStyle(booking.status || booking.bookingStatus); // Support both status naming conventions
   const dateStr = booking.createdAt?.seconds
     ? new Date(booking.createdAt.seconds * 1000).toLocaleString('en-IN', {
-        day: '2-digit', month: 'short', year: 'numeric',
-        hour: '2-digit', minute: '2-digit',
-      })
+      day: '2-digit', month: 'short', year: 'numeric',
+      hour: '2-digit', minute: '2-digit',
+    })
     : 'Unknown Date';
 
   return (
@@ -135,8 +135,7 @@ const BookingCard = ({ booking, idx }) => {
       initial={{ opacity: 0, scale: 0.96 }}
       animate={{ opacity: 1, scale: 1 }}
       transition={{ delay: idx * 0.055, duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
-      className="booking-card"
-      style={{ padding: '24px' }}
+      className="booking-card p-4 sm:p-6"
     >
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 20 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
@@ -283,6 +282,7 @@ const Dashboard = () => {
           <div style={{
             display: 'inline-flex', alignItems: 'center', gap: 10,
             padding: '7px 16px', borderRadius: 99,
+            margin: '10px',
             background: '#f8fafc', border: '2px solid #0f172a', marginBottom: 20,
           }}>
             <div style={{
@@ -303,23 +303,21 @@ const Dashboard = () => {
           </h1>
         </motion.div>
 
-        <div style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))',
-          gap: 20, marginBottom: 48,
-        }}>
-          <StatCard icon={<Activity />} label="Total Trips" value={bookings.length} delay={0.1} />
-          <StatCard icon={<Zap />}      label="Credits Spent" value={`₹${totalSpent}`} accent delay={0.18} />
-          <StatCard icon={<Radio />}    label="Active Now"   value={bookings.filter(b => (b.status || b.bookingStatus)?.toLowerCase() === 'active').length} delay={0.26} />
-          <StatCard icon={<Cpu />}      label="Completed"      value={bookings.filter(b => (b.status || b.bookingStatus)?.toLowerCase() === 'completed').length} delay={0.34} />
+        <div 
+          style={{ gap: 16, marginBottom: 48 }}
+          className="grid grid-cols-2 md:grid-cols-4"
+        >
+          <StatCard icon={<Activity />} label="Total Charge" value={bookings.length} delay={0.1} />
+          <StatCard icon={<Zap />} label="Credits Spent" value={`₹${totalSpent}`} delay={0.18} />
+          <StatCard icon={<Radio />} label="Active Now" value={bookings.filter(b => (b.status || b.bookingStatus)?.toLowerCase() === 'active').length} delay={0.26} />
+          <StatCard icon={<Cpu />} label="Completed" value={bookings.filter(b => (b.status || b.bookingStatus)?.toLowerCase() === 'completed').length} delay={0.34} />
         </div>
 
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2, duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
-          className="hard-card"
-          style={{ padding: '36px 36px 40px' }}
+          className="hard-card p-5 sm:p-8"
         >
           <div style={{
             display: 'flex', alignItems: 'center', justifyContent: 'space-between',
@@ -349,11 +347,7 @@ const Dashboard = () => {
           </div>
 
           {bookings.length > 0 ? (
-            <div style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))',
-              gap: 20,
-            }}>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
               {bookings.map((booking, idx) => (
                 <BookingCard key={booking.id} booking={booking} idx={idx} />
               ))}

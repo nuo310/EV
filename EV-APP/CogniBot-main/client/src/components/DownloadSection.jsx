@@ -15,8 +15,8 @@ const LiveCounter = () => {
   }, []);
   return (
     <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 20px', borderRadius: 12, background: '#f8fafc', border: '1px solid #e2e8f0' }}>
-       <div style={{ width: 8, height: 8, borderRadius: '50%', background: '#16a34a', boxShadow: '0 0 12px rgba(22,163,74,0.4)' }} />
-       <span style={{ fontSize: 13, fontWeight: 800, fontFamily: 'monospace', letterSpacing: '0.05em' }}>{count.toLocaleString()} ACTIVE_DRIVERS</span>
+      <div style={{ width: 8, height: 8, borderRadius: '50%', background: '#16a34a', boxShadow: '0 0 12px rgba(22,163,74,0.4)' }} />
+      <span style={{ fontSize: 13, fontWeight: 800, fontFamily: 'monospace', letterSpacing: '0.05em' }}>{count.toLocaleString()} ACTIVE_DRIVERS</span>
     </div>
   );
 };
@@ -47,114 +47,117 @@ const DownloadSection = () => {
   }, []);
 
   return (
-    <section style={{ padding: '160px 0', background: '#fff', position: 'relative', overflow: 'hidden', fontFamily: 'var(--font-body)' }}>
-      
+    <section className="py-16 md:py-24 lg:py-32" style={{ background: '#fff', position: 'relative', overflow: 'hidden', fontFamily: 'var(--font-body)' }}>
+
       {/* Background Frame Architecture */}
       <div className="grid-lines" style={{ position: 'absolute', inset: 0, opacity: 0.6, pointerEvents: 'none' }} />
       <div style={{ position: 'absolute', top: '15%', left: 0, right: 0, height: 1, background: '#e2e8f0' }} />
       <div style={{ position: 'absolute', bottom: '15%', left: 0, right: 0, height: 1, background: '#e2e8f0' }} />
 
       {/* Decorative Rotating Tech Hub */}
-      <div style={{ position: 'absolute', bottom: '-15%', left: '50%', transform: 'translateX(-50%)', width: 1000, height: 1000, pointerEvents: 'none', opacity: 0.1 }}>
+      <div style={{ position: 'absolute', bottom: '-15%', left: '50%', transform: 'translateX(-50%)', width: 1000, height: 1000, pointerEvents: 'none', opacity: 0.1 }} className="hidden md:block">
         <div className="animate-spin-slow" style={{ position: 'absolute', width: '100%', height: '100%', borderRadius: '50%', border: '4px dashed #0f172a' }} />
       </div>
 
       <div style={{ maxWidth: 1280, margin: '0 auto', padding: '0 24px', position: 'relative', zIndex: 10 }}>
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 80, alignItems: 'center' }}>
-          
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20 items-center">
+
           {/* Left: Text & UI */}
           <motion.div initial={{ opacity: 0, x: -40 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }}>
-            <div style={{ display: 'inline-flex', padding: '8px 16px', borderRadius: 99, background: '#f8fafc', border: '2px solid #16a34a', color: '#16a34a', fontSize: 11, fontWeight: 900, letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: 32, boxShadow: '4px 4px 0 #16a34a' }}>
+            <div style={{ display: 'inline-flex', padding: '8px 16px', borderRadius: 99, background: '#f8fafc', border: '2px solid #16a34a', color: '#16a34a', fontSize: 11, fontWeight: 900, letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: 24, boxShadow: '4px 4px 0 #16a34a' }}>
               Terminal Available
             </div>
-            <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(3rem, 6vw, 5rem)', fontWeight: 800, color: '#0f172a', lineHeight: 1, letterSpacing: '-0.04em', marginBottom: 24 }}>
-              System Terminal<br/>
+            <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(2.2rem, 5vw, 4.5rem)', fontWeight: 800, color: '#0f172a', lineHeight: 1, letterSpacing: '-0.04em', marginBottom: 20 }}>
+              System Terminal<br />
               <span style={{ color: '#16a34a' }}>In Your Pocket.</span>
             </h2>
-            <p style={{ fontSize: '1.25rem', color: '#64748b', fontWeight: 600, lineHeight: 1.5, maxWidth: 480, marginBottom: 48 }}>
+            <p style={{ fontSize: '1.15rem', color: '#64748b', fontWeight: 600, lineHeight: 1.5, maxWidth: 480, marginBottom: 36 }}>
               Connect instantly, monitor precisely, and pay without friction. The entire infrastructure is localized for your mobile experience.
             </p>
 
             {/* Store Buttons with Hover QR Reveal */}
-            <div style={{ display: 'flex', gap: 20, marginBottom: 48 }}>
+            <div className="flex flex-wrap gap-4 mb-10">
               {['App Store', 'Google Play'].map((store, i) => (
                 <button
                   key={i}
                   onMouseEnter={() => setShowQR(store)}
                   onMouseLeave={() => setShowQR(null)}
                   style={{
-                    display: 'flex', alignItems: 'center', gap: 14,
-                    background: i === 0 ? '#0f172a' : '#fff', 
+                    display: 'flex', alignItems: 'center', gap: 10,
+                    background: i === 0 ? '#0f172a' : '#fff',
                     color: i === 0 ? '#fff' : '#0f172a',
-                    padding: '18px 36px', borderRadius: 16,
+                    padding: '8px 18px', borderRadius: 12,
                     border: '2px solid #0f172a', cursor: 'pointer',
-                    boxShadow: `8px 8px 0 ${i === 0 ? '#16a34a' : '#0f172a'}`,
+                    boxShadow: `5px 5px 0 ${i === 0 ? '#16a34a' : '#0f172a'}`,
                     transition: 'all 0.2s cubic-bezier(0.16, 1, 0.3, 1)',
-                    position: 'relative'
+                    position: 'relative',
+                    flex: '1',
+                    minWidth: '140px'
                   }}
+                  className="sm:flex-initial"
                 >
-                  {i === 0 ? <Smartphone size={24} /> : <PlayCircle size={24} color="#16a34a" />}
+                  {i === 0 ? <Smartphone size={20} /> : <PlayCircle size={20} color="#16a34a" />}
                   <div style={{ textAlign: 'left' }}>
-                    <span style={{ display: 'block', fontSize: 10, fontWeight: 800, opacity: 0.6 }}>{i === 0 ? 'Download on' : 'Get it on'}</span>
-                    <span style={{ fontFamily: 'var(--font-display)', fontSize: 20, fontWeight: 800 }}>{store}</span>
+                    <span style={{ display: 'block', fontSize: 9, fontWeight: 800, opacity: 0.6 }}>{i === 0 ? 'Download on' : 'Get it on'}</span>
+                    <span style={{ fontFamily: 'var(--font-display)', fontSize: 15, fontWeight: 800 }}>{store}</span>
                   </div>
                 </button>
               ))}
             </div>
 
-            <LiveCounter />
+            {/* <LiveCounter /> */}
           </motion.div>
 
           {/* Right: 3D ACTION PHONE & QR HUB */}
-          <div style={{ position: 'relative', height: 700, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            
+          <div style={{ position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center' }} className="h-[520px] md:h-[600px] lg:h-[700px]">
+
             {/* Phone Shadow Base */}
             <motion.div style={{ position: 'absolute', width: 340, height: 20, background: 'rgba(0,0,0,0.1)', filter: 'blur(32px)', borderRadius: '50%', bottom: 40 }} />
 
-            <motion.div style={{ rotateX, rotateY, x: floatX, y: floatY, transformStyle: 'preserve-3d', transformPerspective: 1200, position: 'relative' }}>
-               {/* 3D Phone Shell */}
-               <div style={{ width: 340, height: 680, borderRadius: 52, border: '16px solid #0f172a', background: '#0f172a', boxShadow: '24px 24px 0 rgba(15,23,42,0.05)', overflow: 'hidden' }}>
-                  <div className="grid-lines" style={{ position: 'absolute', inset: 0, opacity: 0.3 }} />
-                  <div style={{ width: '100%', height: '100%', background: '#fff', borderRadius: 36, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: 40, textAlign: 'center' }}>
-                    <div style={{ width: 80, height: 80, borderRadius: 20, background: '#16a34a', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 24, boxShadow: '8px 8px 0 #0f172a' }}>
-                      <Zap size={40} color="#fff" fill="#fff" />
-                    </div>
-                    <h3 style={{ fontFamily: 'var(--font-display)', fontSize: 32, fontWeight: 800, margin: '0 0 12px' }}>EV Charge</h3>
-                    <p style={{ color: '#64748b', fontWeight: 600 }}>v1.0.42 STABLE_RELEASE</p>
-                    
-                    <div style={{ marginTop: 60, width: '100%', height: 4, background: '#f1f5f9', borderRadius: 2 }}>
-                       <motion.div animate={{ width: ['0%', '100%', '0%'] }} transition={{ duration: 3, repeat: Infinity }} style={{ height: '100%', background: '#16a34a' }} />
-                    </div>
+            <motion.div style={{ rotateX, rotateY, x: floatX, y: floatY, transformStyle: 'preserve-3d', transformPerspective: 1200, position: 'relative' }} className="scale-[0.75] md:scale-90 lg:scale-100">
+              {/* 3D Phone Shell */}
+              <div style={{ width: 340, height: 680, borderRadius: 52, border: '16px solid #0f172a', background: '#0f172a', boxShadow: '24px 24px 0 rgba(15,23,42,0.05)', overflow: 'hidden' }}>
+                <div className="grid-lines" style={{ position: 'absolute', inset: 0, opacity: 0.3 }} />
+                <div style={{ width: '100%', height: '100%', background: '#fff', borderRadius: 36, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: 40, textAlign: 'center' }}>
+                  <div style={{ width: 80, height: 80, borderRadius: 20, background: '#16a34a', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 24, boxShadow: '8px 8px 0 #0f172a' }}>
+                    <Zap size={40} color="#fff" fill="#fff" />
                   </div>
-               </div>
+                  <h3 style={{ fontFamily: 'var(--font-display)', fontSize: 32, fontWeight: 800, margin: '0 0 12px' }}>EV Charge</h3>
+                  <p style={{ color: '#64748b', fontWeight: 600 }}>v1.0.42 STABLE_RELEASE</p>
 
-               {/* QR CODE OVERLAY (Activates on Button Hover) */}
-               <AnimatePresence>
-                 {showQR && (
-                   <motion.div
-                     initial={{ opacity: 0, scale: 0.8, x: 100 }}
-                     animate={{ opacity: 1, scale: 1, x: 140 }}
-                     exit={{ opacity: 0, scale: 0.8, x: 100 }}
-                     style={{ position: 'absolute', top: '20%', zIndex: 100 }}
-                   >
-                      <div className="glass-card" style={{ padding: 24, borderRadius: 24, textAlign: 'center', minWidth: 200, border: '3px solid #0f172a' }}>
-                         <div style={{ position: 'relative', width: 160, height: 160, background: '#fff', padding: 8, border: '2px solid #0f172a', borderRadius: 12, marginBottom: 16 }}>
-                            <QrCode size={144} color="#0f172a" />
-                             <div className="animate-scan" style={{ position: 'absolute', left: 0, right: 0, height: 2, background: '#D4AF37', boxShadow: '0 0 12px #D4AF37', zIndex: 10 }} />
-                         </div>
-                         <span style={{ fontSize: 11, fontWeight: 900, letterSpacing: '0.1em' }}>SCAN FOR {showQR.toUpperCase()}</span>
+                  <div style={{ marginTop: 60, width: '100%', height: 4, background: '#f1f5f9', borderRadius: 2 }}>
+                    <motion.div animate={{ width: ['0%', '100%', '0%'] }} transition={{ duration: 3, repeat: Infinity }} style={{ height: '100%', background: '#16a34a' }} />
+                  </div>
+                </div>
+              </div>
+
+              {/* QR CODE OVERLAY (Activates on Button Hover) */}
+              <AnimatePresence>
+                {showQR && (
+                  <motion.div
+                    initial={{ opacity: 0, scale: 0.8, x: 100 }}
+                    animate={{ opacity: 1, scale: 1, x: 140 }}
+                    exit={{ opacity: 0, scale: 0.8, x: 100 }}
+                    style={{ position: 'absolute', top: '20%', zIndex: 100 }}
+                  >
+                    <div className="glass-card" style={{ padding: 24, borderRadius: 24, textAlign: 'center', minWidth: 200, border: '3px solid #0f172a' }}>
+                      <div style={{ position: 'relative', width: 160, height: 160, background: '#fff', padding: 8, border: '2px solid #0f172a', borderRadius: 12, marginBottom: 16 }}>
+                        <QrCode size={144} color="#0f172a" />
+                        <div className="animate-scan" style={{ position: 'absolute', left: 0, right: 0, height: 2, background: '#D4AF37', boxShadow: '0 0 12px #D4AF37', zIndex: 10 }} />
                       </div>
-                   </motion.div>
-                 )}
-               </AnimatePresence>
+                      <span style={{ fontSize: 11, fontWeight: 900, letterSpacing: '0.1em' }}>SCAN FOR {showQR.toUpperCase()}</span>
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
 
-               {/* System Status Tag (Floating) */}
-               <motion.div style={{ position: 'absolute', left: '-6rem', bottom: '8rem', zIndex: 50 }}>
-                   <div className="glass-card" style={{ padding: '12px 20px', borderRadius: 16, display: 'flex', alignItems: 'center', gap: 10 }}>
-                      <Globe size={18} color="#D4AF37" />
-                     <span style={{ fontSize: 13, fontWeight: 800 }}>GLOBALSYNC_ACTIVE</span>
-                  </div>
-               </motion.div>
+              {/* System Status Tag (Floating) */}
+              <motion.div style={{ position: 'absolute', left: '-6rem', bottom: '8rem', zIndex: 50 }} className="hidden lg:block">
+                <div className="glass-card" style={{ padding: '12px 20px', borderRadius: 16, display: 'flex', alignItems: 'center', gap: 10 }}>
+                  <Globe size={18} color="#D4AF37" />
+                  <span style={{ fontSize: 13, fontWeight: 800 }}>GLOBALSYNC_ACTIVE</span>
+                </div>
+              </motion.div>
             </motion.div>
           </div>
 

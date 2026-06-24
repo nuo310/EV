@@ -2,7 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { Menu, X, Zap, ChevronRight, Activity, User as UserIcon, LogOut } from 'lucide-react';
 import { motion, AnimatePresence, useScroll, useSpring } from 'framer-motion';
 import { useAuth } from '../contexts/AuthContext';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
+import { collection, getDocs } from 'firebase/firestore';
+import { db } from '../lib/firebase';
 
 const Navbar = () => {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -11,6 +13,29 @@ const Navbar = () => {
   const [hoveredLink, setHoveredLink] = useState(null);
   const { currentUser, logout } = useAuth();
   const navigate = useNavigate();
+  const { pathname } = useLocation();
+
+  const handleNavClick = (link) => {
+    if (link.isRoute) {
+      navigate(link.href);
+    } else if (link.href.startsWith('/#')) {
+      const targetId = link.href.substring(2);
+      if (pathname === '/') {
+        const el = document.getElementById(targetId);
+        if (el) {
+          el.scrollIntoView({ behavior: 'smooth' });
+        }
+      } else {
+        navigate('/');
+        setTimeout(() => {
+          const el = document.getElementById(targetId);
+          if (el) {
+            el.scrollIntoView({ behavior: 'smooth' });
+          }
+        }, 150);
+      }
+    }
+  };
   
   const { scrollYProgress } = useScroll();
   const scaleX = useSpring(scrollYProgress, { stiffness: 100, damping: 30, restDelta: 0.001 });
@@ -22,6 +47,26 @@ const Navbar = () => {
   }, []);
 
   const isAdmin = currentUser?.profile?.role === 'admin';
+  const [revenue, setRevenue] = useState(0);
+
+  useEffect(() => {
+    if (isAdmin && profileOpen) {
+      const fetchRevenue = async () => {
+        try {
+          const bookingsSnap = await getDocs(collection(db, 'bookings'));
+          let totalRevenue = 0;
+          bookingsSnap.forEach(d => {
+            const data = d.data();
+            totalRevenue += data.amount || data.paidAmount || data.billTotal || data.energyCharge || 0;
+          });
+          setRevenue(totalRevenue);
+        } catch (err) {
+          console.error("Error fetching admin revenue in navbar:", err);
+        }
+      };
+      fetchRevenue();
+    }
+  }, [isAdmin, profileOpen]);
 
   // Dynamic Links based on role
   const navLinks = currentUser ? [
@@ -31,7 +76,8 @@ const Navbar = () => {
       href: isAdmin ? '/deploy-charger' : '/find-charger', 
       isRoute: true 
     },
-    { name: 'My Profile', href: '/profile', isRoute: true },
+    ...(!isAdmin ? [{ name: 'My Profile', href: '/profile', isRoute: true }] : []),
+    { name: 'How It Works', href: '/#how-it-works' },
   ] : [
     { name: 'About App', href: '/#features' },
     { name: 'How It Works', href: '/#how-it-works' },
@@ -85,12 +131,13 @@ const Navbar = () => {
           </a>
         </motion.div>
 
-        <nav style={{ display: 'flex', alignItems: 'center', gap: 40 }} className="hidden-mobile" onMouseLeave={() => setHoveredLink(null)}>
+        {/* Desktop Navigation */}
+        <nav style={{ gap: 40 }} className="hidden md:flex items-center" onMouseLeave={() => setHoveredLink(null)}>
           <div style={{ display: 'flex', gap: 8, position: 'relative' }}>
             {navLinks.map((link) => (
               <button
                 key={link.name}
-                onClick={() => navigate(link.href)}
+                onClick={() => handleNavClick(link)}
                 onMouseEnter={() => setHoveredLink(link.name)}
                 style={{
                   fontFamily: 'var(--font-body)', fontSize: 14, fontWeight: 700, color: hoveredLink === link.name ? '#0f172a' : '#475569',
@@ -136,10 +183,17 @@ const Navbar = () => {
                       >
                          <p style={{ margin: 0, fontSize: 12, fontWeight: 800, color: '#94a3b8', textTransform: 'uppercase' }}>Signed in as</p>
                          <p style={{ margin: 0, fontSize: 15, fontWeight: 700, color: '#0f172a' }}>{currentUser.displayName || currentUser.email}</p>
-                         <div style={{ marginTop: 8, display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#fffbeb', padding: '8px 12px', borderRadius: 12, border: '1px solid rgba(212,175,55,0.2)' }}>
-                           <span style={{ fontSize: 12, fontWeight: 700, color: '#D4AF37' }}>Wallet</span>
-                           <span style={{ fontSize: 14, fontWeight: 900, color: '#AA7C11' }}>₹{(currentUser.profile?.walletBalance || 0).toFixed(2)}</span>
-                         </div>
+                         {isAdmin ? (
+                           <div style={{ marginTop: 8, display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#f0fdf4', padding: '8px 12px', borderRadius: 12, border: '1px solid rgba(22, 163, 74, 0.2)' }}>
+                             <span style={{ fontSize: 12, fontWeight: 700, color: '#16a34a' }}>Revenue</span>
+                             <span style={{ fontSize: 14, fontWeight: 900, color: '#15803d' }}>₹{revenue.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                           </div>
+                         ) : (
+                           <div style={{ marginTop: 8, display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#fffbeb', padding: '8px 12px', borderRadius: 12, border: '1px solid rgba(212,175,55,0.2)' }}>
+                             <span style={{ fontSize: 12, fontWeight: 700, color: '#D4AF37' }}>Wallet</span>
+                             <span style={{ fontSize: 14, fontWeight: 900, color: '#AA7C11' }}>₹{(currentUser.profile?.walletBalance || 0).toFixed(2)}</span>
+                           </div>
+                         )}
                       </div>
 
                       <button 
@@ -159,12 +213,135 @@ const Navbar = () => {
                   )}
                 </AnimatePresence>
               </div>
-            ) : (
-              /* ... Log In / Sign Up buttons remain same ... */
-              null
-            )}
+            ) : null}
           </div>
         </nav>
+
+        {/* Mobile Navigation controls */}
+        <div className="flex md:hidden items-center gap-3">
+          {currentUser && (
+            <div style={{ position: 'relative' }}>
+              <div onClick={() => { setProfileOpen(!profileOpen); setMobileMenuOpen(false); }} style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '6px 12px', background: '#f1f5f9', borderRadius: 20, cursor: 'pointer', border: '1px solid #e2e8f0' }}>
+                <UserIcon size={14} color="#475569" />
+                <span style={{ fontSize: 12, fontWeight: 800, color: '#0f172a' }}>
+                  {(currentUser.displayName || currentUser.email.split('@')[0]).substring(0, 10)}
+                </span>
+              </div>
+              <AnimatePresence>
+                {profileOpen && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                    transition={{ duration: 0.15 }}
+                    style={{
+                      position: 'absolute', top: 45, right: 0, width: 240,
+                      background: '#fff', borderRadius: 20, border: '2px solid #0f172a',
+                      boxShadow: '8px 8px 0 rgba(15, 23, 42, 0.08)', padding: 12, zIndex: 110,
+                      display: 'flex', flexDirection: 'column', gap: 10, pointerEvents: 'auto'
+                    }}
+                  >
+                    <div 
+                      onClick={() => { setProfileOpen(false); navigate('/profile'); }}
+                      style={{ padding: '6px', borderBottom: '1px solid #e2e8f0', marginBottom: 2, cursor: 'pointer', borderRadius: 10 }}
+                    >
+                       <p style={{ margin: 0, fontSize: 10, fontWeight: 800, color: '#94a3b8', textTransform: 'uppercase' }}>Signed in as</p>
+                       <p style={{ margin: 0, fontSize: 13, fontWeight: 700, color: '#0f172a', overflow: 'hidden', textOverflow: 'ellipsis' }}>{currentUser.displayName || currentUser.email}</p>
+                       {isAdmin ? (
+                         <div style={{ marginTop: 6, display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#f0fdf4', padding: '6px 10px', borderRadius: 10, border: '1px solid rgba(22, 163, 74, 0.2)' }}>
+                           <span style={{ fontSize: 10, fontWeight: 700, color: '#16a34a' }}>Revenue</span>
+                           <span style={{ fontSize: 12, fontWeight: 900, color: '#15803d' }}>₹{revenue.toLocaleString('en-IN', { minimumFractionDigits: 1, maximumFractionDigits: 1 })}</span>
+                         </div>
+                       ) : (
+                         <div style={{ marginTop: 6, display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#fffbeb', padding: '6px 10px', borderRadius: 10, border: '1px solid rgba(212,175,55,0.2)' }}>
+                           <span style={{ fontSize: 10, fontWeight: 700, color: '#D4AF37' }}>Wallet</span>
+                           <span style={{ fontSize: 12, fontWeight: 900, color: '#AA7C11' }}>₹{(currentUser.profile?.walletBalance || 0).toFixed(2)}</span>
+                         </div>
+                       )}
+                    </div>
+
+                    <button 
+                      onClick={() => { setProfileOpen(false); navigate(isAdmin ? '/admin' : '/dashboard'); }}
+                      style={{ border: 'none', background: '#f8fafc', padding: '8px', borderRadius: 10, fontWeight: 700, color: '#0f172a', cursor: 'pointer', textAlign: 'left', display: 'flex', alignItems: 'center', gap: 6, fontSize: 12 }}
+                    >
+                       <Activity size={14} /> {isAdmin ? 'Admin' : 'Dashboard'}
+                    </button>
+
+                    <button 
+                      onClick={async () => { setProfileOpen(false); await logout(); navigate('/'); }}
+                      style={{ border: 'none', background: '#fee2e2', padding: '8px', borderRadius: 10, fontWeight: 800, color: '#dc2626', cursor: 'pointer', textAlign: 'left', display: 'flex', alignItems: 'center', gap: 6, fontSize: 12 }}
+                    >
+                       <LogOut size={14} /> Sign Out
+                    </button>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+          )}
+
+          <button
+            onClick={() => { setMobileMenuOpen(!mobileMenuOpen); setProfileOpen(false); }}
+            style={{
+              width: 38, height: 38, borderRadius: 10, background: '#fff',
+              border: '2px solid #0f172a', display: 'flex', alignItems: 'center', justifyContent: 'center',
+              cursor: 'pointer', boxShadow: '3px 3px 0 #0f172a'
+            }}
+          >
+            {mobileMenuOpen ? <X size={18} color="#0f172a" /> : <Menu size={18} color="#0f172a" />}
+          </button>
+        </div>
+
+        {/* Mobile Dropdown Panel */}
+        <AnimatePresence>
+          {mobileMenuOpen && (
+            <motion.div
+              initial={{ opacity: 0, y: -20, height: 0 }}
+              animate={{ opacity: 1, y: 0, height: 'auto' }}
+              exit={{ opacity: 0, y: -20, height: 0 }}
+              transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
+              style={{
+                position: 'absolute', top: '100%', left: 0, right: 0,
+                background: '#fff', borderRadius: 20, border: '2px solid #0f172a',
+                boxShadow: '10px 10px 0 rgba(15, 23, 42, 0.08)', padding: '20px 24px',
+                display: 'flex', flexDirection: 'column', gap: 14, zIndex: 90, marginTop: 12,
+                pointerEvents: 'auto', overflow: 'hidden'
+              }}
+            >
+              {navLinks.map((link) => (
+                <button
+                  key={link.name}
+                  onClick={() => {
+                    setMobileMenuOpen(false);
+                    handleNavClick(link);
+                  }}
+                  style={{
+                    fontFamily: 'var(--font-body)', fontSize: 15, fontWeight: 800, color: '#0f172a',
+                    background: 'transparent', border: 'none', cursor: 'pointer',
+                    textAlign: 'left', padding: '10px 0', borderBottom: '1px solid #f1f5f9'
+                  }}
+                >
+                  {link.name}
+                </button>
+              ))}
+              {currentUser && (
+                <button
+                  onClick={async () => {
+                    setMobileMenuOpen(false);
+                    await logout();
+                    navigate('/');
+                  }}
+                  style={{
+                    fontFamily: 'var(--font-body)', fontSize: 15, fontWeight: 800, color: '#dc2626',
+                    background: 'transparent', border: 'none', cursor: 'pointer',
+                    textAlign: 'left', padding: '10px 0', display: 'flex', alignItems: 'center', gap: 8
+                  }}
+                >
+                  <LogOut size={16} /> Sign Out
+                </button>
+              )}
+            </motion.div>
+          )}
+        </AnimatePresence>
       </motion.div>
     </header>
   );

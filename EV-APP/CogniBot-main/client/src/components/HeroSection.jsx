@@ -128,25 +128,29 @@ const SearchWidget = () => {
       initial={{ opacity: 0, scale: 0.95 }}
       animate={{ opacity: 1, scale: 1 }}
       transition={{ delay: 0.5, duration: 0.8 }}
-      whileHover={{ boxShadow: '12px 12px 0 #D4AF37', y: -2 }}
+      whileHover={{ boxShadow: '8px 8px 0 #D4AF37', y: -2 }}
       style={{
-        background: '#fff', borderRadius: 20, padding: 12,
-        border: '2px solid #0f172a', boxShadow: '8px 8px 0 #0f172a',
-        display: 'flex', alignItems: 'center', gap: 12, width: '100%', maxWidth: 440,
-        marginTop: 40, position: 'relative', zIndex: 20,
+        background: '#fff', borderRadius: 16,
+        border: '2px solid #0f172a', boxShadow: '5px 5px 0 #0f172a',
+        width: '100%', maxWidth: 380,
+        marginTop: 24, position: 'relative', zIndex: 20,
         transition: 'box-shadow 0.2s cubic-bezier(0.16, 1, 0.3, 1), transform 0.2s cubic-bezier(0.16, 1, 0.3, 1)'
       }}
+      className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-3 p-2.5"
     >
-      <div style={{ width: 44, height: 44, borderRadius: 12, background: '#f8fafc', border: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-        <Crosshair size={20} color="#16a34a" />
+      <div style={{ display: 'flex', alignItems: 'center', gap: 10, flex: 1 }}>
+        <div style={{ width: 36, height: 36, borderRadius: 10, background: '#f8fafc', border: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+          <Crosshair size={18} color="#16a34a" />
+        </div>
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <p style={{ fontFamily: 'var(--font-body)', fontSize: 10, fontWeight: 800, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.06em', margin: 0 }}>Smart Routing</p>
+          <input type="text" placeholder="Scanning for hubs..." disabled style={{ width: '100%', border: 'none', outline: 'none', background: 'transparent', fontFamily: 'var(--font-body)', fontSize: 14, fontWeight: 800, color: '#0f172a', margin: '1px 0 0', padding: 0 }} />
+        </div>
       </div>
-      <div style={{ flex: 1 }}>
-        <p style={{ fontFamily: 'var(--font-body)', fontSize: 11, fontWeight: 800, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.06em', margin: 0 }}>Smart Routing</p>
-        <input type="text" placeholder="Scanning for hubs..." disabled style={{ width: '100%', border: 'none', outline: 'none', background: 'transparent', fontFamily: 'var(--font-body)', fontSize: 15, fontWeight: 800, color: '#0f172a', margin: '2px 0 0', padding: 0 }} />
-      </div>
-      <button 
+      <button
         onClick={() => navigate('/login')}
-        style={{ height: 44, padding: '0 20px', borderRadius: 12, background: '#0f172a', color: '#fff', border: 'none', fontFamily: 'var(--font-body)', fontWeight: 800, fontSize: 14, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6 }}
+        style={{ height: 36, padding: '0 16px', borderRadius: 10, background: '#0f172a', color: '#fff', border: 'none', fontFamily: 'var(--font-body)', fontWeight: 800, fontSize: 13, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 4 }}
+        className="w-full sm:w-auto flex-shrink-0"
       >
         Find Hubs
       </button>
@@ -240,7 +244,10 @@ const HeroSection = () => {
   }, []);
 
   return (
-    <section style={{ position: 'relative', minHeight: '100vh', background: '#fff', overflow: 'hidden', display: 'flex', alignItems: 'center', paddingTop: 80 }}>
+    <section 
+      style={{ position: 'relative', minHeight: '100vh', background: '#fff', overflow: 'hidden', display: 'flex', alignItems: 'center' }}
+      className="pt-36 sm:pt-28 lg:pt-20"
+    >
       <style>{GLOBAL_CSS}</style>
 
       {/* Background Layer */}
@@ -249,45 +256,43 @@ const HeroSection = () => {
         <motion.div
           style={{ x: textX, y: floatY, position: 'absolute', top: '50%', left: '-5%', transform: 'translateY(-50%)', fontFamily: 'var(--font-display)', fontSize: '22vw', fontWeight: 900, color: '#f1f5f9', letterSpacing: '-0.05em', whiteSpace: 'nowrap', userSelect: 'none' }}
         >
-          INFRASTRUCTURE
+          EV CHARGE
         </motion.div>
         <div className="animate-scan-wipe" style={{ position: 'absolute', top: 0, bottom: 0, width: 2, background: 'linear-gradient(to bottom, transparent, #D4AF37, transparent)', opacity: 0.5, zIndex: 1 }} />
       </div>
 
       <div style={{ maxWidth: 1360, margin: '0 auto', padding: '0 24px', position: 'relative', zIndex: 10, width: '100%' }}>
-        <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: 80, alignItems: 'center' }}>
+        <div className="grid grid-cols-1 lg:grid-cols-[1.2fr_1fr] gap-16 lg:gap-20 items-center">
 
           {/* Left Side */}
-          <motion.div initial={{ opacity: 0, x: -40 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 1, ease: [0.16, 1, 0.3, 1] }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '8px 16px', borderRadius: 99, background: '#f8fafc', border: '2px solid #0f172a', marginBottom: 32, alignSelf: 'flex-start', width: 'fit-content', boxShadow: '4px 4px 0 #D4AF37' }}>
+          <motion.div initial={{ opacity: 0, x: -40 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 1, ease: [0.16, 1, 0.3, 1] }} className="flex flex-col justify-center">
+            <div 
+              style={{ alignItems: 'center', gap: 12, padding: '8px 16px', borderRadius: 99, background: '#f8fafc', border: '2px solid #0f172a', marginBottom: 24, alignSelf: 'flex-start', width: 'fit-content', boxShadow: '4px 4px 0 #D4AF37' }}
+              className="hidden sm:flex"
+            >
               <div style={{ width: 8, height: 8, borderRadius: '50%', background: '#16a34a', boxShadow: '0 0 8px rgba(22,163,74,0.4)' }} />
               <span style={{ fontSize: 11, fontWeight: 800, color: '#0f172a', letterSpacing: '0.1em' }}>TERMINAL READY</span>
             </div>
 
-            <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(3.5rem, 8vw, 6.5rem)', fontWeight: 800, color: '#0f172a', lineHeight: 0.95, letterSpacing: '-0.04em', margin: '0 0 24px' }}>
+            <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(2.2rem, 7vw, 5.5rem)', fontWeight: 800, color: '#0f172a', lineHeight: 0.95, letterSpacing: '-0.04em', margin: '0 0 20px' }}>
               Built To <br />
               <Typewriter words={["Charge.", "Sync.", "Route.", "Connect."]} />
             </h1>
 
-            <p style={{ fontSize: '1.25rem', color: '#64748b', lineHeight: 1.6, maxWidth: 480, margin: '0 0 40px' }}>
+            <p style={{ fontSize: 'clamp(1.1rem, 2vw, 1.25rem)', color: '#64748b', lineHeight: 1.6, maxWidth: 480, margin: '0 0 32px' }}>
               The most advanced EV charging infrastructure terminal. Real-time telemetry, smart routing, and global connectivity.
             </p>
-
-            {/* <div style={{ display: 'flex', gap: 16 }}>
-               <motion.button whileHover={{ y: -4, boxShadow: '12px 12px 0 #D4AF37' }} whileTap={{ scale: 0.98 }} style={{ padding: '18px 36px', borderRadius: 16, background: '#0f172a', color: '#fff', border: '2px solid #0f172a', fontWeight: 800, fontSize: 16, boxShadow: '8px 8px 0 #D4AF37', cursor: 'pointer', transition: 'box-shadow 0.2s cubic-bezier(0.16, 1, 0.3, 1)' }}>Get Started</motion.button>
-               <motion.button whileHover={{ background: '#f8fafc', y: -2 }} style={{ padding: '18px 36px', borderRadius: 16, background: 'transparent', color: '#0f172a', border: '2px solid #0f172a', fontWeight: 800, fontSize: 16, cursor: 'pointer' }}>Watch System</motion.button>
-            </div> */}
 
             <SearchWidget />
           </motion.div>
 
           {/* Right Side: 3D ECOSYSTEM */}
-          <div style={{ position: 'relative', height: 750, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <motion.div style={{ rotateX, rotateY, x: floatX, y: floatY, transformStyle: 'preserve-3d', transformPerspective: 1200, position: 'relative' }}>
+          <div style={{ position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center' }} className="h-[430px] sm:h-[520px] md:h-[600px] lg:h-[750px] mt-8 sm:mt-0">
+            <motion.div style={{ rotateX, rotateY, x: floatX, y: floatY, transformStyle: 'preserve-3d', transformPerspective: 1200, position: 'relative' }} className="scale-[0.65] sm:scale-[0.8] md:scale-95 lg:scale-100">
               <PhoneMockup />
               <TelemetryWidget floatX={floatX} floatY={floatY} />
 
-              <motion.div style={{ x: floatX, y: floatY, position: 'absolute', bottom: '4rem', right: '-80px', zIndex: 10 }}>
+              <motion.div className="hidden lg:block" style={{ x: floatX, y: floatY, position: 'absolute', bottom: '4rem', right: '-80px', zIndex: 10 }}>
                 <div className="glass-card" style={{ padding: '12px 18px', borderRadius: 16, display: 'flex', alignItems: 'center', gap: 10 }}>
                   <Globe size={18} color="#16a34a" />
                   <div>

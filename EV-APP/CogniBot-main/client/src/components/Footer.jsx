@@ -58,13 +58,13 @@ const Footer = () => {
 
       {/* Architectural Frame Base */}
       <div className="grid-lines" style={{ position: 'absolute', inset: 0, opacity: 0.3, pointerEvents: 'none' }} />
-      <div style={{ position: 'absolute', top: 0, bottom: 0, left: '8%', width: 1, background: '#f1f5f9', pointerEvents: 'none' }} />
-      <div style={{ position: 'absolute', top: 0, bottom: 0, left: '92%', width: 1, background: '#f1f5f9', pointerEvents: 'none' }} />
+      <div className="hidden lg:block" style={{ position: 'absolute', top: 0, bottom: 0, left: '8%', width: 1, background: '#f1f5f9', pointerEvents: 'none' }} />
+      <div className="hidden lg:block" style={{ position: 'absolute', top: 0, bottom: 0, left: '92%', width: 1, background: '#f1f5f9', pointerEvents: 'none' }} />
 
       <div style={{ maxWidth: 1440, margin: '0 auto', padding: '0 24px', position: 'relative', zIndex: 10 }}>
 
         {/* TOP STATUS BAR (Network Dashboard) */}
-        <div style={{ display: 'flex', borderBottom: '1px solid #e2e8f0', background: '#f8fafc' }}>
+        <div style={{ borderBottom: '1px solid #e2e8f0', background: '#f8fafc' }} className="hidden md:flex">
           <SystemMetric label="Server Hub" value="US-EAST-GLOBAL" />
           <SystemMetric label="API Latency" value={`${latency}ms`} color={latency > 28 ? '#ef4444' : '#16a34a'} />
           <SystemMetric label="Uptime" value="99.998%" />
@@ -74,26 +74,20 @@ const Footer = () => {
         </div>
 
         {/* MAIN NAV SECTION */}
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '40px 0', flexWrap: 'wrap', gap: 32 }}>
+        <div style={{ padding: '40px 0', gap: 32 }} className="flex flex-col lg:flex-row lg:justify-between lg:items-center flex-wrap">
 
           {/* Brand & Info Block */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: 24, flexWrap: 'wrap' }}>
+          <div className="flex flex-col sm:flex-row sm:items-center gap-6 flex-wrap">
             <a href="/" style={{ display: 'inline-flex', alignItems: 'center', gap: 10, textDecoration: 'none' }}>
               <div style={{ width: 36, height: 36, borderRadius: 8, background: '#16a34a', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                 <Zap size={18} color="#fff" fill="#fff" />
               </div>
               <span style={{ fontFamily: 'var(--font-display)', fontSize: 22, fontWeight: 900, color: '#0f172a', letterSpacing: '-0.04em' }}>EV Charge</span>
             </a>
-            <div style={{ width: 1, height: 24, background: '#e2e8f0' }} />
+            <div style={{ width: 1, height: 24, background: '#e2e8f0' }} className="hidden sm:block" />
             <p style={{ fontSize: '0.9rem', color: '#64748b', fontWeight: 600, margin: 0, maxWidth: 360 }}>
               High-performance EV charging infrastructure terminal. Real-time telemetry, smart routing, and global connectivity.
             </p>
-
-            {/* Security Badge Pill */}
-            <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '4px 10px', borderRadius: 6, border: '1px solid #e2e8f0', background: '#f8fafc' }}>
-              <ShieldCheck size={14} color="#16a34a" />
-              <span style={{ fontSize: 9, fontWeight: 900, color: '#64748b', letterSpacing: '0.05em', fontFamily: 'monospace' }}>ISO_15118</span>
-            </div>
           </div>
 
           {/* Legal & Compliance horizontal block containing vertical column pairs */}
@@ -133,16 +127,19 @@ const Footer = () => {
         </div>
 
         {/* BOTTOM TERMINAL FOOTNOTE */}
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '32px 0', borderTop: '1px solid #e2e8f0' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-            <Terminal size={16} color="#16a34a" />
+        <div style={{ borderTop: '1px solid #e2e8f0', padding: '32px 0' }} className="flex flex-col md:flex-row justify-between items-center gap-6 md:gap-0">
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }} className="flex-col md:flex-row text-center md:text-left">
+            <div className="flex items-center gap-2">
+              <Terminal size={16} color="#16a34a" />
+              <span className="md:hidden" style={{ fontSize: 12, fontWeight: 700, color: '#94a3b8' }}>EV Charge</span>
+            </div>
             <p style={{ fontSize: 12, fontWeight: 700, color: '#94a3b8', margin: 0 }}>
-              &copy; {new Date().getFullYear()} EV Charge Terminal Inc. SYNCING_GLOBAL_ACTIVE
+              &copy; {new Date().getFullYear()} EV Charge Powered by S.AIntelligence Technologies
             </p>
           </div>
 
           {/* Architectural Social Boxes */}
-          <div style={{ display: 'flex', gap: 8 }}>
+          <div style={{ display: 'flex', gap: 8 }} className="flex-wrap justify-center">
             {['X_SYS', 'IG_HLD', 'LI_CORP', 'GH_DEV'].map((tag, i) => (
               <motion.a
                 key={i} href="#"

@@ -15,25 +15,31 @@ const StepTag = ({ text }) => (
    SINGLE STEP COMPONENT
    ───────────────────────────────────────────────────────── */
 const TimelineStep = ({ step, idx, isEven }) => (
-  <div style={{ 
-    gridColumn: isEven ? '1' : '2', 
-    display: 'flex', flexDirection: 'column', 
-    alignItems: isEven ? 'flex-end' : 'flex-start',
-    marginTop: isEven ? 0 : 160, 
-    textAlign: isEven ? 'right' : 'left',
-    position: 'relative',
-    paddingBottom: 80
-  }}>
+  <div
+    style={{
+      gridColumn: isEven ? '1' : '2',
+      display: 'flex', flexDirection: 'column',
+      alignItems: isEven ? 'flex-end' : 'flex-start',
+      marginTop: isEven ? 0 : 160,
+      textAlign: isEven ? 'right' : 'left',
+      position: 'relative',
+      paddingBottom: 80
+    }}
+    className="timeline-step-card"
+  >
     {/* Timeline Dot with Breathing Glow */}
-    <div style={{ 
-      position: 'absolute', top: 44, 
-      [isEven ? 'right' : 'left']: -58, 
-      transform: isEven ? 'translateX(50%)' : 'translateX(-50%)',
-      zIndex: 20
-    }}>
-      <motion.div 
-        initial={{ scale: 0 }} 
-        whileInView={{ scale: 1 }} 
+    <div
+      style={{
+        position: 'absolute', top: 44,
+        [isEven ? 'right' : 'left']: -58,
+        transform: isEven ? 'translateX(50%)' : 'translateX(-50%)',
+        zIndex: 20
+      }}
+      className="timeline-dot-wrapper"
+    >
+      <motion.div
+        initial={{ scale: 0 }}
+        whileInView={{ scale: 1 }}
         viewport={{ once: false, amount: 0.8 }}
         style={{ width: 20, height: 20, borderRadius: '50%', background: '#fff', border: '4px solid #0f172a', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
       >
@@ -42,15 +48,16 @@ const TimelineStep = ({ step, idx, isEven }) => (
     </div>
 
     {/* Wireframe Number Background */}
-    <motion.div 
+    <motion.div
       initial={{ opacity: 0, scale: 0.8 }}
       whileInView={{ opacity: 0.15, scale: 1 }}
       viewport={{ once: true }}
-      style={{ 
+      style={{
         position: 'absolute', top: -30, [isEven ? 'right' : 'left']: isEven ? 40 : 40,
-        fontFamily: 'var(--font-display)', fontSize: '10rem', fontWeight: 900, color: 'transparent', 
-        WebkitTextStroke: '2px #0f172a', zIndex: 0, pointerEvents: 'none' 
+        fontFamily: 'var(--font-display)', fontSize: '10rem', fontWeight: 900, color: 'transparent',
+        WebkitTextStroke: '2px #0f172a', zIndex: 0, pointerEvents: 'none'
       }}
+      className="timeline-step-num"
     >
       {step.num}
     </motion.div>
@@ -61,8 +68,8 @@ const TimelineStep = ({ step, idx, isEven }) => (
       whileInView={{ opacity: 1, x: 0 }}
       viewport={{ once: true, margin: "-100px" }}
       transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1] }}
-      className="glass-card"
-      style={{ position: 'relative', zIndex: 10, padding: 40, borderRadius: 32, minWidth: 380, border: '3px solid #0f172a', boxShadow: '16px 16px 0 #0f172a' }}
+      className="glass-card p-6 md:p-10"
+      style={{ position: 'relative', zIndex: 10, borderRadius: 32, maxWidth: 440, width: '100%', border: '3px solid #0f172a', boxShadow: '16px 16px 0 #0f172a', boxSizing: 'border-box' }}
     >
       <StepTag text={step.tag} />
       <div style={{ width: 56, height: 56, borderRadius: 16, background: '#0f172a', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 24, alignSelf: isEven ? 'flex-end' : 'flex-start' }}>
@@ -81,7 +88,7 @@ const HowItWorks = () => {
   const targetRef = useRef(null);
   const { scrollYProgress } = useScroll({ target: targetRef, offset: ["start end", "end start"] });
   const springProgress = useSpring(scrollYProgress, { stiffness: 100, damping: 30, restDelta: 0.001 });
-  
+
   const lineHeight = useTransform(springProgress, [0.1, 0.9], ["0%", "100%"]);
   const parallaxY = useTransform(scrollYProgress, [0, 1], [-200, 200]);
   const parallaxRev = useTransform(scrollYProgress, [0, 1], [200, -200]);
@@ -90,51 +97,84 @@ const HowItWorks = () => {
     { num: "01", title: "LOCATE", tag: "SEARCHING...", icon: <Satellite size={28} color="#16a34a" />, desc: "Find the best charging spots near you with real-time availability updates." },
     { num: "02", title: "SYNC", tag: "CONNECTING...", icon: <Cpu size={28} color="#16a34a" />, desc: "Connect your vehicle to any charger instantly with our smart sync technology." },
     { num: "03", title: "STREAM", tag: "LIVE_DATA", icon: <Activity size={28} color="#16a34a" />, desc: "Track your charging speed and battery level in real-time on your dashboard." },
-    { num: "04", title: "SETTLE", tag: "DONE", icon: <CreditCard size={28} color="#16a34a" />, desc: "Pay automatically when you're finished and get back on the road in seconds." }
+    { num: "04", title: "SETTLE", tag: "DONE", icon: <CreditCard size={28} color="#16a34a" />, desc: "Pay upfront, start charging instantly, and get back on the road faster." }
   ];
 
+  const CSS = `
+    .timeline-section {
+      padding: 160px 0;
+    }
+    .timeline-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 32px;
+      width: 100%;
+    }
+    @media (max-width: 1023px) {
+      .timeline-section {
+        padding: 80px 0 !important;
+      }
+      .timeline-step-card {
+        grid-column: 1 / -1 !important;
+        margin-top: 0 !important;
+        align-items: flex-start !important;
+        text-align: left !important;
+        padding-left: 36px !important;
+        padding-right: 0 !important;
+        padding-bottom: 48px !important;
+      }
+      .timeline-dot-wrapper {
+        left: 0 !important;
+        right: auto !important;
+        transform: translateX(-50%) !important;
+        top: 38px !important;
+      }
+      .timeline-step-num {
+        left: 36px !important;
+        right: auto !important;
+        font-size: 7rem !important;
+        top: -15px !important;
+      }
+      .timeline-progress-line {
+        left: 24px !important;
+        transform: none !important;
+      }
+      .timeline-grid {
+        grid-template-columns: 1fr !important;
+        gap: 16px !important;
+      }
+    }
+  `;
+
   return (
-    <section ref={targetRef} id="how-it-works" style={{ position: 'relative', padding: '160px 0', background: '#fff', overflow: 'hidden', fontFamily: 'var(--font-body)' }}>
-      
+    <section ref={targetRef} id="how-it-works" className="timeline-section" style={{ position: 'relative', background: '#fff', overflow: 'hidden', fontFamily: 'var(--font-body)' }}>
+      <style>{CSS}</style>
+
       {/* Background Frame Architecture */}
       <div className="grid-lines" style={{ position: 'absolute', inset: 0, opacity: 0.6, pointerEvents: 'none' }} />
-      <div style={{ position: 'absolute', left: '8%', top: 0, bottom: 0, width: 1, background: '#e2e8f0', pointerEvents: 'none' }} />
-      <div style={{ position: 'absolute', left: '92%', top: 0, bottom: 0, width: 1, background: '#e2e8f0', pointerEvents: 'none' }} />
-      
+      <div className="hidden lg:block" style={{ position: 'absolute', left: '8%', top: 0, bottom: 0, width: 1, background: '#e2e8f0', pointerEvents: 'none' }} />
+      <div className="hidden lg:block" style={{ position: 'absolute', left: '92%', top: 0, bottom: 0, width: 1, background: '#e2e8f0', pointerEvents: 'none' }} />
+
       {/* Floating Parallax Background Text */}
-      <motion.div style={{ y: parallaxY, position: 'absolute', top: '10%', right: '-4%', fontSize: '18vw', fontWeight: 900, fontFamily: 'var(--font-display)', color: '#f1f5f9', whiteSpace: 'nowrap', userSelect: 'none', pointerEvents: 'none', writingMode: 'vertical-rl', transform: 'rotate(180deg)', opacity: 0.6 }}>
+      <motion.div style={{ y: parallaxY, position: 'absolute', top: '10%', right: '-4%', fontSize: '18vw', fontWeight: 900, fontFamily: 'var(--font-display)', color: '#f1f5f9', whiteSpace: 'nowrap', userSelect: 'none', pointerEvents: 'none', writingMode: 'vertical-rl', transform: 'rotate(180deg)', opacity: 0.6 }} className="hidden xl:block">
         SYSTEM_PROCESS
       </motion.div>
-      <motion.div style={{ y: parallaxRev, position: 'absolute', bottom: '10%', left: '-2%', fontSize: '15vw', fontWeight: 900, fontFamily: 'var(--font-display)', color: '#f8fafc', whiteSpace: 'nowrap', userSelect: 'none', pointerEvents: 'none', zIndex: 0 }}>
+      <motion.div style={{ y: parallaxRev, position: 'absolute', bottom: '10%', left: '-2%', fontSize: '15vw', fontWeight: 900, fontFamily: 'var(--font-display)', color: '#f8fafc', whiteSpace: 'nowrap', userSelect: 'none', pointerEvents: 'none', zIndex: 0 }} className="hidden xl:block">
         PROTOCOL_v1
       </motion.div>
 
       <div style={{ maxWidth: 1280, margin: '0 auto', padding: '0 24px', position: 'relative', zIndex: 10 }}>
-        
-        {/* Header */}
-        <div style={{ textAlign: 'center', maxWidth: 720, margin: '0 auto 120px' }}>
-          <motion.div initial={{ opacity: 0, y: 10 }} whileInView={{ opacity: 1, y: 0 }} style={{ display: 'inline-flex', padding: '8px 20px', borderRadius: 99, border: '2px solid #0f172a', background: '#fff', color: '#0f172a', fontSize: 11, fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.12em', marginBottom: 32, boxShadow: '6px 6px 0 #D4AF37' }}>
-            Engineering The Future
-          </motion.div>
-          <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(3rem, 7vw, 5.5rem)', fontWeight: 800, color: '#0f172a', lineHeight: 0.95, letterSpacing: '-0.04em', marginBottom: 32 }}>
-            Designed To <br/>
-            <span style={{ color: '#D4AF37', WebkitTextStroke: '1px #0f172a' }}>Work Silently.</span>
-          </h2>
-          <p style={{ fontSize: '1.35rem', color: '#64748b', fontWeight: 600, lineHeight: 1.4, maxWidth: 540, margin: '0 auto' }}>
-            We removed the noise. The result is a radically minimal infrastructure that runs with technical precision.
-          </p>
-        </div>
 
         {/* Cinematic Timeline */}
         <div style={{ position: 'relative', maxWidth: 1000, margin: '0 auto' }}>
-          
+
           {/* Main Structural Progress Line */}
-          <div style={{ position: 'absolute', left: '50%', top: 0, bottom: 0, width: 4, background: '#f1f5f9', transform: 'translateX(-50%)', borderRadius: 4, overflow: 'hidden' }}>
+          <div className="timeline-progress-line" style={{ position: 'absolute', left: '50%', top: 0, bottom: 0, width: 4, background: '#f1f5f9', transform: 'translateX(-50%)', borderRadius: 4, overflow: 'hidden' }}>
             <motion.div style={{ width: '100%', height: lineHeight, background: '#16a34a', borderRadius: 4 }} />
             <motion.div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: lineHeight, background: '#D4AF37', opacity: 0.3, filter: 'blur(8px)' }} />
           </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '32px', width: '100%' }}>
+          <div className="timeline-grid">
             {steps.map((step, idx) => (
               <TimelineStep key={idx} step={step} idx={idx} isEven={idx % 2 === 0} />
             ))}
@@ -145,7 +185,7 @@ const HowItWorks = () => {
 
       {/* Decorative End */}
       <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: 160, background: 'linear-gradient(to top, #fff, transparent)', zIndex: 20 }} />
-    </section>
+    </section >
   );
 };
 

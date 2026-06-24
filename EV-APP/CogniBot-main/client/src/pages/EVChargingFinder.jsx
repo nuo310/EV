@@ -14,7 +14,7 @@ import {
 } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 import { useAuth } from '../contexts/AuthContext';
-import { Zap, Loader2, BatteryCharging, Navigation, Wifi, WifiOff, AlertCircle, X, Check } from 'lucide-react';
+import { Zap, Loader2, BatteryCharging, Navigation, Wifi, WifiOff, AlertCircle, X, Check, Map, List } from 'lucide-react';
 import toast from 'react-hot-toast';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
@@ -186,12 +186,12 @@ function formatSessionElapsed(startedAt) {
 
 function calculateDistance(lat1, lon1, lat2, lon2) {
   if (!isValidLatLng(lat1, lon1) || !isValidLatLng(lat2, lon2)) return null;
-  const R = 6371; 
+  const R = 6371;
   const dLat = (lat2 - lat1) * (Math.PI / 180);
   const dLon = (lon2 - lon1) * (Math.PI / 180);
   const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) + Math.cos(lat1 * (Math.PI / 180)) * Math.cos(lat2 * (Math.PI / 180)) * Math.sin(dLon / 2) * Math.sin(dLon / 2);
   const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-  return (R * c).toFixed(1); 
+  return (R * c).toFixed(1);
 }
 
 function MapController({ setUserPosition, setMapInstance }) {
@@ -228,6 +228,7 @@ const EVChargingFinder = () => {
   const [kwhInputValue, setKwhInputValue] = useState(20);
   const [checkoutModalOpen, setCheckoutModalOpen] = useState(false);
   const { currentUser } = useAuth();
+  const [viewMode, setViewMode] = useState('list'); // 'list' or 'map'
 
   const bookingForStation = (stationId) => myBookings.find((b) => b.stationId === stationId);
 
@@ -350,7 +351,7 @@ const EVChargingFinder = () => {
   const handleCompletePayment = async (totalAmount, finalKwh) => {
     const station = kwhInputStation;
     if (!station) return;
-    
+
     setBookingLoadingId(station.id);
     try {
       // 1. Send the actual OCPP startup signal so the simulator triggers charging!
@@ -379,7 +380,7 @@ const EVChargingFinder = () => {
 
       setKwhInputStation(null);
       toast.success('Charging session started successfully!');
-      
+
       // 3. Navigate directly to dashboard to monitor charging session
       navigate('/dashboard');
     } catch (err) {
@@ -404,7 +405,7 @@ const EVChargingFinder = () => {
       if (booking && booking.status === 'active') {
         const meterEndWh = parseEnergyWhFromTelemetry(stationStatuses?.[stationId]?.telemetry) ?? 0;
         const startWh = Number(booking.meterStartWh) || 0;
-        
+
         // Calculate Bill
         const energyKwh = Math.max(0, roundMoney((meterEndWh - startWh) / 1000));
         const rate = energyRateForStation(station);
@@ -530,48 +531,92 @@ const EVChargingFinder = () => {
     <div style={{ display: 'flex', width: '100%', height: 'calc(100vh - 110px)', marginTop: '110px', overflow: 'hidden', background: '#fff', position: 'relative', zIndex: 10 }}>
       <style>{GLOBAL_CSS}</style>
 
-      <aside style={{ width: '440px', height: '100%', display: 'flex', flexDirection: 'column', background: '#fff', borderRight: '2px solid #0f172a', borderTop: '2px solid #0f172a', zIndex: 40, position: 'relative' }}>
-        
+      {/* Mobile view toggle button */}
+      <div 
+        style={{
+          position: 'fixed',
+          bottom: '24px',
+          left: '50%',
+          transform: 'translateX(-50%)',
+          zIndex: 10000,
+        }}
+        className="md:hidden"
+      >
+        <button
+          onClick={() => setViewMode(viewMode === 'list' ? 'map' : 'list')}
+          style={{
+            background: '#0f172a',
+            color: '#fff',
+            border: '2px solid #0f172a',
+            borderRadius: '30px',
+            padding: '12px 24px',
+            fontWeight: 800,
+            fontSize: '14px',
+            boxShadow: '0 8px 24px rgba(15, 23, 42, 0.25), 4px 4px 0 #16a34a',
+            cursor: 'pointer',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '8px',
+            whiteSpace: 'nowrap'
+          }}
+        >
+          {viewMode === 'list' ? (
+            <>
+              <Map size={16} color="#16a34a" fill="#16a34a" /> Show Map
+            </>
+          ) : (
+            <>
+              <List size={16} color="#16a34a" /> Show List
+            </>
+          )}
+        </button>
+      </div>
+
+      <aside 
+        style={{ height: '100%', display: 'flex', flexDirection: 'column', background: '#fff', borderRight: '2px solid #0f172a', borderTop: '2px solid #0f172a', zIndex: 40, position: 'relative' }}
+        className={`${viewMode === 'list' ? 'w-full md:w-[440px]' : 'hidden md:flex md:w-[440px]'}`}
+      >
+
         {/* Sidebar Header */}
         <div style={{ padding: '24px 28px', borderBottom: '2px solid #0f172a', background: '#fff' }}>
           <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '1.8rem', fontWeight: 900, color: '#0f172a', margin: 0, display: 'flex', alignItems: 'center', gap: '10px' }}>
             <Zap size={24} color="#16a34a" fill="#16a34a" /> AhmedabadHubs
           </h2>
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '14px' }}>
-             <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#16a34a' }} className="animate-pulse" />
-             <span style={{ fontFamily: 'monospace', fontSize: '10px', fontWeight: 800, color: '#94a3b8' }}>LIVE NETWORK STREAM</span>
+            <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#16a34a' }} className="animate-pulse" />
+            <span style={{ fontFamily: 'monospace', fontSize: '10px', fontWeight: 800, color: '#94a3b8' }}>LIVE NETWORK STREAM</span>
           </div>
         </div>
 
         {/* Stations List */}
         <div style={{ flex: 1, overflowY: 'auto', padding: '24px', background: '#f8fafc', display: 'flex', flexDirection: 'column', gap: '20px' }}>
           {loading ? (
-             Array.from({ length: 3 }).map((_, i) => <div key={i} className="neo-card skeleton-bg" style={{ height: '200px' }} />)
+            Array.from({ length: 3 }).map((_, i) => <div key={i} className="neo-card skeleton-bg" style={{ height: '200px' }} />)
           ) : (
             processedStations.map(s => {
               const isSelected = selectedStation?.id === s.id;
               const isStationBooking = bookingLoadingId === s.id;
               const conn = connectorSessionFlags(s, stationStatuses);
               const ub = bookingForStation(s.id);
-              
+
               const showStop = ub?.status === 'active';
               const showStart = !showStop;
-              
+
               // Compute live consumption
-              const live = ub?.status === 'active' 
-                ? liveConsumptionBill(ub, s, stationStatuses?.[getOcppStationId(s)]?.telemetry) 
+              const live = ub?.status === 'active'
+                ? liveConsumptionBill(ub, s, stationStatuses?.[getOcppStationId(s)]?.telemetry)
                 : null;
-              
+
               return (
-                <div 
-                  key={s.id} 
-                  className="neo-card group" 
-                  style={{ 
-                    padding: '24px', position: 'relative', cursor: 'pointer', 
+                <div
+                  key={s.id}
+                  className="neo-card group"
+                  style={{
+                    padding: '24px', position: 'relative', cursor: 'pointer',
                     borderColor: isSelected ? '#16a34a' : '#e2e8f0',
                     borderWidth: isSelected ? '2px' : '1.5px',
-                    boxShadow: isSelected 
-                      ? '0 10px 15px -3px rgba(22, 163, 74, 0.08), 0 4px 6px -4px rgba(22, 163, 74, 0.08)' 
+                    boxShadow: isSelected
+                      ? '0 10px 15px -3px rgba(22, 163, 74, 0.08), 0 4px 6px -4px rgba(22, 163, 74, 0.08)'
                       : '0 4px 6px -1px rgba(0, 0, 0, 0.03), 0 2px 4px -2px rgba(0, 0, 0, 0.03)',
                     transform: isSelected ? 'translateY(-2px)' : 'none',
                     transition: 'all 0.2s cubic-bezier(0.16, 1, 0.3, 1)',
@@ -584,14 +629,18 @@ const EVChargingFinder = () => {
                         {s.name}
                       </h3>
                       <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', alignItems: 'center' }}>
-                        <span style={{ fontSize: '10px', fontWeight: 800, color: '#3b82f6', background: '#eff6ff', padding: '3px 8px', borderRadius: '6px', border: '1.5px solid #bfdbfe' }}>
+                        {/* <span style={{ fontSize: '10px', fontWeight: 800, color: '#3b82f6', background: '#eff6ff', padding: '3px 8px', borderRadius: '6px', border: '1.5px solid #bfdbfe' }}>
                           {s.status}
-                        </span>
+                        </span> */}
                         {s.distanceStr && (
                           <div style={{ display: 'flex', alignItems: 'center', gap: '4px', color: '#64748b', fontSize: '11px', fontWeight: 700 }}>
                             <Navigation size={12} /> {s.distanceStr}km
                           </div>
                         )}
+                        {/* <span style={{ fontSize: '10px', color: '#64748b', fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                          {s.distanceStr && <span style={{ color: '#cbd5e1' }}>•</span>}
+                          <span>CID: {s.connectorId} • {s.chargerType}</span>
+                        </span> */}
                       </div>
                     </div>
                     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '6px', flexShrink: 0 }}>
@@ -613,29 +662,6 @@ const EVChargingFinder = () => {
                     </div>
                   </div>
 
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', marginBottom: '20px' }}>
-                    <div style={{ background: '#f8fafc', padding: '10px', borderRadius: '12px', border: '1.5px solid #e2e8f0' }}>
-                      <p style={{ fontFamily: 'monospace', fontSize: '9px', fontWeight: 800, color: '#94a3b8', margin: '0 0 4px 0', textTransform: 'uppercase' }}>Hardware</p>
-                      <p style={{ fontSize: '12px', fontWeight: 800, color: '#0f172a', margin: 0 }}>{s.vendor} {s.model}</p>
-                      <p style={{ fontSize: '10px', color: '#64748b', margin: 0 }}>CID: {s.connectorId} • {s.chargerType}</p>
-                    </div>
-                    <div
-                      style={{
-                        background: '#f1f5f9',
-                        padding: '10px',
-                        borderRadius: '12px',
-                        border: '1.5px solid #e2e8f0',
-                      }}
-                    >
-                      <p style={{ fontFamily: 'monospace', fontSize: '9px', fontWeight: 800, color: '#94a3b8', margin: '0 0 4px 0', textTransform: 'uppercase' }}>Diagnostics</p>
-                      <p style={{ fontSize: '12px', fontWeight: 800, color: '#64748b', margin: 0 }}>
-                        Slots: {s.availableSlots == null || s.availableSlots === '' ? '—' : s.availableSlots}
-                      </p>
-                      <p style={{ fontSize: '10px', color: s.errorCode === 'NoError' ? '#64748b' : '#dc2626', margin: 0, display: 'flex', alignItems: 'center', gap: '2px' }}>
-                        {s.errorCode !== 'NoError' && <AlertCircle size={10} />} {s.errorCode}
-                      </p>
-                    </div>
-                  </div>
 
                   <div style={{ paddingTop: '16px', borderTop: '2.5px solid #f1f5f9' }}>
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
@@ -643,14 +669,14 @@ const EVChargingFinder = () => {
                         <span style={{ fontFamily: 'var(--font-display)', fontSize: '24px', fontWeight: 900, color: '#0f172a' }}>₹{energyRateForStation(s)}</span>
                         <span style={{ fontSize: '12px', fontWeight: 600, color: '#64748b', marginLeft: '6px' }}>/kWh</span>
                       </div>
-                      <span style={{ fontSize: '10px', color: '#64748b', fontWeight: 700, fontFamily: 'monospace' }}>
+                      {/* <span style={{ fontSize: '10px', color: '#64748b', fontWeight: 700, fontFamily: 'monospace' }}>
                         SYNC: {s.lastSeen?.toDate ? s.lastSeen.toDate().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' }) : 'N/A'}
-                      </span>
+                      </span> */}
                     </div>
-                      {!currentUser && (
+                    {!currentUser && (
                       <p style={{ margin: '0 0 10px 0', fontSize: '11px', fontWeight: 700, color: '#b45309' }}>Sign in to control charger.</p>
                     )}
-                    
+
                     {/* Live Active Session UI */}
                     {ub?.status === 'active' && live && (
                       <div
@@ -667,8 +693,8 @@ const EVChargingFinder = () => {
                           <div style={{ flex: 1 }}>
                             <p style={{ margin: 0, fontSize: '10px', fontWeight: 900, color: '#15803d', letterSpacing: '0.05em' }}>YOUR SESSION · LIVE</p>
                             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '4px' }}>
-                                <p style={{ margin: 0, fontSize: '16px', fontWeight: 900, color: '#0f172a' }}>₹{live.energyCharge}</p>
-                                <p style={{ margin: 0, fontSize: '13px', fontWeight: 700, color: '#15803d' }}>{live.energyKwh} kWh</p>
+                              <p style={{ margin: 0, fontSize: '16px', fontWeight: 900, color: '#0f172a' }}>₹{live.energyCharge}</p>
+                              <p style={{ margin: 0, fontSize: '13px', fontWeight: 700, color: '#15803d' }}>{live.energyKwh} kWh</p>
                             </div>
                             {formatSessionElapsed(ub.startedAt) && (
                               <p style={{ margin: '6px 0 0 0', fontSize: '11px', fontWeight: 700, color: '#15803d', fontFamily: 'monospace' }}>
@@ -679,7 +705,7 @@ const EVChargingFinder = () => {
                         </div>
                       </div>
                     )}
-                    
+
                     <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', alignItems: 'center', width: '100%' }} onClick={(e) => e.stopPropagation()}>
                       {showStart && (
                         <button
@@ -733,11 +759,14 @@ const EVChargingFinder = () => {
         </div>
       </aside>
 
-      <main style={{ flex: 1, position: 'relative', zIndex: 0, background: '#f1f5f9' }}>
+      <main 
+        style={{ flex: 1, position: 'relative', zIndex: 0, background: '#f1f5f9' }}
+        className={`${viewMode === 'map' ? 'block w-full' : 'hidden md:block'}`}
+      >
         <MapContainer center={[23.0225, 72.5714]} zoom={13} style={{ height: '100%', width: '100%' }}>
           <MapController setUserPosition={setUserPosition} setMapInstance={setMapInstance} />
           <TileLayer url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png" />
-          
+
           {userPosition && (
             <Marker position={userPosition} icon={userIcon}>
               <Popup><div style={{ padding: '10px', fontWeight: 800 }}>You are here</div></Popup>
@@ -750,85 +779,86 @@ const EVChargingFinder = () => {
             const pubUb = bookingForStation(s.id);
             const pubLoading = bookingLoadingId === s.id;
             const pubConn = connectorSessionFlags(s, stationStatuses);
-            
+
             const pubShowStop = pubUb?.status === 'active';
             const pubShowStart = !pubShowStop;
 
-            const pubLive = pubUb?.status === 'active' 
-                ? liveConsumptionBill(pubUb, s, stationStatuses?.[getOcppStationId(s)]?.telemetry) 
-                : null;
-            
+            const pubLive = pubUb?.status === 'active'
+              ? liveConsumptionBill(pubUb, s, stationStatuses?.[getOcppStationId(s)]?.telemetry)
+              : null;
+
             return (
-            <Marker key={s.id} position={[s.lat, s.lng]} icon={stationIcon}>
-              <Popup>
-                <div style={{ padding: '20px', minWidth: '260px' }}>
-                  <p style={{ fontFamily: 'var(--font-display)', fontSize: '18px', fontWeight: 900, margin: '0 0 10px 0' }}>{s.name}</p>
-                  <p style={{ fontSize: '9px', fontWeight: 900, color: '#94a3b8', margin: '0 0 6px 0' }}>CONNECTOR (OCPP)</p>
-                  <div style={{ marginBottom: '10px' }}>
-                    {renderStatusBadge(pubConn.label)}
-                  </div>
-                  <div style={{ background: '#f8fafc', padding: '10px', borderRadius: '8px', marginBottom: '15px' }}>
-                    <p style={{ fontSize: '12px', margin: '0 0 4px 0', fontWeight: 700 }}>{s.vendor} {s.model}</p>
-                    <p style={{ fontSize: '11px', color: '#64748b', margin: 0 }}>Connector ID: {s.connectorId}</p>
-                    <p style={{ fontSize: '11px', color: isStationConsideredOnline(s) ? '#16a34a' : '#dc2626', fontWeight: 800, margin: '4px 0 0 0' }}>{isStationConsideredOnline(s) ? 'Network: ACTIVE' : 'Network: OFFLINE'}</p>
-                  </div>
-                  {!currentUser && (
-                    <p style={{ fontSize: '11px', color: '#b45309', fontWeight: 700 }}>Sign in to control charger.</p>
-                  )}
-                  {pubUb?.status === 'active' && pubLive && (
-                    <div style={{ padding: '10px', borderRadius: '10px', border: '1.5px solid #a7f3d0', background: '#f0fdf4', marginBottom: '10px' }}>
-                      <p style={{ fontSize: '10px', fontWeight: 900, color: '#15803d', margin: 0 }}>YOUR SESSION · LIVE</p>
-                      <p style={{ fontSize: '14px', fontWeight: 900, color: '#0f172a', margin: '6px 0 0 0' }}>₹{pubLive.energyCharge} <span style={{ fontSize: '12px', fontWeight: 'normal' }}>({pubLive.energyKwh} kWh)</span></p>
-                      {formatSessionElapsed(pubUb.startedAt) && (
-                        <p style={{ fontSize: '11px', fontWeight: 700, margin: '4px 0 0 0', fontFamily: 'monospace', color: '#15803d' }}>{formatSessionElapsed(pubUb.startedAt)}</p>
-                      )}
+              <Marker key={s.id} position={[s.lat, s.lng]} icon={stationIcon}>
+                <Popup>
+                  <div style={{ padding: '20px', minWidth: '260px' }}>
+                    <p style={{ fontFamily: 'var(--font-display)', fontSize: '18px', fontWeight: 900, margin: '0 0 10px 0' }}>{s.name}</p>
+                    <p style={{ fontSize: '9px', fontWeight: 900, color: '#94a3b8', margin: '0 0 6px 0' }}>CONNECTOR (OCPP)</p>
+                    <div style={{ marginBottom: '10px' }}>
+                      {renderStatusBadge(pubConn.label)}
                     </div>
-                  )}
-                  {pubShowStart && (
-                    <button
-                      type="button"
-                      onClick={() => handleStartCharging(s)}
-                      disabled={pubLoading || !isStationConsideredOnline(s) || !pubConn.isAvailable}
-                      style={{
-                        width: '100%',
-                        marginTop: 8,
-                        background: (pubLoading || !isStationConsideredOnline(s) || !pubConn.isAvailable) ? '#e2e8f0' : '#16a34a',
-                        color: (pubLoading || !isStationConsideredOnline(s) || !pubConn.isAvailable) ? '#94a3b8' : '#fff',
-                        padding: '12px',
-                        borderRadius: '10px',
-                        fontWeight: 800,
-                        border: 'none',
-                        cursor: (pubLoading || !isStationConsideredOnline(s) || !pubConn.isAvailable) ? 'not-allowed' : 'pointer',
-                        boxShadow: (pubLoading || !isStationConsideredOnline(s) || !pubConn.isAvailable) ? 'none' : '0 4px 10px rgba(22, 163, 74, 0.2)',
-                      }}
-                    >
-                      {pubLoading ? '…' : 'Start charging'}
-                    </button>
-                  )}
-                  {pubShowStop && (
-                    <button
-                      type="button"
-                      onClick={() => handleStopCharging(s)}
-                      disabled={pubLoading}
-                      style={{
-                        marginTop: 8,
-                        width: '100%',
-                        background: '#fee2e2',
-                        color: '#b91c1c',
-                        padding: '12px',
-                        borderRadius: '10px',
-                        fontWeight: 800,
-                        border: '1.5px solid #fca5a5',
-                        cursor: pubLoading ? 'wait' : 'pointer',
-                      }}
-                    >
-                      {pubLoading ? '…' : 'Stop charging'}
-                    </button>
-                  )}
-                </div>
-              </Popup>
-            </Marker>
-          );})}
+                    <div style={{ background: '#f8fafc', padding: '10px', borderRadius: '8px', marginBottom: '15px' }}>
+                      <p style={{ fontSize: '12px', margin: '0 0 4px 0', fontWeight: 700 }}>{s.vendor} {s.model}</p>
+                      <p style={{ fontSize: '11px', color: '#64748b', margin: 0 }}>Connector ID: {s.connectorId}</p>
+                      <p style={{ fontSize: '11px', color: isStationConsideredOnline(s) ? '#16a34a' : '#dc2626', fontWeight: 800, margin: '4px 0 0 0' }}>{isStationConsideredOnline(s) ? 'Network: ACTIVE' : 'Network: OFFLINE'}</p>
+                    </div>
+                    {!currentUser && (
+                      <p style={{ fontSize: '11px', color: '#b45309', fontWeight: 700 }}>Sign in to control charger.</p>
+                    )}
+                    {pubUb?.status === 'active' && pubLive && (
+                      <div style={{ padding: '10px', borderRadius: '10px', border: '1.5px solid #a7f3d0', background: '#f0fdf4', marginBottom: '10px' }}>
+                        <p style={{ fontSize: '10px', fontWeight: 900, color: '#15803d', margin: 0 }}>YOUR SESSION · LIVE</p>
+                        <p style={{ fontSize: '14px', fontWeight: 900, color: '#0f172a', margin: '6px 0 0 0' }}>₹{pubLive.energyCharge} <span style={{ fontSize: '12px', fontWeight: 'normal' }}>({pubLive.energyKwh} kWh)</span></p>
+                        {formatSessionElapsed(pubUb.startedAt) && (
+                          <p style={{ fontSize: '11px', fontWeight: 700, margin: '4px 0 0 0', fontFamily: 'monospace', color: '#15803d' }}>{formatSessionElapsed(pubUb.startedAt)}</p>
+                        )}
+                      </div>
+                    )}
+                    {pubShowStart && (
+                      <button
+                        type="button"
+                        onClick={() => handleStartCharging(s)}
+                        disabled={pubLoading || !isStationConsideredOnline(s) || !pubConn.isAvailable}
+                        style={{
+                          width: '100%',
+                          marginTop: 8,
+                          background: (pubLoading || !isStationConsideredOnline(s) || !pubConn.isAvailable) ? '#e2e8f0' : '#16a34a',
+                          color: (pubLoading || !isStationConsideredOnline(s) || !pubConn.isAvailable) ? '#94a3b8' : '#fff',
+                          padding: '12px',
+                          borderRadius: '10px',
+                          fontWeight: 800,
+                          border: 'none',
+                          cursor: (pubLoading || !isStationConsideredOnline(s) || !pubConn.isAvailable) ? 'not-allowed' : 'pointer',
+                          boxShadow: (pubLoading || !isStationConsideredOnline(s) || !pubConn.isAvailable) ? 'none' : '0 4px 10px rgba(22, 163, 74, 0.2)',
+                        }}
+                      >
+                        {pubLoading ? '…' : 'Start charging'}
+                      </button>
+                    )}
+                    {pubShowStop && (
+                      <button
+                        type="button"
+                        onClick={() => handleStopCharging(s)}
+                        disabled={pubLoading}
+                        style={{
+                          marginTop: 8,
+                          width: '100%',
+                          background: '#fee2e2',
+                          color: '#b91c1c',
+                          padding: '12px',
+                          borderRadius: '10px',
+                          fontWeight: 800,
+                          border: '1.5px solid #fca5a5',
+                          cursor: pubLoading ? 'wait' : 'pointer',
+                        }}
+                      >
+                        {pubLoading ? '…' : 'Stop charging'}
+                      </button>
+                    )}
+                  </div>
+                </Popup>
+              </Marker>
+            );
+          })}
         </MapContainer>
       </main>
 
@@ -971,7 +1001,7 @@ const EVChargingFinder = () => {
             >
               <X size={20} />
             </button>
-            
+
             <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '16px' }}>
               <div style={{ background: 'rgba(16,185,129,0.1)', border: '1px solid rgba(16,185,129,0.2)', borderRadius: '10px', padding: '8px', color: '#34d399' }}>
                 <Zap size={22} className="animate-pulse" />
@@ -1012,7 +1042,7 @@ const EVChargingFinder = () => {
                 />
                 <span style={{ fontSize: '16px', fontWeight: 800, color: '#16a34a' }}>kWh</span>
               </div>
- 
+
               {/* Quick selectors presets */}
               <div style={{ display: 'flex', gap: '8px', marginTop: '12px' }}>
                 {[10, 20, 30, 50].map((val) => (
