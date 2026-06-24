@@ -264,7 +264,7 @@ const Dashboard = () => {
   const totalSpent = bookings.reduce((sum, b) => sum + (Number(b.amount ?? b.paidAmount ?? b.billTotal ?? b.energyCharge) || 0), 0);
 
   return (
-    <div style={{ minHeight: '100vh', background: '#fff', paddingTop: 96, paddingBottom: 80, position: 'relative', overflow: 'hidden' }}>
+    <div style={{ minHeight: '100vh', background: '#fff', paddingTop: 140, paddingBottom: 80, position: 'relative', overflow: 'hidden' }}>
       <style>{GLOBAL_CSS}</style>
 
       <div style={{ position: 'fixed', inset: 0, pointerEvents: 'none', zIndex: 0 }}>
@@ -279,20 +279,6 @@ const Dashboard = () => {
           transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
           style={{ marginBottom: 48 }}
         >
-          <div style={{
-            display: 'inline-flex', alignItems: 'center', gap: 10,
-            padding: '7px 16px', borderRadius: 99,
-            margin: '10px',
-            background: '#f8fafc', border: '2px solid #0f172a', marginBottom: 20,
-          }}>
-            <div style={{
-              width: 8, height: 8, borderRadius: '50%', background: '#16a34a',
-              animation: 'pulse-dot 2s infinite',
-            }} />
-            <span style={{ fontFamily: 'var(--font-body)', fontSize: 10, fontWeight: 800, color: '#0f172a', letterSpacing: '0.12em', textTransform: 'uppercase' }}>
-              TELEMETRY LIVE
-            </span>
-          </div>
           <h1 style={{
             fontFamily: 'var(--font-display)', fontSize: 'clamp(2.8rem, 6vw, 5rem)',
             fontWeight: 900, color: '#0f172a', letterSpacing: '-0.04em',
@@ -336,14 +322,6 @@ const Dashboard = () => {
               </span>
               Recent Activity
             </h2>
-            <div style={{
-              padding: '6px 16px', borderRadius: 99, border: '2px solid #0f172a',
-              background: '#f8fafc',
-            }}>
-              <span style={{ fontFamily: 'var(--font-body)', fontSize: 11, fontWeight: 800, color: '#0f172a', letterSpacing: '0.08em' }}>
-                {bookings.length} RECORDS
-              </span>
-            </div>
           </div>
 
           {bookings.length > 0 ? (

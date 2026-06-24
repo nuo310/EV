@@ -77,7 +77,6 @@ const Navbar = () => {
       isRoute: true 
     },
     ...(!isAdmin ? [{ name: 'My Profile', href: '/profile', isRoute: true }] : []),
-    { name: 'How It Works', href: '/#how-it-works' },
   ] : [
     { name: 'About App', href: '/#features' },
     { name: 'How It Works', href: '/#how-it-works' },
@@ -156,11 +155,8 @@ const Navbar = () => {
           <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
             {currentUser ? (
               <div style={{ position: 'relative' }}>
-                <div onClick={() => setProfileOpen(!profileOpen)} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '6px 16px', background: '#f1f5f9', borderRadius: 20, cursor: 'pointer', border: '1px solid #e2e8f0' }}>
+                <div onClick={() => setProfileOpen(!profileOpen)} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: 36, height: 36, background: '#f1f5f9', borderRadius: '50%', cursor: 'pointer', border: '1px solid #e2e8f0' }}>
                   <UserIcon size={16} color="#475569" />
-                  <span style={{ fontSize: 14, fontWeight: 800, color: '#0f172a' }}>
-                    {currentUser.displayName || currentUser.email.split('@')[0]}
-                  </span>
                 </div>
 
                 <AnimatePresence>
@@ -219,66 +215,6 @@ const Navbar = () => {
 
         {/* Mobile Navigation controls */}
         <div className="flex md:hidden items-center gap-3">
-          {currentUser && (
-            <div style={{ position: 'relative' }}>
-              <div onClick={() => { setProfileOpen(!profileOpen); setMobileMenuOpen(false); }} style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '6px 12px', background: '#f1f5f9', borderRadius: 20, cursor: 'pointer', border: '1px solid #e2e8f0' }}>
-                <UserIcon size={14} color="#475569" />
-                <span style={{ fontSize: 12, fontWeight: 800, color: '#0f172a' }}>
-                  {(currentUser.displayName || currentUser.email.split('@')[0]).substring(0, 10)}
-                </span>
-              </div>
-              <AnimatePresence>
-                {profileOpen && (
-                  <motion.div
-                    initial={{ opacity: 0, y: 10, scale: 0.95 }}
-                    animate={{ opacity: 1, y: 0, scale: 1 }}
-                    exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                    transition={{ duration: 0.15 }}
-                    style={{
-                      position: 'absolute', top: 45, right: 0, width: 240,
-                      background: '#fff', borderRadius: 20, border: '2px solid #0f172a',
-                      boxShadow: '8px 8px 0 rgba(15, 23, 42, 0.08)', padding: 12, zIndex: 110,
-                      display: 'flex', flexDirection: 'column', gap: 10, pointerEvents: 'auto'
-                    }}
-                  >
-                    <div 
-                      onClick={() => { setProfileOpen(false); navigate('/profile'); }}
-                      style={{ padding: '6px', borderBottom: '1px solid #e2e8f0', marginBottom: 2, cursor: 'pointer', borderRadius: 10 }}
-                    >
-                       <p style={{ margin: 0, fontSize: 10, fontWeight: 800, color: '#94a3b8', textTransform: 'uppercase' }}>Signed in as</p>
-                       <p style={{ margin: 0, fontSize: 13, fontWeight: 700, color: '#0f172a', overflow: 'hidden', textOverflow: 'ellipsis' }}>{currentUser.displayName || currentUser.email}</p>
-                       {isAdmin ? (
-                         <div style={{ marginTop: 6, display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#f0fdf4', padding: '6px 10px', borderRadius: 10, border: '1px solid rgba(22, 163, 74, 0.2)' }}>
-                           <span style={{ fontSize: 10, fontWeight: 700, color: '#16a34a' }}>Revenue</span>
-                           <span style={{ fontSize: 12, fontWeight: 900, color: '#15803d' }}>₹{revenue.toLocaleString('en-IN', { minimumFractionDigits: 1, maximumFractionDigits: 1 })}</span>
-                         </div>
-                       ) : (
-                         <div style={{ marginTop: 6, display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#fffbeb', padding: '6px 10px', borderRadius: 10, border: '1px solid rgba(212,175,55,0.2)' }}>
-                           <span style={{ fontSize: 10, fontWeight: 700, color: '#D4AF37' }}>Wallet</span>
-                           <span style={{ fontSize: 12, fontWeight: 900, color: '#AA7C11' }}>₹{(currentUser.profile?.walletBalance || 0).toFixed(2)}</span>
-                         </div>
-                       )}
-                    </div>
-
-                    <button 
-                      onClick={() => { setProfileOpen(false); navigate(isAdmin ? '/admin' : '/dashboard'); }}
-                      style={{ border: 'none', background: '#f8fafc', padding: '8px', borderRadius: 10, fontWeight: 700, color: '#0f172a', cursor: 'pointer', textAlign: 'left', display: 'flex', alignItems: 'center', gap: 6, fontSize: 12 }}
-                    >
-                       <Activity size={14} /> {isAdmin ? 'Admin' : 'Dashboard'}
-                    </button>
-
-                    <button 
-                      onClick={async () => { setProfileOpen(false); await logout(); navigate('/'); }}
-                      style={{ border: 'none', background: '#fee2e2', padding: '8px', borderRadius: 10, fontWeight: 800, color: '#dc2626', cursor: 'pointer', textAlign: 'left', display: 'flex', alignItems: 'center', gap: 6, fontSize: 12 }}
-                    >
-                       <LogOut size={14} /> Sign Out
-                    </button>
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </div>
-          )}
-
           <button
             onClick={() => { setMobileMenuOpen(!mobileMenuOpen); setProfileOpen(false); }}
             style={{
@@ -307,6 +243,23 @@ const Navbar = () => {
                 pointerEvents: 'auto', overflow: 'hidden'
               }}
             >
+              {currentUser && (
+                <div style={{ padding: '12px', marginBottom: 8, background: '#f8fafc', borderRadius: 14, border: '2px solid #0f172a' }}>
+                   <p style={{ margin: 0, fontSize: 10, fontWeight: 800, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Signed in as</p>
+                   <p style={{ margin: '4px 0 0', fontSize: 14, fontWeight: 800, color: '#0f172a' }}>{currentUser.displayName || currentUser.email}</p>
+                   {isAdmin ? (
+                     <div style={{ marginTop: 8, display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#f0fdf4', padding: '6px 10px', borderRadius: 10, border: '1.5px solid #16a34a' }}>
+                       <span style={{ fontSize: 11, fontWeight: 800, color: '#16a34a' }}>Revenue</span>
+                       <span style={{ fontSize: 13, fontWeight: 900, color: '#15803d' }}>₹{revenue.toLocaleString('en-IN', { minimumFractionDigits: 1, maximumFractionDigits: 1 })}</span>
+                     </div>
+                   ) : (
+                     <div style={{ marginTop: 8, display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#fffbeb', padding: '6px 10px', borderRadius: 10, border: '1.5px solid #D4AF37' }}>
+                       <span style={{ fontSize: 11, fontWeight: 800, color: '#D4AF37' }}>Wallet</span>
+                       <span style={{ fontSize: 13, fontWeight: 900, color: '#AA7C11' }}>₹{(currentUser.profile?.walletBalance || 0).toFixed(2)}</span>
+                     </div>
+                   )}
+                </div>
+              )}
               {navLinks.map((link) => (
                 <button
                   key={link.name}
