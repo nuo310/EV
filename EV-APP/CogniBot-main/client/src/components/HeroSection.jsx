@@ -86,7 +86,7 @@ const Typewriter = ({ words, delay = 2000 }) => {
 
   return (
     <span style={{
-      color: '#16a34a',
+      color: '#13D399',
       borderRight: '3px solid #D4AF37',
       paddingRight: '4px',
       display: 'inline-block'
@@ -171,7 +171,7 @@ const TelemetryWidget = ({ floatX, floatY }) => (
       </div>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
         {[
-          { l: 'Network Load', v: '94%', c: '#16a34a', icon: <Activity size={12} /> },
+          { l: 'Network Load', v: '94%', c: '#13D399', icon: <Activity size={12} /> },
           { l: 'Data Flow', v: '12GB/s', c: '#D4AF37', icon: <BarChart3 size={12} /> }
         ].map((item, i) => (
           <div key={i}>
@@ -202,7 +202,7 @@ const PhoneMockup = () => (
       <div style={{ height: '60%', position: 'relative', background: '#f8fafc' }}>
         <div className="grid-lines" style={{ position: 'absolute', inset: 0, opacity: 0.5 }} />
         <svg style={{ position: 'absolute', inset: 0, width: '100%', height: '100%' }}>
-          <path d="M 40,300 Q 150,250 240,80" fill="none" stroke="#16a34a" strokeWidth="6" strokeLinecap="round" strokeDasharray="12 12" />
+          <path d="M 40,300 Q 150,250 240,80" fill="none" stroke="#13D399" strokeWidth="6" strokeLinecap="round" strokeDasharray="12 12" />
         </svg>
         <div style={{ position: 'absolute', left: 40, top: 300, width: 24, height: 24, borderRadius: '50%', border: '2px solid #0f172a', background: '#0f172a' }} />
         <div style={{ position: 'absolute', left: 240, top: 80, width: 32, height: 32, borderRadius: '50%', border: '4px solid #fff', background: '#D4AF37', boxShadow: '0 8px 16px rgba(212,175,55,0.3)' }} />
@@ -244,7 +244,7 @@ const HeroSection = () => {
   }, []);
 
   return (
-    <section 
+    <section
       style={{ position: 'relative', minHeight: '100vh', background: '#fff', overflow: 'hidden', display: 'flex', alignItems: 'center' }}
       className="pt-36 sm:pt-28 lg:pt-20"
     >
@@ -266,11 +266,11 @@ const HeroSection = () => {
 
           {/* Left Side */}
           <motion.div initial={{ opacity: 0, x: -40 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 1, ease: [0.16, 1, 0.3, 1] }} className="flex flex-col justify-center">
-            <div 
+            <div
               style={{ alignItems: 'center', gap: 12, padding: '8px 16px', borderRadius: 99, background: '#f8fafc', border: '2px solid #0f172a', marginBottom: 24, alignSelf: 'flex-start', width: 'fit-content', boxShadow: '4px 4px 0 #D4AF37' }}
               className="hidden sm:flex"
             >
-              <div style={{ width: 8, height: 8, borderRadius: '50%', background: '#16a34a', boxShadow: '0 0 8px rgba(22,163,74,0.4)' }} />
+              <div style={{ width: 8, height: 8, borderRadius: '50%', background: '#13D399', boxShadow: '0 0 8px rgba(22,163,74,0.4)' }} />
               <span style={{ fontSize: 11, fontWeight: 800, color: '#0f172a', letterSpacing: '0.1em' }}>TERMINAL READY</span>
             </div>
 
@@ -294,7 +294,7 @@ const HeroSection = () => {
 
               <motion.div className="hidden lg:block" style={{ x: floatX, y: floatY, position: 'absolute', bottom: '4rem', right: '-80px', zIndex: 10 }}>
                 <div className="glass-card" style={{ padding: '12px 18px', borderRadius: 16, display: 'flex', alignItems: 'center', gap: 10 }}>
-                  <Globe size={18} color="#16a34a" />
+                  <Globe size={18} color="#13D399" />
                   <div>
                     <span style={{ fontSize: 9, fontWeight: 800, color: '#94a3b8', display: 'block', lineHeight: 1 }}>CONNECTED TO</span>
                     <span style={{ fontSize: 12, fontWeight: 800, color: '#0f172a' }}>SYD_NORTH_HUB</span>

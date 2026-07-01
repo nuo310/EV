@@ -27,7 +27,7 @@ void main() {
 
     expect(find.textContaining('My Bookings'), findsOneWidget);
     expect(find.textContaining('Dashboard'), findsNWidgets(2));
-    expect(find.text('TOTAL TRIPS'), findsOneWidget);
+    expect(find.text('TOTAL CHARGE'), findsOneWidget);
     expect(find.text('CREDITS SPENT'), findsOneWidget);
     expect(find.text('ACTIVE NOW'), findsOneWidget);
     expect(find.text('COMPLETED'), findsNWidgets(3));

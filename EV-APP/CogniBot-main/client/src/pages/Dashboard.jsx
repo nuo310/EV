@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
-import { Calendar, Activity, Zap, ArrowRight, Radio, Cpu } from 'lucide-react';
+import { Calendar, Activity, Zap, ArrowRight, Radio, Cpu, MapPin } from 'lucide-react';
 import { motion } from 'framer-motion';
 // Switched to onSnapshot for real-time updates
 import { collection, query, where, onSnapshot } from 'firebase/firestore';
@@ -121,7 +121,7 @@ const StatCard = ({ icon, label, value, accent = false, delay = 0 }) => (
 /* ─────────────────────────────────────────────────────────
    BOOKING CARD (Unchanged)
    ───────────────────────────────────────────────────────── */
-const BookingCard = ({ booking, idx }) => {
+const BookingCard = ({ booking, idx, stations = [] }) => {
   const st = statusStyle(booking.status || booking.bookingStatus); // Support both status naming conventions
   const dateStr = booking.createdAt?.seconds
     ? new Date(booking.createdAt.seconds * 1000).toLocaleString('en-IN', {
@@ -129,6 +129,10 @@ const BookingCard = ({ booking, idx }) => {
       hour: '2-digit', minute: '2-digit',
     })
     : 'Unknown Date';
+
+  const station = stations.find(s => s.id === booking.stationId);
+  const lat = station?.lat;
+  const lng = station?.lng;
 
   return (
     <motion.div
@@ -192,6 +196,45 @@ const BookingCard = ({ booking, idx }) => {
           {booking.status || booking.bookingStatus}
         </span>
       </div>
+
+      {lat && lng && (
+        <div style={{ marginTop: 18 }}>
+          <a
+            href={`https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: 8,
+              padding: '10px 16px',
+              borderRadius: 12,
+              background: '#f8fafc',
+              border: '2px solid #0f172a',
+              color: '#0f172a',
+              fontFamily: 'var(--font-body)',
+              fontWeight: 800,
+              fontSize: 12,
+              textDecoration: 'none',
+              cursor: 'pointer',
+              transition: 'all 0.2s ease',
+              boxShadow: '4px 4px 0 #0f172a',
+            }}
+            onMouseEnter={e => {
+              e.currentTarget.style.background = '#0f172a';
+              e.currentTarget.style.color = '#fff';
+            }}
+            onMouseLeave={e => {
+              e.currentTarget.style.background = '#f8fafc';
+              e.currentTarget.style.color = '#0f172a';
+            }}
+          >
+            <MapPin size={14} color="currentColor" />
+            Navigate to Charger
+          </a>
+        </div>
+      )}
     </motion.div>
   );
 };
@@ -241,6 +284,7 @@ const EmptyState = () => (
 const Dashboard = () => {
   const { currentUser } = useAuth();
   const [bookings, setBookings] = useState([]);
+  const [stations, setStations] = useState([]);
 
   useEffect(() => {
     if (!currentUser?.uid) return;
@@ -258,7 +302,14 @@ const Dashboard = () => {
       setBookings(raw);
     });
 
-    return () => unsubscribe();
+    const unsubscribeStations = onSnapshot(collection(db, 'stations'), (snap) => {
+      setStations(snap.docs.map(d => ({ id: d.id, ...d.data() })));
+    });
+
+    return () => {
+      unsubscribe();
+      unsubscribeStations();
+    };
   }, [currentUser]);
 
   const totalSpent = bookings.reduce((sum, b) => sum + (Number(b.amount ?? b.paidAmount ?? b.billTotal ?? b.energyCharge) || 0), 0);
@@ -327,7 +378,7 @@ const Dashboard = () => {
           {bookings.length > 0 ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
               {bookings.map((booking, idx) => (
-                <BookingCard key={booking.id} booking={booking} idx={idx} />
+                <BookingCard key={booking.id} booking={booking} idx={idx} stations={stations} />
               ))}
             </div>
           ) : (

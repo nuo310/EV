@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:ev/app/core/theme/app_colors.dart';
 import 'package:ev/app/modules/home/controllers/home_controller.dart';
 import 'package:flutter_map/flutter_map.dart';
@@ -404,6 +405,37 @@ class FindChargersView extends GetView<HomeController> {
                 ),
                 Row(
                   children: [
+                    if (station['lat'] != null && station['lng'] != null) ...[
+                      GestureDetector(
+                        onTap: () async {
+                          final lat = station['lat'];
+                          final lng = station['lng'];
+                          final url = Uri.parse(
+                            'https://www.google.com/maps/dir/?api=1&destination=$lat,$lng',
+                          );
+                          if (await canLaunchUrl(url)) {
+                            await launchUrl(url, mode: LaunchMode.externalApplication);
+                          }
+                        },
+                        child: Container(
+                          margin: const EdgeInsets.only(right: 8),
+                          padding: const EdgeInsets.all(10),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(14),
+                            border: Border.all(color: AppColors.border, width: 2.0),
+                            boxShadow: const [
+                              BoxShadow(color: Color(0x120F172A), offset: Offset(2.0, 2.0)),
+                            ],
+                          ),
+                          child: const Icon(
+                            Icons.near_me_rounded,
+                            size: 16,
+                            color: AppColors.text,
+                          ),
+                        ),
+                      ),
+                    ],
                     if (!isCharging)
                       _buildActionButton(
                         text: 'Start charging',
@@ -509,7 +541,7 @@ class FindChargersView extends GetView<HomeController> {
         child: Obx(() {
           final bool isSelected = controller.selectedStationId.value == id;
           return Container(
-            padding: const EdgeInsets.all(24),
+            padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
               color: Colors.white,
               borderRadius: BorderRadius.circular(20),
@@ -530,7 +562,6 @@ class FindChargersView extends GetView<HomeController> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Top Right Badges
                 Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -542,60 +573,49 @@ class FindChargersView extends GetView<HomeController> {
                             name,
                             style: const TextStyle(
                               fontFamily: 'Space Grotesk',
-                              fontSize: 20,
+                              fontSize: 18,
                               fontWeight: FontWeight.w900,
                               color: AppColors.text,
                             ),
                           ),
-                          const SizedBox(height: 6),
-                          Row(
+                          const SizedBox(height: 8),
+                          Wrap(
+                            spacing: 6,
+                            runSpacing: 6,
+                            crossAxisAlignment: WrapCrossAlignment.center,
                             children: [
-                              _buildBadge(status, const Color(0xFF1D4ED8), const Color(0xFFDBEAFE), const Color(0xFFBFDBFE), dotColor: const Color(0xFF3B82F6)),
-                              const SizedBox(width: 8),
+                              _buildStatusBadge(status),
+                              isOnline
+                                  ? _buildBadge('ONLINE', const Color(0xFF15803D), const Color(0xFFDCFCE7), const Color(0xFF16A34A), dotColor: const Color(0xFF16A34A))
+                                  : _buildBadge('OFFLINE', const Color(0xFF991B1B), const Color(0xFFFEE2E2), const Color(0xFFDC2626), dotColor: const Color(0xFFEF4444)),
                               if (distance != '--')
-                                Row(
-                                  children: [
-                                    const Icon(Icons.navigation_rounded, size: 12, color: AppColors.textMuted),
-                                    const SizedBox(width: 4),
-                                    Text(
-                                      distance,
-                                      style: const TextStyle(
-                                        fontSize: 11,
-                                        fontWeight: FontWeight.w800,
-                                        color: AppColors.textMuted,
+                                Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                  decoration: BoxDecoration(
+                                    color: const Color(0xFFF8FAFC),
+                                    borderRadius: BorderRadius.circular(20),
+                                    border: Border.all(color: const Color(0xFFE2E8F0), width: 1.0),
+                                  ),
+                                  child: Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      const Icon(Icons.navigation_rounded, size: 10, color: AppColors.textMuted),
+                                      const SizedBox(width: 4),
+                                      Text(
+                                        distance,
+                                        style: const TextStyle(
+                                          fontSize: 9,
+                                          fontWeight: FontWeight.w900,
+                                          color: AppColors.textMuted,
+                                        ),
                                       ),
-                                    ),
-                                  ],
+                                    ],
+                                  ),
                                 ),
                             ],
                           ),
                         ],
                       ),
-                    ),
-                    // Connector + Online badges
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.end,
-                      children: [
-                        const Text(
-                          'CONNECTOR (OCPP)',
-                          style: TextStyle(
-                            fontSize: 8,
-                            fontWeight: FontWeight.w900,
-                            color: AppColors.textLight,
-                            letterSpacing: 0.5,
-                          ),
-                        ),
-                        const SizedBox(height: 6),
-                        Row(
-                          children: [
-                            _buildStatusBadge(status),
-                            const SizedBox(width: 6),
-                            isOnline
-                                ? _buildBadge('ONLINE', const Color(0xFF15803D), const Color(0xFFDCFCE7), const Color(0xFF16A34A), dotColor: const Color(0xFF16A34A))
-                                : _buildBadge('OFFLINE', const Color(0xFF991B1B), const Color(0xFFFEE2E2), const Color(0xFFDC2626), dotColor: const Color(0xFFEF4444)),
-                          ],
-                        ),
-                      ],
                     ),
                   ],
                 ),
@@ -627,6 +647,8 @@ class FindChargersView extends GetView<HomeController> {
                             const SizedBox(height: 4),
                             Text(
                               '$vendor $model',
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
                               style: const TextStyle(
                                 fontSize: 12,
                                 fontWeight: FontWeight.w800,
@@ -635,6 +657,8 @@ class FindChargersView extends GetView<HomeController> {
                             ),
                             Text(
                               'CID: $connectorId \u2022 $chargerType',
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
                               style: const TextStyle(
                                 fontSize: 10,
                                 color: AppColors.textMuted,
@@ -668,6 +692,8 @@ class FindChargersView extends GetView<HomeController> {
                             const SizedBox(height: 4),
                             Text(
                               'Slots: $availableSlots',
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
                               style: const TextStyle(
                                 fontSize: 12,
                                 fontWeight: FontWeight.w800,
@@ -682,6 +708,8 @@ class FindChargersView extends GetView<HomeController> {
                                 Expanded(
                                   child: Text(
                                     errorCode,
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
                                     style: TextStyle(
                                       fontSize: 10,
                                       color: errorCode == 'NoError' ? AppColors.textMuted : AppColors.error,
@@ -707,48 +735,83 @@ class FindChargersView extends GetView<HomeController> {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            crossAxisAlignment: CrossAxisAlignment.baseline,
+                            textBaseline: TextBaseline.alphabetic,
+                            children: [
+                              Text(
+                                '\u20b9$ratePerKwh',
+                                style: const TextStyle(
+                                  fontFamily: 'Space Grotesk',
+                                  fontSize: 26,
+                                  fontWeight: FontWeight.w900,
+                                  color: AppColors.text,
+                                ),
+                              ),
+                              const SizedBox(width: 4),
+                              const Text(
+                                '/kWh',
+                                style: TextStyle(
+                                  fontSize: 10,
+                                  fontWeight: FontWeight.w700,
+                                  color: AppColors.textMuted,
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            'SYNC: ${DateTime.now().hour.toString().padLeft(2, '0')}:${DateTime.now().minute.toString().padLeft(2, '0')}',
+                            style: const TextStyle(
+                              fontFamily: 'monospace',
+                              fontSize: 9,
+                              fontWeight: FontWeight.w800,
+                              color: AppColors.textLight,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    // Action Buttons
+                    Row(
+                      mainAxisSize: MainAxisSize.min,
                       children: [
-                        Row(
-                          crossAxisAlignment: CrossAxisAlignment.baseline,
-                          textBaseline: TextBaseline.alphabetic,
-                          children: [
-                            Text(
-                              '\u20b9$ratePerKwh',
-                              style: const TextStyle(
-                                fontFamily: 'Space Grotesk',
-                                fontSize: 26,
-                                fontWeight: FontWeight.w900,
+                        if (station['lat'] != null && station['lng'] != null) ...[
+                          GestureDetector(
+                            onTap: () async {
+                              final lat = station['lat'];
+                              final lng = station['lng'];
+                              final url = Uri.parse(
+                                'https://www.google.com/maps/dir/?api=1&destination=$lat,$lng',
+                              );
+                              if (await canLaunchUrl(url)) {
+                                await launchUrl(url, mode: LaunchMode.externalApplication);
+                              }
+                            },
+                            child: Container(
+                              margin: const EdgeInsets.only(right: 8),
+                              padding: const EdgeInsets.all(10),
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                borderRadius: BorderRadius.circular(14),
+                                border: Border.all(color: AppColors.border, width: 2.0),
+                                boxShadow: const [
+                                  BoxShadow(color: Color(0x120F172A), offset: Offset(2.0, 2.0)),
+                                ],
+                              ),
+                              child: const Icon(
+                                Icons.near_me_rounded,
+                                size: 16,
                                 color: AppColors.text,
                               ),
                             ),
-                            const SizedBox(width: 8),
-                            const Text(
-                              '/kWh',
-                              style: TextStyle(
-                                fontSize: 10,
-                                fontWeight: FontWeight.w700,
-                                color: AppColors.textMuted,
-                              ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          'SYNC: ${DateTime.now().hour.toString().padLeft(2, '0')}:${DateTime.now().minute.toString().padLeft(2, '0')}',
-                          style: const TextStyle(
-                            fontFamily: 'monospace',
-                            fontSize: 9,
-                            fontWeight: FontWeight.w800,
-                            color: AppColors.textLight,
                           ),
-                        ),
-                      ],
-                    ),
-                    // Action Buttons
-                    Row(
-                      children: [
+                        ],
                         if (!isCharging)
                           _buildActionButton(
                             text: 'Start charging',
@@ -1266,7 +1329,7 @@ class FindChargersView extends GetView<HomeController> {
     return GestureDetector(
       onTap: enabled ? onTap : null,
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
         decoration: BoxDecoration(
           color: isOutlined
               ? Colors.white
@@ -1288,7 +1351,7 @@ class FindChargersView extends GetView<HomeController> {
         child: Text(
           text,
           style: TextStyle(
-            fontSize: 14,
+            fontSize: 13,
             fontWeight: FontWeight.w800,
             color: isOutlined
                 ? color

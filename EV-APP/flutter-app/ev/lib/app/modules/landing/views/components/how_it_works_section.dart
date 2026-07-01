@@ -88,22 +88,7 @@ class HowItWorksSection extends StatelessWidget {
               ),
             ),
           ),
-          Center(
-            child: Text(
-              'Work Silently.',
-              style: TextStyle(
-                fontFamily: 'Space Grotesk',
-                fontSize: 36,
-                fontWeight: FontWeight.w900,
-                height: 1.1,
-                letterSpacing: -0.5,
-                foreground: Paint()
-                  ..style = PaintingStyle.stroke
-                  ..strokeWidth = 1.0
-                  ..color = AppColors.gold,
-              ),
-            ),
-          ),
+          
           const SizedBox(height: 14),
           const Center(
             child: Text(

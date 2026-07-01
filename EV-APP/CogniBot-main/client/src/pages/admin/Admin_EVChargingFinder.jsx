@@ -26,7 +26,9 @@ const userIcon = createIcon('#D4AF37');
 function toFiniteNumber(value) {
   if (typeof value === 'number') return Number.isFinite(value) ? value : null;
   if (typeof value === 'string') {
-    const n = Number(value.trim());
+    const trimmed = value.trim();
+    if (trimmed === '') return null;
+    const n = Number(trimmed);
     return Number.isFinite(n) ? n : null;
   }
   return null;

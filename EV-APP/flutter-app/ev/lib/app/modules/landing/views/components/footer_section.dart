@@ -88,16 +88,16 @@ class FooterSection extends StatelessWidget {
                           size: 14,
                         ),
                         const SizedBox(width: 6),
-                        const Text(
-                          'ISO_15118',
-                          style: TextStyle(
-                            fontFamily: 'monospace',
-                            fontSize: 9,
-                            fontWeight: FontWeight.w700,
-                            color: AppColors.textMuted,
-                            letterSpacing: 0.5,
-                          ),
-                        ),
+                        // const Text(
+                        //   'ISO_15118',
+                        //   style: TextStyle(
+                        //     fontFamily: 'monospace',
+                        //     fontSize: 9,
+                        //     fontWeight: FontWeight.w700,
+                        //     color: AppColors.textMuted,
+                        //     letterSpacing: 0.5,
+                        //   ),
+                        // ),
                       ],
                     ),
                   ),

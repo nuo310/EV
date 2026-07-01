@@ -53,33 +53,7 @@ class FeaturesSection extends StatelessWidget {
           ),
           const SizedBox(height: 24),
 
-          // Section Title
-          const Center(
-            child: Text(
-              'Architectural Core.',
-              style: TextStyle(
-                fontFamily: 'Space Grotesk',
-                fontSize: 36,
-                fontWeight: FontWeight.w900,
-                color: AppColors.text,
-                height: 1.1,
-                letterSpacing: -0.5,
-              ),
-            ),
-          ),
-          const Center(
-            child: Text(
-              'Technical Precision.',
-              style: TextStyle(
-                fontFamily: 'Space Grotesk',
-                fontSize: 36,
-                fontWeight: FontWeight.w900,
-                color: AppColors.textMuted,
-                height: 1.1,
-                letterSpacing: -0.5,
-              ),
-            ),
-          ),
+       
           const SizedBox(height: 48),
 
           // Bento Card 1: Universal Plug & Charge (Large Stack Card)

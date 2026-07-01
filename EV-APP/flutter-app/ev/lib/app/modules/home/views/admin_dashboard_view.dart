@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:ev/app/core/theme/app_colors.dart';
 import 'package:ev/app/core/widgets/reusable_widgets.dart';
 import '../controllers/admin_controller.dart';
@@ -676,6 +677,21 @@ class AdminDashboardView extends GetView<AdminController> {
               const Spacer(),
               Row(
                 children: [
+                  if (station['lat'] != null && station['lng'] != null)
+                    IconButton(
+                      icon: const Icon(Icons.near_me_rounded, color: AppColors.primary),
+                      tooltip: 'Navigate to Charger',
+                      onPressed: () async {
+                        final lat = station['lat'];
+                        final lng = station['lng'];
+                        final url = Uri.parse(
+                          'https://www.google.com/maps/dir/?api=1&destination=$lat,$lng',
+                        );
+                        if (await canLaunchUrl(url)) {
+                          await launchUrl(url, mode: LaunchMode.externalApplication);
+                        }
+                      },
+                    ),
                   IconButton(
                     icon: const Icon(Icons.edit_rounded, color: AppColors.text),
                     onPressed: () => _showStationDialog(station: station),

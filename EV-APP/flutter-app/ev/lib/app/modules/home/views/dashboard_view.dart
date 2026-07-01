@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:ev/app/core/theme/app_colors.dart';
 import 'package:ev/app/core/widgets/reusable_widgets.dart';
 import 'package:ev/app/modules/home/controllers/home_controller.dart';
@@ -85,7 +86,7 @@ class DashboardView extends GetView<HomeController> {
                     children: [
                       _buildStatCard(
                         icon: Icons.trending_up_rounded,
-                        label: 'Total Trips',
+                        label: 'Total Charge',
                         value: tripsCount.toString(),
                       ),
                       const SizedBox(width: 16),
@@ -130,7 +131,11 @@ class DashboardView extends GetView<HomeController> {
                     children: [
                       const Row(
                         children: [
-                          Icon(Icons.calendar_month_rounded, color: AppColors.primary, size: 20),
+                          Icon(
+                            Icons.calendar_month_rounded,
+                            color: AppColors.primary,
+                            size: 20,
+                          ),
                           SizedBox(width: 10),
                           Text(
                             'Recent Activity',
@@ -146,11 +151,17 @@ class DashboardView extends GetView<HomeController> {
                       Obx(() {
                         final count = controller.bookings.length;
                         return Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 12,
+                            vertical: 6,
+                          ),
                           decoration: BoxDecoration(
                             color: const Color(0xFFF8FAFC),
                             borderRadius: BorderRadius.circular(99),
-                            border: Border.all(color: AppColors.border, width: 2.0),
+                            border: Border.all(
+                              color: AppColors.border,
+                              width: 2.0,
+                            ),
                           ),
                           child: Text(
                             '$count RECORDS',
@@ -166,10 +177,7 @@ class DashboardView extends GetView<HomeController> {
                     ],
                   ),
                   const SizedBox(height: 20),
-                  Container(
-                    height: 2.0,
-                    color: const Color(0xFFF1F5F9),
-                  ),
+                  Container(height: 2.0, color: const Color(0xFFF1F5F9)),
                   const SizedBox(height: 20),
 
                   // Bookings List or Empty State
@@ -181,7 +189,8 @@ class DashboardView extends GetView<HomeController> {
                       shrinkWrap: true,
                       physics: const NeverScrollableScrollPhysics(),
                       itemCount: controller.bookings.length,
-                      separatorBuilder: (context, index) => const SizedBox(height: 16),
+                      separatorBuilder: (context, index) =>
+                          const SizedBox(height: 16),
                       itemBuilder: (context, index) {
                         final booking = controller.bookings[index];
                         return _buildBookingCard(booking, index);
@@ -192,7 +201,7 @@ class DashboardView extends GetView<HomeController> {
               ),
             ),
             const SizedBox(height: 32),
-            _buildTerminalConsole(),
+            // _buildTerminalConsole(),
           ],
         ),
       ),
@@ -213,7 +222,11 @@ class DashboardView extends GetView<HomeController> {
         children: [
           Row(
             children: [
-              const Icon(Icons.terminal_rounded, color: Color(0xFF4ADE80), size: 18),
+              const Icon(
+                Icons.terminal_rounded,
+                color: Color(0xFF4ADE80),
+                size: 18,
+              ),
               const SizedBox(width: 8),
               const Text(
                 'SYSTEM TELEMETRY CONSOLE',
@@ -293,7 +306,7 @@ class DashboardView extends GetView<HomeController> {
                   } else if (log.contains('[API]')) {
                     logColor = const Color(0xFF2DD4BF);
                   }
-                  
+
                   return Padding(
                     padding: const EdgeInsets.only(bottom: 6.0),
                     child: Text(
@@ -352,7 +365,9 @@ class DashboardView extends GetView<HomeController> {
     return Expanded(
       child: NeoCard(
         backgroundColor: accent ? AppColors.border : Colors.white,
-        shadowColor: accent ? AppColors.primary.withValues(alpha: 0.25) : AppColors.border.withValues(alpha: 0.08),
+        shadowColor: accent
+            ? AppColors.primary.withValues(alpha: 0.25)
+            : AppColors.border.withValues(alpha: 0.08),
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 20),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -366,7 +381,9 @@ class DashboardView extends GetView<HomeController> {
                     color: accent ? AppColors.primary : const Color(0xFFF8FAFC),
                     borderRadius: BorderRadius.circular(8),
                     border: Border.all(
-                      color: accent ? AppColors.primary : const Color(0xFFE2E8F0),
+                      color: accent
+                          ? AppColors.primary
+                          : const Color(0xFFE2E8F0),
                       width: 1.5,
                     ),
                   ),
@@ -387,7 +404,9 @@ class DashboardView extends GetView<HomeController> {
                       fontSize: 8,
                       fontWeight: FontWeight.w800,
                       letterSpacing: 0.5,
-                      color: accent ? const Color(0xFF94A3B8) : AppColors.textMuted,
+                      color: accent
+                          ? const Color(0xFF94A3B8)
+                          : AppColors.textMuted,
                     ),
                   ),
                 ),
@@ -416,6 +435,12 @@ class DashboardView extends GetView<HomeController> {
     final int amount = booking['amount'] ?? 0;
     final String id = booking['id'] ?? '';
     final DateTime createdAt = booking['createdAt'] ?? DateTime.now();
+
+    // Look up station coordinates for navigation
+    final String? stationId = booking['stationId'];
+    final station = stationId != null ? controller.getStationById(stationId) : null;
+    final double? stationLat = station?['lat']?.toDouble();
+    final double? stationLng = station?['lng']?.toDouble();
 
     Color statusColor;
     Color statusBg;
@@ -448,10 +473,7 @@ class DashboardView extends GetView<HomeController> {
         borderRadius: BorderRadius.circular(16),
         border: Border.all(color: AppColors.border, width: 2.0),
         boxShadow: const [
-          BoxShadow(
-            color: Color(0x120F172A),
-            offset: Offset(4.0, 4.0),
-          ),
+          BoxShadow(color: Color(0x120F172A), offset: Offset(4.0, 4.0)),
         ],
       ),
       child: Column(
@@ -468,7 +490,11 @@ class DashboardView extends GetView<HomeController> {
                   borderRadius: BorderRadius.circular(10),
                   border: Border.all(color: AppColors.border, width: 1.5),
                 ),
-                child: const Icon(Icons.bolt_rounded, color: AppColors.primary, size: 20),
+                child: const Icon(
+                  Icons.bolt_rounded,
+                  color: AppColors.primary,
+                  size: 20,
+                ),
               ),
               const SizedBox(width: 12),
               Expanded(
@@ -509,10 +535,7 @@ class DashboardView extends GetView<HomeController> {
             ],
           ),
           const SizedBox(height: 12),
-          Container(
-            height: 1.0,
-            color: const Color(0xFFF1F5F9),
-          ),
+          Container(height: 1.0, color: const Color(0xFFF1F5F9)),
           const SizedBox(height: 12),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -542,7 +565,10 @@ class DashboardView extends GetView<HomeController> {
                 ],
               ),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 4,
+                ),
                 decoration: BoxDecoration(
                   color: statusBg,
                   borderRadius: BorderRadius.circular(99),
@@ -560,6 +586,57 @@ class DashboardView extends GetView<HomeController> {
               ),
             ],
           ),
+          // Navigate to Charger button
+          if (stationLat != null && stationLng != null) ...[
+            const SizedBox(height: 14),
+            SizedBox(
+              width: double.infinity,
+              child: GestureDetector(
+                onTap: () async {
+                  final url = Uri.parse(
+                    'https://www.google.com/maps/dir/?api=1&destination=$stationLat,$stationLng',
+                  );
+                  if (await canLaunchUrl(url)) {
+                    await launchUrl(url, mode: LaunchMode.externalApplication);
+                  }
+                },
+                child: Container(
+                  padding: const EdgeInsets.symmetric(vertical: 10),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFF8FAFC),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: AppColors.border, width: 2.0),
+                    boxShadow: const [
+                      BoxShadow(
+                        color: Color(0x120F172A),
+                        offset: Offset(3.0, 3.0),
+                      ),
+                    ],
+                  ),
+                  child: const Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(
+                        Icons.near_me_rounded,
+                        size: 14,
+                        color: AppColors.text,
+                      ),
+                      SizedBox(width: 8),
+                      Text(
+                        'Navigate to Charger',
+                        style: TextStyle(
+                          fontFamily: 'Space Grotesk',
+                          fontWeight: FontWeight.w800,
+                          fontSize: 12,
+                          color: AppColors.text,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ],
         ],
       ),
     );
@@ -575,10 +652,7 @@ class DashboardView extends GetView<HomeController> {
           height: 70,
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(16),
-            border: Border.all(
-              color: const Color(0xFFCBD5E1),
-              width: 2.0,
-            ),
+            border: Border.all(color: const Color(0xFFCBD5E1), width: 2.0),
           ),
           child: const Icon(
             Icons.eco_rounded,
@@ -600,10 +674,7 @@ class DashboardView extends GetView<HomeController> {
         const Text(
           'Head to Find Chargers to book an EV charging slot',
           textAlign: TextAlign.center,
-          style: TextStyle(
-            fontSize: 12,
-            color: AppColors.textMuted,
-          ),
+          style: TextStyle(fontSize: 12, color: AppColors.textMuted),
         ),
         const SizedBox(height: 20),
         NeoButton(
@@ -619,7 +690,20 @@ class DashboardView extends GetView<HomeController> {
   }
 
   String _formatDateTime(DateTime dt) {
-    final months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    final months = [
+      'Jan',
+      'Feb',
+      'Mar',
+      'Apr',
+      'May',
+      'Jun',
+      'Jul',
+      'Aug',
+      'Sep',
+      'Oct',
+      'Nov',
+      'Dec',
+    ];
     final day = dt.day.toString().padLeft(2, '0');
     final month = months[dt.month - 1];
     final year = dt.year;
@@ -641,7 +725,8 @@ class PulsingDot extends StatefulWidget {
   State<PulsingDot> createState() => _PulsingDotState();
 }
 
-class _PulsingDotState extends State<PulsingDot> with SingleTickerProviderStateMixin {
+class _PulsingDotState extends State<PulsingDot>
+    with SingleTickerProviderStateMixin {
   late AnimationController _controller;
   late Animation<double> _scaleAnimation;
   late Animation<double> _opacityAnimation;
@@ -654,12 +739,14 @@ class _PulsingDotState extends State<PulsingDot> with SingleTickerProviderStateM
       duration: const Duration(seconds: 2),
     )..repeat(reverse: true);
 
-    _scaleAnimation = Tween<double>(begin: 1.0, end: 1.5).animate(
-      CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
-    );
-    _opacityAnimation = Tween<double>(begin: 1.0, end: 0.4).animate(
-      CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
-    );
+    _scaleAnimation = Tween<double>(
+      begin: 1.0,
+      end: 1.5,
+    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeInOut));
+    _opacityAnimation = Tween<double>(
+      begin: 1.0,
+      end: 0.4,
+    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeInOut));
   }
 
   @override

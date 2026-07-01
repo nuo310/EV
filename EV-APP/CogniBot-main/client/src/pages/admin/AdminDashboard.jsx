@@ -913,7 +913,19 @@ export default function AdminDashboard() {
                             </div>
 
                             {/* Actions */}
-                            <div style={{ display: 'flex', justifyContent: 'flex-end' }} className="w-full md:w-20 md:flex-shrink-0">
+                            <div style={{ display: 'flex', gap: 6, justifyContent: 'flex-end' }} className="w-full md:w-auto md:flex-shrink-0">
+                              {s.lat && s.lng && (
+                                <a
+                                  href={`https://www.google.com/maps/dir/?api=1&destination=${s.lat},${s.lng}`}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="admin-btn admin-btn-ghost text-center justify-center"
+                                  style={{ padding: '6px 10px', borderRadius: 8, fontSize: 11, border: '1.5px solid #0f172a', display: 'inline-flex', alignItems: 'center', gap: 4, textDecoration: 'none' }}
+                                  title="Navigate to Charger"
+                                >
+                                  <MapPin size={12} />
+                                </a>
+                              )}
                               <button
                                 className="admin-btn admin-btn-ghost w-full md:w-auto text-center justify-center"
                                 style={{ padding: '6px 12px', borderRadius: 8, fontSize: 11, border: '1.5px solid #0f172a' }}
@@ -1018,6 +1030,18 @@ export default function AdminDashboard() {
                             </td>
                             <td style={{ padding: '16px' }}>
                               <div style={{ display: 'flex', gap: 6 }}>
+                                {s.lat && s.lng && (
+                                  <a
+                                    href={`https://www.google.com/maps/dir/?api=1&destination=${s.lat},${s.lng}`}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="admin-btn admin-btn-ghost"
+                                    style={{ padding: '6px 10px', fontSize: 10, display: 'inline-flex', alignItems: 'center', textDecoration: 'none' }}
+                                    title="Navigate to Charger"
+                                  >
+                                    <MapPin size={12} />
+                                  </a>
+                                )}
                                 <button className="admin-btn admin-btn-ghost" style={{ padding: '6px 10px', fontSize: 10 }}
                                   onClick={() => { setEditingStation(s); setShowAddModal(true); }}>
                                   <Edit3 size={12} />

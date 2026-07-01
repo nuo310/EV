@@ -117,7 +117,9 @@ const userIcon = createIcon('#3b82f6');
 function toFiniteNumber(value) {
   if (typeof value === 'number') return Number.isFinite(value) ? value : null;
   if (typeof value === 'string') {
-    const n = Number(value.trim());
+    const trimmed = value.trim();
+    if (trimmed === '') return null;
+    const n = Number(trimmed);
     return Number.isFinite(n) ? n : null;
   }
   return null;
@@ -706,14 +708,14 @@ const EVChargingFinder = () => {
                       </div>
                     )}
 
-                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', alignItems: 'center', width: '100%' }} onClick={(e) => e.stopPropagation()}>
+                    <div style={{ display: 'flex', gap: '8px', alignItems: 'center', width: '100%' }} onClick={(e) => e.stopPropagation()}>
                       {showStart && (
                         <button
                           type="button"
                           onClick={() => handleStartCharging(s)}
                           disabled={isStationBooking || !isStationConsideredOnline(s) || !conn.isAvailable}
                           style={{
-                            width: '100%',
+                            flex: 1,
                             background: (isStationBooking || !isStationConsideredOnline(s) || !conn.isAvailable) ? '#e2e8f0' : '#16a34a',
                             color: (isStationBooking || !isStationConsideredOnline(s) || !conn.isAvailable) ? '#94a3b8' : '#fff',
                             border: 'none',
@@ -735,7 +737,7 @@ const EVChargingFinder = () => {
                           onClick={() => handleStopCharging(s)}
                           disabled={isStationBooking}
                           style={{
-                            width: '100%',
+                            flex: 1,
                             background: '#fee2e2',
                             color: '#b91c1c',
                             border: '1.5px solid #fca5a5',
@@ -749,6 +751,38 @@ const EVChargingFinder = () => {
                         >
                           {isStationBooking ? <Loader2 className="animate-spin" size={16} /> : 'Stop charging'}
                         </button>
+                      )}
+                      {s.lat && s.lng && (
+                        <a
+                          href={`https://www.google.com/maps/dir/?api=1&destination=${s.lat},${s.lng}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          title="Navigate to station"
+                          style={{
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            width: '46px',
+                            height: '46px',
+                            background: '#fff',
+                            border: '1.5px solid #0f172a',
+                            borderRadius: '12px',
+                            color: '#0f172a',
+                            cursor: 'pointer',
+                            transition: 'all 0.2s ease',
+                            flexShrink: 0,
+                          }}
+                          onMouseEnter={(e) => {
+                            e.currentTarget.style.background = '#0f172a';
+                            e.currentTarget.style.color = '#fff';
+                          }}
+                          onMouseLeave={(e) => {
+                            e.currentTarget.style.background = '#fff';
+                            e.currentTarget.style.color = '#0f172a';
+                          }}
+                        >
+                          <Navigation size={18} />
+                        </a>
                       )}
                     </div>
                   </div>

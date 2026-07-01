@@ -81,7 +81,7 @@ class DownloadSection extends StatelessWidget {
           
 
           // Real-time active users counter widget
-          const LiveDriverCounterWidget(),
+          // const LiveDriverCounterWidget(),
           const SizedBox(height: 48),
 
           // Core phone released representation container card
